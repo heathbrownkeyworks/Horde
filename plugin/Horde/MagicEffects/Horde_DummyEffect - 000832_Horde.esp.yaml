@@ -1,0 +1,16 @@
+FormKey: 000832:Horde.esp
+EditorID: Horde_DummyEffect
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: ''
+Flags:
+- HideInUI
+- NoArea
+- NoHitEffect
+- NoRecast
+Archetype:
+  MutagenObjectType: MagicEffectArchetype
+  Type: Script
+CastType: FireAndForget

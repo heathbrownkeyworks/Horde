@@ -1,0 +1,30 @@
+FormKey: 075084:Skyrim.esm
+VersionControl: 1978415
+EditorID: DialogueFollowerWaitTopic
+Version2: 3
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: German
+    String: Wartet hier.
+  - Language: English
+    String: Wait here.
+  - Language: Spanish
+    String: Espera aquí.
+  - Language: Italian
+    String: Aspetta qui.
+  - Language: Chinese
+    String: 在這裡等著。
+  - Language: Polish
+    String: Zaczekaj tutaj.
+  - Language: Russian
+    String: Жди здесь.
+  - Language: French
+    String: Attendez ici.
+  - Language: Japanese
+    String: ここで待て
+Priority: 95
+Branch: 0750BC:Skyrim.esm
+Quest: 0750BA:Skyrim.esm
+SubtypeName: CUST
+Unknown: 99

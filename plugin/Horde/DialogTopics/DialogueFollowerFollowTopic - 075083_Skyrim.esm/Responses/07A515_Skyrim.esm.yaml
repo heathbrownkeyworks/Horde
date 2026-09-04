@@ -1,0 +1,69 @@
+FormKey: 07A515:Skyrim.esm
+VersionControl: 1978415
+Version2: 8
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A515
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A515
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A515
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Try not to walk into any spike-filled pits or filthy skeever dens.
+    - Language: Spanish
+      String: Intenta no caer en ningún foso lleno de estacas o en un cubil de inmundos skeevers.
+    - Language: Italian
+      String: Cerca di non finire in qualche fossa piena di punte o nelle tane di quei luridi skeever.
+    - Language: Chinese
+      String: 別闖進佈滿釘子或者惡鼠的洞穴啊。
+    - Language: Polish
+      String: Spróbuj nie wpaść do dziury z kolcami albo nory ślizgaczy.
+    - Language: Russian
+      String: Старайся не угодить в капкан и не провалиться в чью-нибудь нору.
+    - Language: French
+      String: Évitez le plus possible les fosses hérissées de pointes et les tanières puantes des ragnards.
+    - Language: Japanese
+      String: 釘だらけの坑道や薄汚いスキーヴァーの巣に足を踏み入れないようにな
+    - Language: German
+      String: Marschiert bitte nicht in eine Grube voller Speere  ... oder in eine dreckige Skeever-Höhle.
+  ScriptNotes: Condescending, snarky
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9980:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

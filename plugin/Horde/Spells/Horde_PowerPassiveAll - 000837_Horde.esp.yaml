@@ -1,0 +1,20 @@
+FormKey: 000837:Horde.esp
+EditorID: Horde_PowerPassiveAll
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: 'Horde: Passive'
+Description:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: Toggle passive. Passive followers break off combat and return to you.
+EquipmentType: 025BEE:Skyrim.esm
+Type: LesserPower
+ChargeTime: 0
+CastType: FireAndForget
+Effects:
+- BaseEffect: 000832:Horde.esp
+  Data:
+    Duration: 0

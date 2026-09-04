@@ -1,0 +1,53 @@
+FormKey: 000803:Horde.esp
+EditorID: Horde_WaitPkg
+Flags:
+- AllowSwimming
+Type: Package
+PreferredSpeed: Run
+InteruptFlags:
+- RandomConversations
+- ReactionToPlayerActions
+- FriendlyFireComments
+- AggroRadiusBehavior
+- AllowIdleChatter
+- WorldInteractions
+ScheduleMonth: -1
+ScheduleDayOfWeek: Any
+ScheduleHour: -1
+ScheduleMinute: -1
+Unknown3: 0x000000
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+PackageTemplate: 01C254:Skyrim.esm
+DataInputVersion: 10
+Data:
+- Key: 0
+  Value:
+    MutagenObjectType: PackageDataLocation
+    Location:
+      Target:
+        MutagenObjectType: LocationFallback
+        Type: NearSelf
+      Radius: 256
+- Key: 14
+  Value:
+    MutagenObjectType: PackageDataBool
+    Data: True
+- Key: 29
+  Value:
+    MutagenObjectType: PackageDataFloat
+    Data: 50
+XnamMarker: 0x20
+OnBegin:
+  Topics:
+  - MutagenObjectType: TopicReference
+OnEnd:
+  Topics:
+  - MutagenObjectType: TopicReference
+OnChange:
+  Topics:
+  - MutagenObjectType: TopicReference

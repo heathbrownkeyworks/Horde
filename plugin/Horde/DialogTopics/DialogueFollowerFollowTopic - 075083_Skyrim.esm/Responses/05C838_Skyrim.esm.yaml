@@ -1,0 +1,73 @@
+FormKey: 05C838:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0005C838
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0005C838
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0005C838
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: As you will, my Thane. I will protect you with my life.
+    - Language: Spanish
+      String: Como desees, thane. Te protegeré con mi vida.
+    - Language: Italian
+      String: Come desideri, thane. Ti proteggerò con la mia vita.
+    - Language: Chinese
+      String: 如您所願，武衛。我會用生命保護您。
+    - Language: Polish
+      String: Jak sobie życzysz, tanie. Będę cię chronić własnym życiem.
+    - Language: Russian
+      String: Как скажешь, тан. Я буду защищать тебя ценой своей жизни.
+    - Language: French
+      String: À vos ordres. Je donnerais ma vie pour vous protéger.
+    - Language: Japanese
+      String: おおせの通りに。命に替えても従士を守ります
+    - Language: German
+      String: Wie Ihr wünscht, Thane. Ich werde Euch mit meinem Leben beschützen.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0A2C8D:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

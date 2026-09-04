@@ -1,0 +1,30 @@
+FormKey: 075083:Skyrim.esm
+VersionControl: 1978415
+EditorID: DialogueFollowerFollowTopic
+Version2: 3
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: German
+    String: Folgt mir.
+  - Language: English
+    String: Follow me.
+  - Language: Spanish
+    String: Sígueme.
+  - Language: Italian
+    String: Vieni con me.
+  - Language: Chinese
+    String: 跟著我。
+  - Language: Polish
+    String: Chodź ze mną.
+  - Language: Russian
+    String: Следуй за мной.
+  - Language: French
+    String: Suivez-moi.
+  - Language: Japanese
+    String: ついて来い
+Priority: 95
+Branch: 0750BD:Skyrim.esm
+Quest: 0750BA:Skyrim.esm
+SubtypeName: CUST
+Unknown: 101

@@ -1,0 +1,71 @@
+FormKey: 07A50E:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A50E
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A50E
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A50E
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: It is a lonely thing, facing all the dangers of Skyrim by yourself. Come and find me if you decide that you miss my companionship.
+    - Language: Spanish
+      String: Es una misión muy solitaria, enfrentarte a todos los peligros de Skyrim por tu cuenta. Ven a verme si echas de menos mi compañía.
+    - Language: Italian
+      String: Affrontare da soli tutti i pericoli di Skyrim non è cosa piacevole. Se ti renderai conto di rimpiangere la mia compagnia, vieni a cercarmi.
+    - Language: Chinese
+      String: 獨自面對天際裡的所有危險，是一件很孤獨的事情。要是你想念我們的友誼了，就來找我吧。
+    - Language: Polish
+      String: Trudno samotnie stawiać czoło niebezpieczeństwom czyhającym w Skyrim. Znajdź mnie, gdy zatęsknisz za moim towarzystwem.
+    - Language: Russian
+      String: Не очень весело противостоять всем опасностям Скайрима в одиночку. Найдешь меня, если решишь, что скучаешь по моей компании.
+    - Language: French
+      String: C'est une bien grande solitude que d'affronter les dangers de Bordeciel sans la moindre compagnie. Venez me trouver si ma présence vous manque.
+    - Language: Japanese
+      String: 寂しいわね、スカイリムの危機にたった1人で立ち向かうなんて。仲間が恋しくなったら、また訪ねてくるといいわ
+    - Language: German
+      String: Sich all den Gefahren in Himmelsrand allein stellen zu müssen, ist eine einsame Sache. Kommt zu mir, wenn Euch meine Gesellschaft fehlt.
+  ScriptNotes: A bit seductive, a bit of a tease. She is sad to see the player go, and she's leaving in a way that she hopes will make the player want to hire her a
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9982:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

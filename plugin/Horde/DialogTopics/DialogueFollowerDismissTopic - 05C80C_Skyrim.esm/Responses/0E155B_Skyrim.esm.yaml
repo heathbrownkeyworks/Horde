@@ -1,0 +1,71 @@
+FormKey: 0E155B:Skyrim.esm
+VersionControl: 1978415
+Version2: 7
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E155B
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E155B
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E155B
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Farewell, then. If you need my services again, just come and look for me in the usual place.
+    - Language: Spanish
+      String: Hasta la vista, entonces. Si vuelves a necesitar de mis servicios, ven a buscarme al sitio de siempre.
+    - Language: Italian
+      String: Addio, allora. Se avrai ancora bisogno di me, potrai trovarmi al solito posto.
+    - Language: Chinese
+      String: 那我們再會。你要是需要我幫忙，就來老地方找我。
+    - Language: Polish
+      String: W takim razie do zobaczenia. Jeśli będziesz potrzebować moich usług, szukaj mnie tam, gdzie zawsze.
+    - Language: Russian
+      String: Тогда прощай. Если тебе снова понадобится моя помощь, ты найдешь меня на старом месте.
+    - Language: French
+      String: Alors bon vent. Si vous avez encore besoin de mes services, vous me trouverez à l'endroit habituel.
+    - Language: Japanese
+      String: さよならだ。もし助けが要るなら、いつもの場所に訪ねて来てくれ
+    - Language: German
+      String: Dann lebt wohl. Kommt einfach zu der üblichen Stelle, wenn Ihr meine Dienste wieder brauchen solltet.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B997F:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

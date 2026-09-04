@@ -1,0 +1,73 @@
+FormKey: 0E155C:Skyrim.esm
+VersionControl: 1978415
+Version2: 3
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E155C
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: MQ203
+      Object: 036192:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E155C
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E155C
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Good. We should keep moving.
+    - Language: Spanish
+      String: Bien. Debemos seguir avanzando.
+    - Language: Italian
+      String: Bene. Faremmo meglio a muoverci.
+    - Language: Chinese
+      String: 很好，我們得一直前進。
+    - Language: Polish
+      String: Dobrze. Powinniśmy ruszać.
+    - Language: Russian
+      String: Хорошо. Нам нельзя останавливаться.
+    - Language: French
+      String: Bien. Ne nous arrêtons pas.
+    - Language: Japanese
+      String: いいぞ。このまま進み続けよう
+    - Language: German
+      String: Gut. Wir sollten weitergehen.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 084D1B:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 013358:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

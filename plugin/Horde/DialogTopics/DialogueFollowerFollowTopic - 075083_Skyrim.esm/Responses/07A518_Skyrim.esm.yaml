@@ -1,0 +1,69 @@
+FormKey: 07A518:Skyrim.esm
+VersionControl: 1978415
+Version2: 8
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A518
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A518
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A518
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Good! Let's go find something to fight.
+    - Language: Spanish
+      String: ¡Bien! Vamos a buscar pelea.
+    - Language: Italian
+      String: Bene! Cerchiamo qualcosa da combattere.
+    - Language: Chinese
+      String: 很好！我們去找點東西打打。
+    - Language: Polish
+      String: Świetnie! Znajdźmy coś, z czym możemy powalczyć.
+    - Language: Russian
+      String: Хорошо! Пойдем поищем, с кем бы подраться.
+    - Language: French
+      String: Bien ! Allons trouver des adversaires à affronter.
+    - Language: Japanese
+      String: よし！　戦う相手を見つけに行こう
+    - Language: German
+      String: Gut! Finden wir etwas, mit dem wir kämpfen können.
+  ScriptNotes: Eager for battle
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9983:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

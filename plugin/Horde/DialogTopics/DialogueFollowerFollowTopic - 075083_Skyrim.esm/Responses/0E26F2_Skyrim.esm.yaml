@@ -1,0 +1,73 @@
+FormKey: 0E26F2:Skyrim.esm
+VersionControl: 1978415
+Version2: 4
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E26F2
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: MQ203
+      Object: 036192:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E26F2
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E26F2
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: J'zargo is ready for more adventure.
+    - Language: Spanish
+      String: J'zargo está listo para más aventuras.
+    - Language: Italian
+      String: J'zargo è pronto per un altra avventura.
+    - Language: Chinese
+      String: 紮格已經準備好踏上冒險旅程了。
+    - Language: Polish
+      String: J'zargo jest gotów na kolejne przygody.
+    - Language: Russian
+      String: Дж'зарго готов к новым приключениям.
+    - Language: French
+      String: J'zargo est prêt pour une nouvelle aventure.
+    - Language: Japanese
+      String: ジェイ・ザルゴはまた冒険に出られる
+    - Language: German
+      String: J'zargo ist bereit für weitere Abenteuer.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01C195:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

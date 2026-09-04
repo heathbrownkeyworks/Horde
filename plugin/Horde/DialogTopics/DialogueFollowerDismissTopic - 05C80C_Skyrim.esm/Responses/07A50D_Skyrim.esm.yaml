@@ -1,0 +1,71 @@
+FormKey: 07A50D:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A50D
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A50D
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A50D
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: If that's what you want. Watch your back out there, and if you need me again, you know where I'll be.
+    - Language: Spanish
+      String: Si eso es lo que quieres. Ten cuidado ahí afuera y, si me necesitas de nuevo, ya sabes dónde encontrarme.
+    - Language: Italian
+      String: Se è quello che vuoi. Sta' in guardia là fuori, e se avrai ancora bisogno di me sai dove trovarmi.
+    - Language: Chinese
+      String: 如果那就是你想要的。你可要當心一點，如果你有什麼事需要我幫忙，你知道該去哪裡找我的。
+    - Language: Polish
+      String: Jeżeli tego chcesz. Uważaj na siebie. Wiesz, gdzie mnie znaleźć, jeśli znowu będę ci potrzebny.
+    - Language: Russian
+      String: Ну, если ты так хочешь... Береги себя, а если я тебе понадоблюсь - ты знаешь, где меня искать.
+    - Language: French
+      String: Si c'est ce que vous voulez. Faites bien attention à vous. Si vous avez encore besoin de moi, vous saurez où me trouver.
+    - Language: Japanese
+      String: お前がそういうなら。気をつけろよ。俺がまた必要になったら、俺の居場所は分かってるだろう
+    - Language: German
+      String: Wie Ihr wollt. Passt da draußen auf Euch auf. Und falls Ihr mich noch einmal benötigen solltet, wisst Ihr ja, wo Ihr mich finden könnt.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9981:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

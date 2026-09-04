@@ -1,0 +1,69 @@
+FormKey: 04C470:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0004C470
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0004C470
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0004C470
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Puzzled
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: You sure? All right. I'll keep guard here.
+    - Language: Spanish
+      String: ¿Seguro? De acuerdo. Haré guardia aquí.
+    - Language: Italian
+      String: Davvero? Va bene. Starò di guardia qui.
+    - Language: Chinese
+      String: 你確定？好吧，我來守住這裡。
+    - Language: Polish
+      String: Na pewno? Dobra. Popilnuję tego miejsca.
+    - Language: Russian
+      String: Точно? Ладно. Я тут посторожу.
+    - Language: French
+      String: Vraiment ? D'accord. Je vais monter la garde ici.
+    - Language: Japanese
+      String: 本当に？　分かった、ここで見張っていよう
+    - Language: German
+      String: Wirklich? Na gut. Ich halte hier Wache.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0350A7:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

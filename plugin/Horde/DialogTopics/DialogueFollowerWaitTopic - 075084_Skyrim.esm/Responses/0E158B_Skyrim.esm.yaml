@@ -1,0 +1,69 @@
+FormKey: 0E158B:Skyrim.esm
+VersionControl: 1978415
+Version2: 6
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E158B
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E158B
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E158B
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Disgust
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll stay here. You try not to get into too much trouble.
+    - Language: Spanish
+      String: Me quedaré aquí. Intenta no meterte en muchos líos.
+    - Language: Italian
+      String: Ti aspetterò qui. Cerca di non cacciarti nei guai.
+    - Language: Chinese
+      String: 我就待在這裡。你儘量少惹麻煩。
+    - Language: Polish
+      String: Ja zostanę tutaj, a ty postaraj się unikać kłopotów.
+    - Language: Russian
+      String: Я подожду здесь. Постарайся не впутываться в совсем уж большие неприятности.
+    - Language: French
+      String: Je reste ici. Tâchez de ne pas vous attirer des ennuis.
+    - Language: Japanese
+      String: ここにいる。あまり面倒は起こさないでくれよ
+    - Language: German
+      String: Ich bleibe hier. Versucht, Euch nicht allzu sehr in Schwierigkeiten zu bringen.
+  ScriptNotes: disappointed
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01C194:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

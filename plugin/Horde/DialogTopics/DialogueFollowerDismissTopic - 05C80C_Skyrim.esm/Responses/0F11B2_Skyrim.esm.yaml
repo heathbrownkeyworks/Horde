@@ -1,0 +1,71 @@
+FormKey: 0F11B2:Skyrim.esm
+VersionControl: 1978415
+Version2: 8
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000F11B2
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000F11B2
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000F11B2
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Well, it's been fun. I guess I'll head back to Rorikstead.
+    - Language: Spanish
+      String: Bueno, ha sido divertido. Supongo que volveré a Paraje de Rorik.
+    - Language: Italian
+      String: Be', è stato divertente. Credo che me ne tornerò a Rorikstead.
+    - Language: Chinese
+      String: 好吧，真是有趣。我想我要回洛利克鎮了。
+    - Language: Polish
+      String: Cóż, było ciekawie. Chyba udam się z powrotem do Rorikstead.
+    - Language: Russian
+      String: Что ж, с тобой было весело. Думаю, я отправлюсь обратно в Рорикстед.
+    - Language: French
+      String: Bon, c'était marrant, mais il faut que je rentre à Rorikbourg.
+    - Language: Japanese
+      String: そうか、楽しかったよ。それじゃあ、ロリクステッドに戻るかな
+    - Language: German
+      String: Nun, das hat Spaß gemacht. Jetzt werde ich wohl nach Rorikstatt zurückkehren.
+  ScriptNotes: The second sentence is tinged with disappointment.
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 065657:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

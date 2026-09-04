@@ -1,0 +1,68 @@
+FormKey: 07A51A:Skyrim.esm
+VersionControl: 1978415
+Version2: 9
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A51A
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A51A
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A51A
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Patience isn't exactly my strong suit, but alright.
+    - Language: Spanish
+      String: La paciencia no es exactamente lo mío, pero vale.
+    - Language: Italian
+      String: La pazienza non è la mia virtù migliore, ma farò come dici.
+    - Language: Chinese
+      String: 我的耐心可不怎麼好，不過好吧。
+    - Language: Polish
+      String: Cierpliwość nie jest moją mocną stroną, ale niech będzie.
+    - Language: Russian
+      String: Терпение - не самая сильная моя сторона, но ладно.
+    - Language: French
+      String: La patience n'est pas mon fort, mais très bien.
+    - Language: Japanese
+      String: 我慢は苦手なんだが…　まあ、いいさ
+    - Language: German
+      String: Geduld ist nicht gerade meine Stärke. Aber in Ordnung.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9983:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

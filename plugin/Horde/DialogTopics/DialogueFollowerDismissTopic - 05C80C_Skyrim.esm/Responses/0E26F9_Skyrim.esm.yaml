@@ -1,0 +1,72 @@
+FormKey: 0E26F9:Skyrim.esm
+VersionControl: 1978415
+Version2: 6
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E26F9
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E26F9
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E26F9
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Disgust
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Really? J'zargo was having such fun. Ah, well. Back to the College then.
+    - Language: Spanish
+      String: ¿En serio? J'zargo se lo estaba pasando tan bien... En fin, de vuelta al Colegio.
+    - Language: Italian
+      String: Veramente? J'zargo si stava divertendo molto. Uff, tornerò all'Accademia allora.
+    - Language: Chinese
+      String: 真的嗎？紮格本來很開心的。嗯，好吧。我們這就回學院。
+    - Language: Polish
+      String: Naprawdę? J'zargo tak dobrze się bawił. Trudno, czas wracać do Akademii.
+    - Language: Russian
+      String: Правда? Дж'зарго так хорошо развлекался. Ну что ж. Пойду назад в Коллегию.
+    - Language: French
+      String: Vraiment ? J'zargo s'amusait bien. Tant pis. Je retourne à l'Académie, alors.
+    - Language: Japanese
+      String: 本当かい？　ジェイ・ザルゴはとても楽しかったのに。でも分かった。大学に帰るよ
+    - Language: German
+      String: Wirklich? J'zargo hatte so viel Spaß. Na gut. Dann zurück zur Akademie.
+  ScriptNotes: disappointed
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01C195:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

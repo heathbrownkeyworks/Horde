@@ -1,0 +1,68 @@
+FormKey: 0F11B0:Skyrim.esm
+VersionControl: 1978415
+Version2: 4
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000F11B0
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000F11B0
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000F11B0
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll be right here. Be careful now!
+    - Language: Spanish
+      String: Yo me quedaré aquí. ¡Ten cuidado!
+    - Language: Italian
+      String: Io resterò qui. Fa' attenzione in fututo.
+    - Language: Chinese
+      String: 我就在這，你小心點！
+    - Language: Polish
+      String: Będę tu czekał. Uważaj na siebie!
+    - Language: Russian
+      String: Я побуду здесь. Береги себя!
+    - Language: French
+      String: Je serai juste là, alors, attention !
+    - Language: Japanese
+      String: ここにいるよ。じゃあ気をつけて
+    - Language: German
+      String: Ich werde hier sein. Passt auf Euch auf!
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 065657:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

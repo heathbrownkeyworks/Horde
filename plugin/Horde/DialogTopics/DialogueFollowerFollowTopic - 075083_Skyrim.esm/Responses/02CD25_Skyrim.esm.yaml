@@ -1,0 +1,70 @@
+FormKey: 02CD25:Skyrim.esm
+VersionControl: 1978415
+Version2: 9
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0002CD25
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0002CD25
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0002CD25
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Happy
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: (bark)
+    - Language: Spanish
+      String: (ladrido)
+    - Language: Italian
+      String: (Abbaia)
+    - Language: Chinese
+      String: （犬吠）
+    - Language: Polish
+      String: (szczeknięcie)
+    - Language: Russian
+      String: (лай)
+    - Language: French
+      String: (aboiement)
+    - Language: Japanese
+      String: ワン！
+    - Language: German
+      String: (bellt)
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsRaceConditionData
+    Race: 0F1AC4:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

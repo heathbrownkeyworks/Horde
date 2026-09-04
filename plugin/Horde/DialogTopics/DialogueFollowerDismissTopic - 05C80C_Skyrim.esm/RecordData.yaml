@@ -1,0 +1,30 @@
+FormKey: 05C80C:Skyrim.esm
+VersionControl: 1978415
+EditorID: DialogueFollowerDismissTopic
+Version2: 5
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: German
+    String: Hier trennen sich unsere Wege.
+  - Language: English
+    String: It's time for us to part ways.
+  - Language: Spanish
+    String: Es el momento de que nos separemos.
+  - Language: Italian
+    String: È arrivato il momento di salutarci.
+  - Language: Chinese
+    String: 是時候分道揚鑣了。
+  - Language: Polish
+    String: Czas, by nasze drogi się rozeszły.
+  - Language: Russian
+    String: Пора нам расстаться.
+  - Language: French
+    String: Il est temps pour nous de nous séparer.
+  - Language: Japanese
+    String: ここで別れよう
+Priority: 10
+Branch: 05C84F:Skyrim.esm
+Quest: 0750BA:Skyrim.esm
+SubtypeName: CUST
+Unknown: 122

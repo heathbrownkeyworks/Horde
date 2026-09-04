@@ -1,0 +1,230 @@
+FormKey: 000806:Horde.esp
+IsCompressed: True
+MajorRecordFlagsRaw: 262144
+EditorID: Horde_HoldingCell
+SkyrimMajorRecordFlags:
+- Compressed
+Name:
+  TargetLanguage: English
+  Value: Horde Holding Cell
+Flags:
+- IsInteriorCell
+Lighting:
+  AmbientColor: '#00202621'
+  DirectionalColor: '#00000000'
+  FogNearColor: '#00172116'
+  FogFar: 4500
+  DirectionalFade: 1
+  FogPower: 0.6
+  AmbientColors:
+    DirectionalXPlus: '#002C2418'
+    DirectionalXMinus: '#00232415'
+    DirectionalYPlus: '#00282517'
+    DirectionalYMinus: '#00282217'
+    DirectionalZPlus: '#0013110A'
+    DirectionalZMinus: '#003C3623'
+    Specular: '#00172116'
+    Scale: 1
+  FogFarColor: '#00172116'
+  FogMax: 1
+  Inherits:
+  - AmbientColor
+  - DirectionalColor
+  - FogColor
+  - FogNear
+  - FogFar
+  - ClipDistance
+LightingTemplate: 0300E2:Skyrim.esm
+WaterHeight: -2.1474836E+09
+Persistent:
+- MutagenObjectType: PlacedObject
+  FormKey: 000807:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker01
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2000, 2000, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000808:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker02
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2200, 2000, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000809:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker03
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2400, 2000, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080A:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker04
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2600, 2000, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080B:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker05
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2800, 2000, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080C:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker06
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2000, 2200, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080D:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker07
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2200, 2200, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080E:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker08
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2400, 2200, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00080F:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker09
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2600, 2200, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000810:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker10
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2800, 2200, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000811:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker11
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2000, 2400, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000812:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker12
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2200, 2400, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000813:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker13
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2400, 2400, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000814:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker14
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2600, 2400, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000815:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker15
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2800, 2400, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000816:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker16
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2000, 2600, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000817:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker17
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2200, 2600, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000818:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker18
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2400, 2600, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000819:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker19
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2600, 2600, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 00081A:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_HomeMarker20
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 2800, 2600, 0
+- MutagenObjectType: PlacedObject
+  FormKey: 000831:Horde.esp
+  MajorRecordFlagsRaw: 1024
+  EditorID: Horde_IdleSandboxMarker
+  SkyrimMajorRecordFlags:
+  - 0x400
+  Base: 00003B:Skyrim.esm
+  Placement:
+    Position: 3000, 2000, 0
+MajorFlags:
+- 0x40000

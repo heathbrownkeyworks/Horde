@@ -1,0 +1,70 @@
+FormKey: 0E3E79:Skyrim.esm
+VersionControl: 1978415
+Version2: 4
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E3E79
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E3E79
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E3E79
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Happy
+  EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Certainly, I'm ready.
+    - Language: Spanish
+      String: Desde luego, estoy listo.
+    - Language: Italian
+      String: Certamente. Sono pronto.
+    - Language: Chinese
+      String: 當然，我準備好了。
+    - Language: Polish
+      String: Jestem gotów.
+    - Language: Russian
+      String: Конечно, я готов.
+    - Language: French
+      String: Je suis prêt.
+    - Language: Japanese
+      String: ああ、準備はできている
+    - Language: German
+      String: Natürlich. Ich bin bereit.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 02427D:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

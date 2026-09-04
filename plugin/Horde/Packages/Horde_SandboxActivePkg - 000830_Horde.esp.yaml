@@ -1,0 +1,86 @@
+FormKey: 000830:Horde.esp
+EditorID: Horde_SandboxActivePkg
+Flags:
+- AllowSwimming
+Type: Package
+PreferredSpeed: Run
+InteruptFlags:
+- HellosToPlayer
+- RandomConversations
+- ObserveCombatBehavior
+- GreetCorpseBehavior
+- ReactionToPlayerActions
+- FriendlyFireComments
+- AggroRadiusBehavior
+- AllowIdleChatter
+- WorldInteractions
+ScheduleMonth: -1
+ScheduleDayOfWeek: Any
+ScheduleHour: -1
+ScheduleMinute: -1
+Unknown3: 0x000000
+PackageTemplate: 01C254:Skyrim.esm
+DataInputVersion: 10
+Data:
+- Key: 0
+  Value:
+    MutagenObjectType: PackageDataLocation
+    Location:
+      Target:
+        MutagenObjectType: LocationTarget
+        Link: 000831:Horde.esp
+      Radius: 1024
+- Key: 1
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Eating
+    Data: True
+- Key: 3
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Sleeping
+    Data: True
+- Key: 4
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Conversation
+    Data: True
+- Key: 5
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Idle Markers
+    Data: True
+- Key: 6
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Sitting
+    Data: True
+- Key: 7
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Wandering
+    Data: True
+- Key: 14
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Unlock On Arrival?
+- Key: 29
+  Value:
+    MutagenObjectType: PackageDataFloat
+    Name: Energy
+    Data: 50
+- Key: 31
+  Value:
+    MutagenObjectType: PackageDataBool
+    Name: Allow Special Furniture
+    Data: True
+XnamMarker: 0x0A
+OnBegin:
+  Topics:
+  - MutagenObjectType: TopicReference
+OnEnd:
+  Topics:
+  - MutagenObjectType: TopicReference
+OnChange:
+  Topics:
+  - MutagenObjectType: TopicReference

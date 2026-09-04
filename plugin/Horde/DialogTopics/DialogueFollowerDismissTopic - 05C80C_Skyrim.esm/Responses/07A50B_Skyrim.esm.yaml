@@ -1,0 +1,72 @@
+FormKey: 07A50B:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A50B
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A50B
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A50B
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Happy
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: If that's what you want. Come find me at the College if you change your mind.
+    - Language: Spanish
+      String: Si eso es lo que quieres... Ven a verme al Colegio si cambias de opinión.
+    - Language: Italian
+      String: Come preferisci. Vieni da me all'Accademia se dovessi cambiare idea.
+    - Language: Chinese
+      String: 如你所願。要是改變主意就來學院找我。
+    - Language: Polish
+      String: Dobrze, skoro tego właśnie chcesz. Będę w Akademii, jeśli zmienisz zdanie.
+    - Language: Russian
+      String: Если ты этого хочешь. Найдешь меня в Коллегии, если передумаешь.
+    - Language: French
+      String: Si c'est ce que vous voulez. Vous pourrez me trouver à l'Académie si vous changez d'avis.
+    - Language: Japanese
+      String: そう言うならそうしよう。気が変わったら大学まで会いに来てくれ
+    - Language: German
+      String: Wenn Ihr das wollt. Sucht mich an der Akademie auf, wenn Ihr Eure Meinung ändert.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01C194:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

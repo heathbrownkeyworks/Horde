@@ -1,0 +1,68 @@
+FormKey: 07A51E:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A51E
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A51E
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A51E
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll wait here. Just don't start any trouble without me.
+    - Language: Spanish
+      String: Estaré aquí mismo. Pero no empieces ninguna pelea sin mí.
+    - Language: Italian
+      String: Aspetterò qui. Cerca di non combinare disastri, senza di me.
+    - Language: Chinese
+      String: 我會在這等你。沒我罩你的時候別惹麻煩！
+    - Language: Polish
+      String: Poczekam tu. Nie zaczynaj żadnej burdy beze mnie.
+    - Language: Russian
+      String: Я подожду здесь. Только не начинай заварушку без меня.
+    - Language: French
+      String: Je vous attends ici. N'allez pas chercher les embrouilles en mon absence.
+    - Language: Japanese
+      String: ここで待つ。ひとりだからって面倒を起こすな
+    - Language: German
+      String: Ich warte hier. Wartet auf mich, bevor Ihr Ärger anzettelt.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B997F:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

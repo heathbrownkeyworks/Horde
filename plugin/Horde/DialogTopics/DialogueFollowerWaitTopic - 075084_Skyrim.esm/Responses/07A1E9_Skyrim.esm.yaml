@@ -1,0 +1,72 @@
+FormKey: 07A1E9:Skyrim.esm
+VersionControl: 1978415
+Version2: 8
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A1E9
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A1E9
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A1E9
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: You go on ahead.
+    - Language: Spanish
+      String: Ve tú delante.
+    - Language: Italian
+      String: Va' avanti tu.
+    - Language: Chinese
+      String: 你去吧。
+    - Language: Polish
+      String: Idź przodem.
+    - Language: Russian
+      String: Хорошо, буду здесь.
+    - Language: French
+      String: Allez-y sans moi.
+    - Language: Japanese
+      String: どうぞ行って下さい
+    - Language: German
+      String: Geht nur.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 0D23AC:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

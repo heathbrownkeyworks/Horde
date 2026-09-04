@@ -1,0 +1,72 @@
+FormKey: 0E155A:Skyrim.esm
+VersionControl: 1978415
+Version2: 7
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E155A
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E155A
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E155A
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Happy
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I understand. We must all follow our own paths. If you wish to find me again, I'll be in Nightcaller Temple.
+    - Language: Spanish
+      String: Lo entiendo. Todos tenemos que seguir nuestro propio camino. Si deseas volver a verme, estaré en el templo de la Visita Nocturna.
+    - Language: Italian
+      String: Capisco. Dobbiamo seguire ognuno la propria strada. Se avrai di nuovo bisogno di me, sono al Tempio di Nightcaller.
+    - Language: Chinese
+      String: 我明白。我們各有自己的道路要走。如果你又想要找我了，我在喚夜神殿等你。
+    - Language: Polish
+      String: Rozumiem. Każdy z nas podąża własną ścieżką. Jeśli zechcesz mnie odnaleźć ponownie, będę w Świątyni Nocnego Zewu.
+    - Language: Russian
+      String: Я понимаю. Каждый из нас идет своим путем. Если захочешь найти меня снова - я буду в храме Призывателей Ночи.
+    - Language: French
+      String: Je comprends. Chacun doit suivre son chemin. Si vous voulez me retrouver, je serai au Temple de Sorguevoix.
+    - Language: Japanese
+      String: 分かった。それぞれ自分の道を歩むべきだな。また会いたくなったら、ナイトコーラー聖堂に来てくれ
+    - Language: German
+      String: Ich verstehe. Wir alle müssen unserem eigenen Weg folgen. Wenn Ihr mich sucht, ich bin im Tempel des Nachtrufers.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 02427D:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

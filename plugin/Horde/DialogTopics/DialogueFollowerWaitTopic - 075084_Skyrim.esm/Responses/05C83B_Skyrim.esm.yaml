@@ -1,0 +1,72 @@
+FormKey: 05C83B:Skyrim.esm
+VersionControl: 1978415
+Version2: 11
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0005C83B
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0005C83B
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0005C83B
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: As you wish, my Thane.
+    - Language: Spanish
+      String: Como desees, thane.
+    - Language: Italian
+      String: Come desideri, thane.
+    - Language: Chinese
+      String: 如您所願，武衛大人。
+    - Language: Polish
+      String: Jak sobie życzysz, tanie.
+    - Language: Russian
+      String: Как скажешь, мой тан.
+    - Language: French
+      String: À vos ordres.
+    - Language: Japanese
+      String: お望みのままに、従士閣下
+    - Language: German
+      String: Wie Ihr wünscht, Thane.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0A2C8D:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

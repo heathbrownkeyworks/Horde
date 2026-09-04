@@ -1,0 +1,13 @@
+SpriggitSource:
+  PackageName: Spriggit.Yaml.Skyrim
+  Version: 0.40
+ModKey: Horde.esp
+GameRelease: SkyrimSE
+ModHeader:
+  Flags:
+  - Small
+  Author: ColdSun
+  Description: Horde - Multi-Follower Management
+  MasterReferences:
+  - Master: Skyrim.esm
+    FileSize: 0

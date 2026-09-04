@@ -1,0 +1,84 @@
+# Local assistant and tool state
+.agents/
+.claude/
+.codex/
+.playwright-mcp/
+.preview/
+.superpowers/
+agents.md
+AGENTS.md
+claude.md
+CLAUDE.md
+
+# Private documentation and release materials
+docs/
+screenshots/
+tests/
+mod-page.md
+patreon-release.md
+screenshot*.html
+/scripts/build-screenshots.mjs
+/view/icons.svg.html
+
+# Private signing material
+signing/
+*.cer
+*.crt
+*.key
+*.p12
+*.pem
+*.pfx
+*.snk
+
+# Editors, caches, and build output
+.cache/
+.idea/
+.vs/
+.vscode/
+.xmake/
+build/
+dist/
+out/
+vs*/
+compile_commands.json
+CMakeUserPresets.json
+*.exp
+*.ilk
+*.lib
+*.obj
+*.pdb
+*.suo
+*.user
+
+# Local configuration and diagnostics
+.env
+.env.*
+!.env.example
+*.bak
+*.dmp
+*.log
+*.tmp
+
+# Compiled binaries and release archives
+*.7z
+*.dll
+*.exe
+*.rar
+*.zip
+
+# Generated Bethesda plugins; commit the Spriggit source instead
+/*.esl
+/*.esm
+/*.esp
+/plugin/*.esl
+/plugin/*.esm
+/plugin/*.esp
+
+# Retired local dependency checkouts
+/ClibUtil/
+/xbyak/
+
+# Operating-system metadata
+.DS_Store
+Desktop.ini
+Thumbs.db

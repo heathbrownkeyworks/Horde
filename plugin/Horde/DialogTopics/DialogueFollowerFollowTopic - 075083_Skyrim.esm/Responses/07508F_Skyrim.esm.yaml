@@ -1,0 +1,73 @@
+FormKey: 07508F:Skyrim.esm
+VersionControl: 1978415
+Version2: 8
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007508F
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: MQ203
+      Object: 036192:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007508F
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007508F
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I've got your back.
+    - Language: Spanish
+      String: Te cubro las espaldas.
+    - Language: Italian
+      String: Ti guardo le spalle.
+    - Language: Chinese
+      String: 我來殿後。
+    - Language: Polish
+      String: Kryję cię.
+    - Language: Russian
+      String: Я прикрою тебе спину.
+    - Language: French
+      String: Je suis derrière vous.
+    - Language: Japanese
+      String: 私がついてますよ
+    - Language: German
+      String: Ich gebe Euch Deckung.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 084D1B:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 013478:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

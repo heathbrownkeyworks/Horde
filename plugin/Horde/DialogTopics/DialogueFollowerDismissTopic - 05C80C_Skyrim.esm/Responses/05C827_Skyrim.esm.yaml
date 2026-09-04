@@ -1,0 +1,90 @@
+FormKey: 05C827:Skyrim.esm
+VersionControl: 1978415
+Version2: 12
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0005C827
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0005C827
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0005C827
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Puzzled
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: (whine)
+    - Language: Spanish
+      String: (gemido)
+    - Language: Italian
+      String: (Guaisce)
+    - Language: Chinese
+      String: （哀嚎）
+    - Language: Polish
+      String: (skomlenie)
+    - Language: Russian
+      String: (скулеж)
+    - Language: French
+      String: (gémissement)
+    - Language: Japanese
+      String: クゥーン…
+    - Language: German
+      String: (winselt)
+  ScriptNotes: dog whining
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsRaceConditionData
+    Race: 0F1AC4:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1
+Prompt:
+  TargetLanguage: English
+  Values:
+  - Language: German
+    String: Du solltest wieder nach Hause gehen, Hund.
+  - Language: English
+    String: It's time for you to go back home, dog.
+  - Language: Spanish
+    String: Es hora de que te vuelvas a tu casa, perro.
+  - Language: Italian
+    String: È ora di tornare a casa, cane.
+  - Language: Chinese
+    String: 狗狗，你該回家了。
+  - Language: Polish
+    String: Chyba czas wracać do domu, psie.
+  - Language: Russian
+    String: Тебе пора домой, песик.
+  - Language: French
+    String: Il est temps de rentrer chez toi, l'ami.
+  - Language: Japanese
+    String: 飼い主のところに戻りな

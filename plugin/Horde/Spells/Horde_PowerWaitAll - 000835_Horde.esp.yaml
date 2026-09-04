@@ -1,0 +1,20 @@
+FormKey: 000835:Horde.esp
+EditorID: Horde_PowerWaitAll
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: 'Horde: Wait'
+Description:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: All followers wait at their current positions.
+EquipmentType: 025BEE:Skyrim.esm
+Type: LesserPower
+ChargeTime: 0
+CastType: FireAndForget
+Effects:
+- BaseEffect: 000832:Horde.esp
+  Data:
+    Duration: 0

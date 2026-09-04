@@ -1,0 +1,71 @@
+FormKey: 07A50C:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A50C
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A50C
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A50C
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: So you think you can make it on your own, then? We'll just see about that.
+    - Language: Spanish
+      String: ¿Así que crees que ya no necesitas ayuda, eh? Eso ya lo veremos.
+    - Language: Italian
+      String: Credi di non aver bisogno d'aiuto? Lo vedremo.
+    - Language: Chinese
+      String: 那你認為你一個人就能搞定嘍？我們不妨看一看。
+    - Language: Polish
+      String: Myślisz, że dasz sobie radę bez mojej pomocy? To się jeszcze okaże.
+    - Language: Russian
+      String: Думаешь, справишься без меня? Ну-ну, это мы посмотрим.
+    - Language: French
+      String: Vous pensez pouvoir vous en sortir ? Nous verrons cela...
+    - Language: Japanese
+      String: ひとりでやっていけると思うんだな？　ならば、それを見届けるようにしよう
+    - Language: German
+      String: Ihr glaubt also, Ihr schafft es allein? Das werden wir ja sehen.
+  ScriptNotes: His pride is a bit wounded that the player does not want to adventure with him anymore, and he's trying to sound like he doesn't care.
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9980:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

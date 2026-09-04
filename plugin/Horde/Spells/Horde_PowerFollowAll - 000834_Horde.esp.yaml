@@ -1,0 +1,20 @@
+FormKey: 000834:Horde.esp
+EditorID: Horde_PowerFollowAll
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: 'Horde: Follow'
+Description:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: All followers resume following you.
+EquipmentType: 025BEE:Skyrim.esm
+Type: LesserPower
+ChargeTime: 0
+CastType: FireAndForget
+Effects:
+- BaseEffect: 000832:Horde.esp
+  Data:
+    Duration: 0

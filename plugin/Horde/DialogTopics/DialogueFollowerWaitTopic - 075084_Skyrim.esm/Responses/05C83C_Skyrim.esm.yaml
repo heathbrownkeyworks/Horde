@@ -1,0 +1,69 @@
+FormKey: 05C83C:Skyrim.esm
+VersionControl: 1978415
+Version2: 13
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0005C83C
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0005C83C
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0005C83C
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Puzzled
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: (growl)
+    - Language: Spanish
+      String: (gruñido)
+    - Language: Italian
+      String: (Ringhia)
+    - Language: Chinese
+      String: （咆哮）
+    - Language: Polish
+      String: (warknięcie)
+    - Language: Russian
+      String: (рычание)
+    - Language: French
+      String: (grognement)
+    - Language: Japanese
+      String: ウゥーッ…
+    - Language: German
+      String: (knurrt)
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsRaceConditionData
+    Race: 0F1AC4:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

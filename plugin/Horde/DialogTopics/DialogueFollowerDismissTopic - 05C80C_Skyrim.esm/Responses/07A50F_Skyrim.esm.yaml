@@ -1,0 +1,71 @@
+FormKey: 07A50F:Skyrim.esm
+VersionControl: 1978415
+Version2: 12
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A50F
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A50F
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A50F
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: You're letting me go? What's wrong, is my skill with a blade making you look bad? Hah! I'm kidding, friend. Until we meet again!
+    - Language: Spanish
+      String: ¿Me dejas marchar? ¿Qué sucede? ¿Mi habilidad con la espada te hace quedar mal? ¡Ja! Estoy de broma. ¡Hasta otra!
+    - Language: Italian
+      String: Vuoi che me ne vada? Perché, cosa c'è che non va? Sono forse troppo in gamba per te? Ah ah! Sto scherzando. A presto, allora!
+    - Language: Chinese
+      String: 你要我走？出了什麼問題，是我的劍術讓你感到不快？哈！朋友，我開玩笑的啦。我們再會！
+    - Language: Polish
+      String: Zwalniasz mnie? W czym rzecz, czyżby moje umiejętności sprawiały, że kiepsko wypadasz? Ha! Żartuję, przyjacielu. Do następnego razu!
+    - Language: Russian
+      String: Ты меня гонишь? Что такое - стесняешься, что я лучше тебя владею мечом? Ха! Я шучу, дружище. До новых встреч!
+    - Language: French
+      String: Vous me congédiez ? Que se passe-t-il ? Je manie ma lame si bien que vous ne soutenez pas la comparaison ? Hah ! Je plaisante, camarade. À bientôt !
+    - Language: Japanese
+      String: もう行けと？　何がいけない、剣の腕が立ちすぎて自分が見劣りするからか？　ハハ、冗談だよ！　また会おう！
+    - Language: German
+      String: Ihr lasst mich gehen? Was ist los? Lässt meine Schwertkunst Euch schlecht dastehen? Ha, war nur Spaß. Bis zum nächsten Mal!
+  ScriptNotes: Jovial. He's giving the player a bit of a ribbing here, sounding both cocky and friendly at the same time.
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9983:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

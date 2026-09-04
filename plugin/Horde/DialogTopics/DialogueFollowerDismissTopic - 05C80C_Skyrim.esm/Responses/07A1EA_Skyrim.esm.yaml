@@ -1,0 +1,76 @@
+FormKey: 07A1EA:Skyrim.esm
+VersionControl: 1978415
+Version2: 7
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A1EA
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A1EA
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A1EA
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Sad
+  EmotionValue: 15
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll head back home if you need me.
+    - Language: Spanish
+      String: Yo volveré a casa por si me necesitas.
+    - Language: Italian
+      String: Tornerò a casa. Se hai bisogno di me mi troverai lì.
+    - Language: Chinese
+      String: 如果你需要我，我就會回家。
+    - Language: Polish
+      String: Jeśli będziesz mnie potrzebować, będę u siebie.
+    - Language: Russian
+      String: Если вдруг понадоблюсь, я буду дома.
+    - Language: French
+      String: Je serai chez moi si vous me cherchez.
+    - Language: Japanese
+      String: なら戻っているよ。用があったら来てくれ
+    - Language: German
+      String: Ich bin zu Hause, falls Ihr mich sucht.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 0D23AC:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

@@ -1,0 +1,72 @@
+FormKey: 0E2702:Skyrim.esm
+VersionControl: 1978415
+Version2: 5
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E2702
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E2702
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E2702
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Sad
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Such a shame. I thought we were getting along so well. I'll head back to Riften if you should have second thoughts.
+    - Language: Spanish
+      String: Qué lástima. Pensaba que nos llevábamos muy bien. Volveré a Riften por si te lo piensas mejor.
+    - Language: Italian
+      String: Questo è un peccato, andavamo d'accordo. Tornerò a Riften, se mai tu dovessi ripensarci.
+    - Language: Chinese
+      String: 真是遺憾。我以為我們能相處得很好。你要是改了主意我就回裂谷城。
+    - Language: Polish
+      String: Wielka szkoda. Myślałam, że dobrze się dogadujemy. Będę w Pękninie, jeśli zmienisz zdanie.
+    - Language: Russian
+      String: Какая жалость. Мне казалось, мы так хорошо ладим. Если вдруг передумаешь, я буду в Рифтене.
+    - Language: French
+      String: Quel dommage. Nous nous entendions si bien. Si vous changez d'avis, sachez que je retourne à Faillaise.
+    - Language: Japanese
+      String: 残念ね。私達とってもうまくやれてると思ってたんだけど。私はリフテンに戻るわ。気が変わったら来てちょうだい
+    - Language: German
+      String: Wie schade. Ich dachte, wir hätten uns so gut verstanden. Ich kehre nach Rifton zurück, falls Ihr es Euch anders überlegen solltet.
+  ScriptNotes: disappointed
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01336B:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

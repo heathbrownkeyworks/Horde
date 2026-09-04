@@ -1,0 +1,79 @@
+FormKey: 05C826:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0005C826
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0005C826
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0005C826
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I will be back at your house if you need me, Thane.
+    - Language: Spanish
+      String: Estaré en tu casa si me necesitas, thane.
+    - Language: Italian
+      String: Se avrai bisogno di me, tornerò a casa tua, thane.
+    - Language: Chinese
+      String: 武衛，你要是需要我，我就在你家。
+    - Language: Polish
+      String: Będę w twoim domu, jeśli będziesz mnie potrzebować, tanie.
+    - Language: Russian
+      String: Если что, я буду в твоем доме, тан.
+    - Language: French
+      String: Je serai dans votre demeure si vous avez besoin de moi.
+    - Language: Japanese
+      String: 必要なら家に戻っています、従士
+    - Language: German
+      String: Ihr findet mich bei Eurem Haus, wenn Ihr mich braucht, Thane.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0A2C8E:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0A2C8D:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

@@ -1,0 +1,72 @@
+FormKey: 0D8E1A:Skyrim.esm
+VersionControl: 1978415
+Version2: 5
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000D8E1A
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000D8E1A
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000D8E1A
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll keep watch from here.
+    - Language: Spanish
+      String: Vigilaré desde aquí.
+    - Language: Italian
+      String: Ti terrò d'occhio da qui.
+    - Language: Chinese
+      String: 我會在這密切留意四週的。
+    - Language: Polish
+      String: Teraz ja obejmę wartę.
+    - Language: Russian
+      String: Я буду стоять на страже.
+    - Language: French
+      String: Je vais monter la garde ici.
+    - Language: Japanese
+      String: 見張りは任せろ
+    - Language: German
+      String: Ich halte von hier aus Wache.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 013AEE:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

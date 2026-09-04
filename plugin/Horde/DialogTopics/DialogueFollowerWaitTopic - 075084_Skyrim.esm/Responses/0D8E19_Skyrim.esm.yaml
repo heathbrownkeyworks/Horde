@@ -1,0 +1,72 @@
+FormKey: 0D8E19:Skyrim.esm
+VersionControl: 1978415
+Version2: 5
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000D8E19
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000D8E19
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000D8E19
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Head on, then. I'll keep an eye out.
+    - Language: Spanish
+      String: Ve, pues. Yo me mantendré alerta.
+    - Language: Italian
+      String: Prosegui pure. Terrò gli occhi aperti.
+    - Language: Chinese
+      String: 往前走，我會警惕周圍的。
+    - Language: Polish
+      String: Więc ruszaj. Ja stanę na straży.
+    - Language: Russian
+      String: Тогда иди вперед. Я буду начеку.
+    - Language: French
+      String: Allez-y, alors. Je resterai à l'affût.
+    - Language: Japanese
+      String: じゃあ行ってくれ。見張ってるから
+    - Language: German
+      String: Dann geht. Ich werde die Augen offen halten.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 013AEC:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

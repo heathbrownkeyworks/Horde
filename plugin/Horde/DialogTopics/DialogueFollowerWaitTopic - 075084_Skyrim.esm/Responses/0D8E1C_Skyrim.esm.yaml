@@ -1,0 +1,72 @@
+FormKey: 0D8E1C:Skyrim.esm
+VersionControl: 1978415
+Version2: 6
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000D8E1C
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000D8E1C
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000D8E1C
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Go on ahead. I'll stand guard.
+    - Language: Spanish
+      String: Adelante. Yo haré guardia.
+    - Language: Italian
+      String: Vai pure, io resterò di guardia.
+    - Language: Chinese
+      String: 去吧，我在這守著。
+    - Language: Polish
+      String: Idź. Ja stanę na straży.
+    - Language: Russian
+      String: Хорошо. Я постою на страже.
+    - Language: French
+      String: Allez-y, je monte la garde.
+    - Language: Japanese
+      String: 先に行ってくれ。見張っているから
+    - Language: German
+      String: Geht vor. Ich halte hier Wache.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 0D23AE:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

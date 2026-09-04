@@ -1,0 +1,72 @@
+FormKey: 0750A5:Skyrim.esm
+VersionControl: 1978415
+Version2: 9
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000750A5
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: MQ203
+      Object: 036192:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000750A5
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000750A5
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: All right. Don't be long.
+    - Language: Spanish
+      String: De acuerdo. No tardes.
+    - Language: Italian
+      String: Va bene. Non metterci troppo.
+    - Language: Chinese
+      String: 好吧，別太久。
+    - Language: Polish
+      String: W porządku. Tylko się nie ociągaj.
+    - Language: Russian
+      String: Ладно. Но поспеши.
+    - Language: French
+      String: D'accord. Mais faites vite.
+    - Language: Japanese
+      String: 分かった。すぐに戻ってきてくれよ
+    - Language: German
+      String: In Ordnung. Macht schnell.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 084D1B:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 013358:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

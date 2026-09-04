@@ -1,0 +1,68 @@
+FormKey: 07A51C:Skyrim.esm
+VersionControl: 1978415
+Version2: 9
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A51C
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A51C
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A51C
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Don't make me wait too long. I get bored very easily.
+    - Language: Spanish
+      String: No me hagas esperar demasiado. Me aburro con facilidad.
+    - Language: Italian
+      String: Non farmi aspettare troppo. Mi annoio facilmente.
+    - Language: Chinese
+      String: 別讓我等太久，我很容易厭倦的。
+    - Language: Polish
+      String: Tylko żebym nie czekał za długo - szybko się nudzę.
+    - Language: Russian
+      String: Только ты не слишком долго, а то я заскучаю.
+    - Language: French
+      String: Ne me faites pas trop attendre. Ma patience a des limites.
+    - Language: Japanese
+      String: あまり待たせるなよ。忍耐強い方じゃないんだ
+    - Language: German
+      String: Lasst mich nicht zu lange warten. Mir wird leicht langweilig.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9980:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

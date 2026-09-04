@@ -1,0 +1,76 @@
+FormKey: 0D8DD2:Skyrim.esm
+VersionControl: 1978415
+Version2: 6
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000D8DD2
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000D8DD2
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000D8DD2
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Sad
+  EmotionValue: 15
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: I'll be heading home, then, if you need me.
+    - Language: Spanish
+      String: Entonces, me iré a casa. Si me necesitas, allí estaré.
+    - Language: Italian
+      String: Me ne andrò a casa allora. Se avrai bisogno di me, mi troverai là.
+    - Language: Chinese
+      String: 如果你非要如此，那我就馬上回家。
+    - Language: Polish
+      String: W takim razie, będę zmierzał do domu, jeśli będziesz mnie potrzebować.
+    - Language: Russian
+      String: Я отправлюсь домой. Если что, ты найдешь меня там.
+    - Language: French
+      String: Je vais rentrer, dans ce cas. Je serai chez moi si vous me cherchez.
+    - Language: Japanese
+      String: じゃあ先に帰るからな。また用ができたら来てくれ
+    - Language: German
+      String: Ihr findet mich zu Hause, wenn Ihr mich braucht.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 013AEE:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

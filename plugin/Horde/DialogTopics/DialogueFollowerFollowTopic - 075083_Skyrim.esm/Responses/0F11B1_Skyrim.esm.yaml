@@ -1,0 +1,69 @@
+FormKey: 0F11B1:Skyrim.esm
+VersionControl: 1978415
+Version2: 4
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000F11B1
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000F11B1
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000F11B1
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Great! Let's go!
+    - Language: Spanish
+      String: ¡Estupendo, vamos!
+    - Language: Italian
+      String: Bene, andiamo!
+    - Language: Chinese
+      String: 很好，走吧！
+    - Language: Polish
+      String: Świetnie, ruszajmy!
+    - Language: Russian
+      String: Отлично! Пошли!
+    - Language: French
+      String: Parfait, allons-y !
+    - Language: Japanese
+      String: いいぞ！　行こう！
+    - Language: German
+      String: Gut, dann los!
+  ScriptNotes: Happy, enthusiastic
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 065657:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

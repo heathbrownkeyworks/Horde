@@ -1,0 +1,76 @@
+FormKey: 0D8DD1:Skyrim.esm
+VersionControl: 1978415
+Version2: 6
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000D8DD1
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000D8DD1
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000D8DD1
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Sad
+  EmotionValue: 15
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: Then back home is where you'll find me.
+    - Language: Spanish
+      String: Pues entonces, si me buscas, me encontrarás en mi casa.
+    - Language: Italian
+      String: Allora mi troverai a casa.
+    - Language: Chinese
+      String: 回家就能找到我。
+    - Language: Polish
+      String: W takim razie znajdziesz mnie w domu.
+    - Language: Russian
+      String: Тогда ты найдешь меня дома.
+    - Language: French
+      String: Alors, c'est chez moi que vous me trouverez.
+    - Language: Japanese
+      String: じゃあ、元いた場所に帰るよ
+    - Language: German
+      String: Dann werdet Ihr mich zu Hause finden.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsVoiceTypeConditionData
+    VoiceTypeOrList: 013AEC:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 0BCC9A:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

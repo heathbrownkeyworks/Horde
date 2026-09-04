@@ -1,0 +1,72 @@
+FormKey: 0E26F8:Skyrim.esm
+VersionControl: 1978415
+Version2: 5
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__000E26F8
+    Properties:
+    - MutagenObjectType: ScriptObjectProperty
+      Name: DismissedFollowerFaction
+      Object: 05C84C:Skyrim.esm
+    - MutagenObjectType: ScriptObjectProperty
+      Name: pDialogueFollower
+      Object: 0750BA:Skyrim.esm
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__000E26F8
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__000E26F8
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- Emotion: Happy
+  EmotionValue: 25
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: You'll be all right on your own? Then I'll see you back at the College.
+    - Language: Spanish
+      String: ¿Estarás bien sin mí? En ese caso, nos veremos cuando vuelvas al Colegio.
+    - Language: Italian
+      String: Saprai cavartela? Va bene, allora ci rivedremo all'Accademia.
+    - Language: Chinese
+      String: 你一個人沒問題吧？那我們就學院再見了。
+    - Language: Polish
+      String: Poradzisz sobie beze mnie? No to zobaczymy się w Akademii.
+    - Language: Russian
+      String: А ты не пропадешь в одиночку? Тогда увидимся в Коллегии.
+    - Language: French
+      String: Ça va aller sans moi ? Alors, on se reverra à l'Académie.
+    - Language: Japanese
+      String: ひとりで大丈夫なの？　じゃあ、また大学で会いましょう
+    - Language: German
+      String: Kommt Ihr allein klar? Dann sehen wir uns an der Akademie.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 01C196:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

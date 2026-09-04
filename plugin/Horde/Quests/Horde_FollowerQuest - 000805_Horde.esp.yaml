@@ -1,0 +1,191 @@
+FormKey: 000805:Horde.esp
+EditorID: Horde_FollowerQuest
+Name:
+  TargetLanguage: English
+  Value: Horde Follower Manager
+Flags:
+- StartGameEnabled
+Priority: 70
+QuestFormVersion: 65
+Type: Misc
+NextAliasID: 20
+Aliases:
+- Name: Horde_Follower01
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 1
+  Name: Horde_Follower02
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 2
+  Name: Horde_Follower03
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 3
+  Name: Horde_Follower04
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 4
+  Name: Horde_Follower05
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 5
+  Name: Horde_Follower06
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 6
+  Name: Horde_Follower07
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 7
+  Name: Horde_Follower08
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 8
+  Name: Horde_Follower09
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 9
+  Name: Horde_Follower10
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 10
+  Name: Horde_Follower11
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 11
+  Name: Horde_Follower12
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 12
+  Name: Horde_Follower13
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 13
+  Name: Horde_Follower14
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 14
+  Name: Horde_Follower15
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 15
+  Name: Horde_Follower16
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 16
+  Name: Horde_Follower17
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 17
+  Name: Horde_Follower18
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 18
+  Name: Horde_Follower19
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null
+- ID: 19
+  Name: Horde_Follower20
+  Flags:
+  - Optional
+  - AllowReserved
+  PackageData:
+  - 000803:Horde.esp
+  - 000802:Horde.esp
+  VoiceTypes: Null

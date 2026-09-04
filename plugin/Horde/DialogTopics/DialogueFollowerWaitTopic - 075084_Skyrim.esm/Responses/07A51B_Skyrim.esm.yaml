@@ -1,0 +1,68 @@
+FormKey: 07A51B:Skyrim.esm
+VersionControl: 1978415
+Version2: 10
+VirtualMachineAdapter:
+  Scripts:
+  - Name: TIF__0007A51B
+  ScriptFragments:
+    MutagenObjectType: ScriptFragments
+    FileName: TIF__0007A51B
+    OnEnd:
+      ExtraBindDataVersion: 1
+      ScriptName: TIF__0007A51B
+      FragmentName: Fragment_0
+Flags:
+  Flags:
+  - Goodbye
+FavorLevel: None
+Responses:
+- EmotionValue: 50
+  ResponseNumber: 1
+  Unknown2: 0x000000
+  Flags:
+  - UseEmotionAnimation
+  Unknown3: 0x000000
+  Text:
+    TargetLanguage: English
+    Values:
+    - Language: English
+      String: As you wish.
+    - Language: Spanish
+      String: Como desees.
+    - Language: Italian
+      String: Come desideri.
+    - Language: Chinese
+      String: 如你所願。
+    - Language: Polish
+      String: Jak sobie życzysz.
+    - Language: Russian
+      String: Как пожелаешь.
+    - Language: French
+      String: Comme vous voudrez.
+    - Language: Japanese
+      String: 好きにしろ
+    - Language: German
+      String: Wie Ihr wünscht.
+  ScriptNotes: ''
+  Edits: ''
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 05C84E:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetIsIDConditionData
+    Object: 0B9982:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  CompareOperator: LessThan
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00082F:Horde.esp
+  ComparisonValue: 1

@@ -1,0 +1,20 @@
+FormKey: 000836:Horde.esp
+EditorID: Horde_PowerSummonAll
+Name:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: 'Horde: Summon'
+Description:
+  TargetLanguage: English
+  Values:
+  - Language: English
+    String: All followers teleport to your location.
+EquipmentType: 025BEE:Skyrim.esm
+Type: LesserPower
+ChargeTime: 0
+CastType: FireAndForget
+Effects:
+- BaseEffect: 000832:Horde.esp
+  Data:
+    Duration: 0
