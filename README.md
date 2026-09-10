@@ -17,6 +17,8 @@ a Meridian UI panel, group lesser powers, or configurable hotkeys.
 - Friendly-fire protection refunds only the damage dealt and stops combat
   between teammates.
 - Custom-framework detection leaves independently managed followers alone.
+- Recruitment does not grant the vanilla hidden follower bow or iron arrows;
+  followers keep their existing equipment.
 
 ### Sandboxing and homes
 
@@ -48,6 +50,9 @@ a Meridian UI panel, group lesser powers, or configurable hotkeys.
 - Crosshair quick-open jumps directly to the targeted follower's detail screen.
 - Five lesser powers: Horde, Follow, Wait, Summon, and Passive.
 - Optional configurable keyboard controls, including group commands.
+- Optional controller navigation through Meridian.Input/1, with follower and
+  command focus, section switching, safe confirmations, contextual button hints,
+  and Meridian's shared stick cursor.
 - Keyboard input is contained while the Horde panel is open.
 - Notifications can be disabled globally.
 - Vanilla Follow, Wait, and Dismiss dialogue is hidden for tracked followers;
@@ -64,6 +69,12 @@ Horde is a standalone replacement for multi-follower frameworks and is not
 compatible with NFF, EFF, or AFT. Independently managed followers such as
 Inigo, Vilja, Lucien, and Kaidan are intentionally not managed. Serana is also
 excluded because she uses the Dawnguard follower quest system.
+
+`Horde.esp` overrides the `DialogueFollower` quest to remove the starter bow
+and arrow grants from its Follower alias. If another plugin overrides that
+quest after Horde, its winning Follower alias must also omit those two items.
+This prevents future recruitment grants; it does not remove items already
+stored in a follower's inventory.
 
 The unified native plugin supports Skyrim SE 1.5.97 and AE runtimes through
 1.7.104. Skyrim VR is not supported because Meridian UI does not currently
@@ -91,6 +102,42 @@ Settings are stored in `Data/SKSE/Plugins/Horde/settings.json`. They include the
 roster limit, control mode and scan codes, default sandbox and Follow Close
 states, notification state, and party follow distance.
 
+### Controllers
+
+Controller support uses `Meridian.Input/1`, available in Meridian UI 1.5.0.
+Horde detects that optional interface directly; older or custom Meridian builds
+without it keep working with mouse, keyboard, and the existing Horde lesser powers.
+
+Default Xbox-style controls (the footer adapts to Meridian's current bindings
+and Xbox, PlayStation, or generic prompt family):
+
+| Control | Action |
+|---|---|
+| Hold LB, then press Y | Open Horde, in either favorites or keybind mode |
+| D-pad / left stick | Move focus within the current section |
+| A | Select a follower and enter their commands, or activate the focused control |
+| LB / RB | Previous / next section: Followers, Commands or Dismissed, Group Orders, Settings |
+| B | Cancel a confirmation, return from a section, or close from Followers |
+| X | Group Orders from Followers; return to Followers from Commands |
+| Y | Open the dismissed registry from Followers, when entries exist |
+| Right-stick click | Toggle Meridian's shared cursor |
+| Right stick | Scroll the current area |
+
+Open Horde from normal gameplay with other game menus closed: hold LB first,
+then tap Y. Once Horde is open, Y retains its dismissed-registry action.
+
+Dismiss, Forget, and active-follower Clear Home retain their confirmation dialogs,
+with Cancel initially focused. Focus is restored by follower identity after
+state updates, rather than by row number. Mouse use remains available at any time.
+Horde keeps its existing paused-menu behavior and sends commands through the same
+game-thread callbacks used by mouse controls.
+
+The opener is registered through Meridian's conflict checks. If another consumer
+already owns an overlapping shortcut, Horde logs that result without taking it
+over; the Horde lesser power and keyboard opener remain available. Meridian's
+global controller settings control dead zones, repeat timing, cursor speed and
+prompt family. Horde adds no independent controller polling or text-entry keyboard.
+
 ## Building
 
 Horde uses C++23 and xmake 3.0.1 or newer. CommonLibSSE-NG is pinned as a Git
@@ -111,6 +158,22 @@ Run the source and plugin regression checks with:
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/qa/horde_static_regression.ps1
 ```
+
+Run the controller consumer tests with Node 20 or newer and a controller-enabled
+Meridian source checkout. The tests use its real injected helper, not a copied
+implementation shipped with Horde:
+
+```powershell
+npm --prefix scripts/qa ci
+node scripts/qa/node_modules/playwright/cli.js install chromium --only-shell
+$env:MERIDIAN_INPUT_HELPER = 'C:\path\to\MeridianUI\src\UIPlatform\Web\meridian-input.js'
+npm --prefix scripts/qa test
+```
+
+These are browser/contract checks with simulated native transport. In-game
+controller operation, paused input capture, shortcut conflicts and hardware
+disconnect/reconnect must also be checked in Skyrim; browser tests do not certify
+those runtime behaviors.
 
 The binary `Horde.esp` is intentionally not stored in source control. Its
 Spriggit YAML source is under `plugin/Horde/` and targets Spriggit 0.40.0. To
@@ -137,8 +200,13 @@ another mod's dialogue changes.
 
 ## License
 
-Horde's source code is released under the [MIT License](LICENSE).
+Horde's source code and native DLL are licensed as GPL-3.0-or-later with the
+Modding Exception and GPL-3.0 Linking Exception in
+[EXCEPTIONS.md](EXCEPTIONS.md). Horde statically links CommonLibSSE-NG and is
+not distributed as MIT-only software.
 
 The bundled Poppins font files in `view/fonts/` are distributed under the
-[SIL Open Font License 1.1](view/fonts/OFL.txt). CommonLibSSE-NG and other build
-dependencies retain their respective upstream licenses.
+[SIL Open Font License 1.1](view/fonts/OFL.txt). Copied Meridian UI integration
+headers remain MIT-licensed. See [LICENSING.md](LICENSING.md) and
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the exact boundaries and
+corresponding-source information.

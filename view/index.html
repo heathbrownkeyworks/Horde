@@ -1206,12 +1206,13 @@
 
         .hidden { display: none !important; }
     </style>
+    <link rel="stylesheet" href="controller.css">
 </head>
 <body>
   <main class="app" id="panel">
     <!-- Close (upper-right of the screen) -->
     <button type="button" class="close-glyph" title="Close" aria-label="Close Horde"
-            onclick="window.hordeClose && window.hordeClose('button')">
+            onclick="hordeRequestClose('button')">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
              stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6L6 18"/>
@@ -1228,16 +1229,16 @@
             <span class="roster-count" id="rosterCount"><strong>0</strong> / 20 followers</span>
         </header>
 
-        <div class="toolbar">
-            <button class="t-btn" onclick="doAction('hordeSummonAll')">Summon All</button>
-            <button class="t-btn" onclick="doAction('hordeFollowAll')">Follow All</button>
-            <button class="t-btn" onclick="doAction('hordeWaitAll')">Wait All</button>
+        <div class="toolbar" id="groupOrders" aria-label="Group orders">
+            <button class="t-btn" id="group-summon" onclick="doAction('hordeSummonAll')">Summon All</button>
+            <button class="t-btn" id="group-follow" onclick="doAction('hordeFollowAll')">Follow All</button>
+            <button class="t-btn" id="group-wait" onclick="doAction('hordeWaitAll')">Wait All</button>
             <button class="t-btn" id="btnPassiveAll" onclick="doPassiveAll()">Passive</button>
             <div class="toolbar-spacer"></div>
             <button class="t-btn t-btn-amber" id="btnDismissed" style="display:none" onclick="showDismissed()">Dismissed (0)</button>
         </div>
 
-        <div class="grid" id="grid"></div>
+        <div class="grid" id="grid" aria-label="Followers"></div>
 
         <footer class="panel-footer" id="footer"></footer>
     </section>
@@ -1252,7 +1253,7 @@
 
         <div class="pane hidden" id="viewDismissed">
             <div class="registry-head">
-                <button class="back-btn" onclick="showGrid()">
+                <button class="back-btn" id="registryBack" onclick="showGrid()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
                     Back
                 </button>
@@ -1262,16 +1263,17 @@
         </div>
     </section>
   </main>
+    <aside id="controllerHints" aria-label="Controller controls" hidden></aside>
 
     <!-- Dismiss confirmation modal -->
     <div class="modal-overlay" id="modalOverlay">
-        <div class="modal">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalText">
             <div class="modal-body">
                 <div class="modal-title" id="modalTitle">Confirm Dismiss</div>
                 <div class="modal-text" id="modalText"></div>
             </div>
             <div class="modal-actions">
-                <button class="t-btn" onclick="closeModal()">Cancel</button>
+                <button class="t-btn" id="modalCancel" onclick="closeModal()">Cancel</button>
                 <button class="t-btn t-btn-danger" id="modalConfirm" onclick="confirmModal()">Dismiss</button>
             </div>
         </div>
@@ -1328,6 +1330,7 @@
             if (_currentView === 'grid') {
                 renderDetail();
             }
+            window.HordeController && HordeController.refresh();
         };
 
         window.hordeUpdateDismissed = function(data) {
@@ -1339,6 +1342,7 @@
             if (_currentView === 'dismissed') {
                 renderDismissed();
             }
+            window.HordeController && HordeController.refresh();
         };
 
         // ─── Right-pane navigation ───
@@ -1350,6 +1354,7 @@
             renderGrid();
             renderFooter();
             renderDetail();
+            window.HordeController && HordeController.screenChanged();
         }
 
         function showDismissed() {
@@ -1358,12 +1363,14 @@
             document.getElementById('viewDismissed').classList.remove('hidden');
             renderDismissed();
             doAction('hordeGetDismissed');
+            window.HordeController && HordeController.screenChanged();
         }
 
         // showDetail: select a follower — their dossier opens on the right.
         function showDetail(formID) {
             _detailFormID = formID;
             showGrid();
+            window.HordeController && HordeController.followerSelected();
         }
 
         function getFollower(formID) {
@@ -1388,7 +1395,7 @@
             var notifChecked = _state.notificationsEnabled === false ? ' checked' : '';
             var dist = _state.followDistance || 'normal';
             function segBtn(value, label) {
-                return '<button class="footer-segment-btn' + (dist === value ? ' active' : '') +
+                return '<button id="distance-' + value + '" class="footer-segment-btn' + (dist === value ? ' active' : '') +
                     '" onclick="setFollowDistance(\'' + value + '\')">' + label + '</button>';
             }
             // Note: all values here are from trusted internal state, not user input
@@ -1402,7 +1409,7 @@
                     '</div>' +
                 '</div>' +
                 '<label class="footer-toggle">' +
-                    '<input type="checkbox"' + notifChecked + ' onchange="toggleNotifications(this.checked)">' +
+                    '<input id="muteNotifications" type="checkbox"' + notifChecked + ' onchange="toggleNotifications(this.checked)">' +
                     'Mute Notifications' +
                 '</label>' +
                 '<div class="footer-spacer"></div>' +
@@ -1420,9 +1427,6 @@
         }
 
         function renderGrid() {
-            if (document.activeElement && document.activeElement !== document.body) {
-                document.activeElement.blur();
-            }
             var grid = document.getElementById('grid');
             grid.innerHTML = '';
             var max = _state.maxFollowers || 20;
@@ -1465,7 +1469,18 @@
             // The colored 3px border is THE status indicator — no separate pill.
             card.className = 'row row-active ' + (isFollowing ? 'is-following' : 'is-waiting') +
                 (isSelected ? ' row-selected' : '');
+            card.dataset.meridianId = 'follower-' + f.formID;
+            card.tabIndex = 0;
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', f.name + ', ' + (isFollowing ? 'following' : 'waiting'));
+            card.setAttribute('aria-pressed', String(isSelected));
             card.onclick = function() { showDetail(f.formID); };
+            card.onkeydown = function(event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    if (!event.repeat) card.click();
+                }
+            };
 
             var hp = Math.round(f.health || 0);
             var hpMax = Math.round(f.healthMax || 1);
@@ -1607,16 +1622,16 @@
                             '<div class="detail-control-row">' +
                                 '<span class="detail-control-label">State</span>' +
                                 '<div class="toggle-group" style="flex:1">' +
-                                    '<button class="toggle-btn' + (isFollowing ? ' active' : '') + '" ' +
+                                    '<button data-meridian-id="detail-' + f.formID + '-follow" class="toggle-btn' + (isFollowing ? ' active' : '') + '" ' +
                                         'onclick="doSetFollow(\'' + f.formID + '\')">Follow</button>' +
-                                    '<button class="toggle-btn' + (!isFollowing ? ' active' : '') + '" ' +
+                                    '<button data-meridian-id="detail-' + f.formID + '-wait" class="toggle-btn' + (!isFollowing ? ' active' : '') + '" ' +
                                         'onclick="doSetWait(\'' + f.formID + '\')">Wait</button>' +
                                 '</div>' +
                             '</div>' +
                             '<div class="detail-control-row">' +
                                 '<span class="detail-control-label">Passive</span>' +
                                 '<label class="check-row">' +
-                                    '<input type="checkbox"' + (f.isPassive ? ' checked' : '') +
+                                    '<input data-meridian-id="detail-' + f.formID + '-passive" aria-label="Passive" type="checkbox"' + (f.isPassive ? ' checked' : '') +
                                         ' onchange="doSetPassive(\'' + f.formID + '\', this.checked)">' +
                                     '<span>' + (f.isPassive ? 'Will not engage in combat' : 'Will fight enemies') + '</span>' +
                                 '</label>' +
@@ -1624,7 +1639,7 @@
                             '<div class="detail-control-row">' +
                                 '<span class="detail-control-label">Follow Close</span>' +
                                 '<label class="check-row">' +
-                                    '<input type="checkbox"' + (f.isFollowClose ? ' checked' : '') +
+                                    '<input data-meridian-id="detail-' + f.formID + '-followClose" aria-label="Follow Close" type="checkbox"' + (f.isFollowClose ? ' checked' : '') +
                                         ' onchange="doSetFollowClose(\'' + f.formID + '\', this.checked)">' +
                                     '<span>' + (f.isFollowClose ? 'Teleports when too far' : 'No auto-teleport') + '</span>' +
                                 '</label>' +
@@ -1632,7 +1647,7 @@
                             '<div class="detail-control-row">' +
                                 '<span class="detail-control-label">Idle Sandbox</span>' +
                                 '<label class="check-row">' +
-                                    '<input type="checkbox"' + (sandboxOn ? ' checked' : '') +
+                                    '<input data-meridian-id="detail-' + f.formID + '-sandbox" aria-label="Idle Sandbox" type="checkbox"' + (sandboxOn ? ' checked' : '') +
                                         ' onchange="doSetSandbox(\'' + f.formID + '\', this.checked)">' +
                                     '<span>' + (sandboxOn ? 'Wanders when idle' : 'Stays close when idle') + '</span>' +
                                 '</label>' +
@@ -1640,7 +1655,7 @@
                             '<div class="detail-control-row">' +
                                 '<span class="detail-control-label">Essential</span>' +
                                 '<label class="check-row">' +
-                                    '<input type="checkbox"' + ((f.isEssential !== false) ? ' checked' : '') +
+                                    '<input data-meridian-id="detail-' + f.formID + '-essential" aria-label="Essential" type="checkbox"' + ((f.isEssential !== false) ? ' checked' : '') +
                                         ' onchange="doSetEssential(\'' + f.formID + '\', this.checked)">' +
                                     '<span>' + ((f.isEssential !== false) ? 'Cannot be killed' : 'Can be killed') + '</span>' +
                                 '</label>' +
@@ -1690,12 +1705,12 @@
 
                 // Actions
                 '<div class="detail-actions">' +
-                    '<button class="t-btn t-btn-primary" onclick="doSummon(\'' + f.formID + '\')">Summon</button>' +
+                    '<button data-meridian-id="detail-' + f.formID + '-summon" class="t-btn t-btn-primary" onclick="doSummon(\'' + f.formID + '\')">Summon</button>' +
                     (f.homeWorldspace
-                        ? '<button class="t-btn" onclick="doSetHome(\'' + f.formID + '\')">Change Home</button>' +
-                          '<button class="t-btn" onclick="doClearHome(\'' + f.formID + '\')">Clear Home</button>'
-                        : '<button class="t-btn" onclick="doSetHome(\'' + f.formID + '\')">Set Home</button>') +
-                    '<button class="t-btn t-btn-danger" onclick="doDismiss(\'' + f.formID + '\')">Dismiss</button>' +
+                        ? '<button data-meridian-id="detail-' + f.formID + '-home" class="t-btn" onclick="doSetHome(\'' + f.formID + '\')">Change Home</button>' +
+                          '<button data-meridian-id="detail-' + f.formID + '-clearHome" class="t-btn" onclick="doClearHome(\'' + f.formID + '\')">Clear Home</button>'
+                        : '<button data-meridian-id="detail-' + f.formID + '-home" class="t-btn" onclick="doSetHome(\'' + f.formID + '\')">Set Home</button>') +
+                    '<button data-meridian-id="detail-' + f.formID + '-dismiss" class="t-btn t-btn-danger" onclick="doDismiss(\'' + f.formID + '\')">Dismiss</button>' +
                 '</div>';
 
             if (animate) restartDetailAnim(content);
@@ -1705,6 +1720,8 @@
         // formID: if provided, open with that follower's dossier selected;
         // otherwise the first follower in the roster is shown.
         window.hordeShowPanel = function(formID) {
+            resetModal();
+            document.getElementById('panel').inert = false;
             _pendingDetailFormID = formID || null;
             _detailFormID = formID || null;
             if (window.hordeFitUI) hordeFitUI();
@@ -1716,7 +1733,18 @@
                 app.classList.add('app-in');
             }
             showGrid();
+            window.HordeController && HordeController.open(formID);
         };
+        window.hordeHidePanel = function() {
+            window.HordeController && HordeController.close();
+            resetModal();
+            document.getElementById('panel').inert = true;
+        };
+        function hordeRequestClose(reason) {
+            if (document.getElementById('panel').inert) return;
+            hordeHidePanel();
+            window.hordeClose && window.hordeClose(reason || 'controller');
+        }
         // ─── Icons ───
         var ICN = {
             // Stats — game-icons.net (CC BY 3.0), viewBox 0 0 512 512
@@ -1770,10 +1798,10 @@
                     '<td class="dismissed-name">' + escapeHtml(d.name) + '</td>' +
                     '<td>' + homeCell + '</td>' +
                     '<td><div class="dismissed-actions">' +
-                        '<button class="dismissed-action dismissed-action-summon" onclick="dismissedAction(\'hordeSummonDismissed\',' + d.formID + ')">Summon</button>' +
-                        '<button class="dismissed-action dismissed-action-home" onclick="dismissedAction(\'hordeSetDismissedHome\',' + d.formID + ')">Set Home</button>' +
-                        '<button class="dismissed-action dismissed-action-clear' + clearClass + '" onclick="dismissedAction(\'hordeClearDismissedHome\',' + d.formID + ')">Clear Home</button>' +
-                        '<button class="dismissed-action dismissed-action-forget" onclick="confirmForget(' + d.formID + ',\'' + escapeHtml(d.name).replace(/'/g, "\\'") + '\')">Forget</button>' +
+                        '<button data-meridian-id="registry-' + d.formID + '-summon" class="dismissed-action dismissed-action-summon" onclick="dismissedAction(\'hordeSummonDismissed\',' + d.formID + ')">Summon</button>' +
+                        '<button data-meridian-id="registry-' + d.formID + '-home" class="dismissed-action dismissed-action-home" onclick="dismissedAction(\'hordeSetDismissedHome\',' + d.formID + ')">Set Home</button>' +
+                        '<button data-meridian-id="registry-' + d.formID + '-clearHome"' + (d.hasHome ? '' : ' disabled') + ' class="dismissed-action dismissed-action-clear' + clearClass + '" onclick="dismissedAction(\'hordeClearDismissedHome\',' + d.formID + ')">Clear Home</button>' +
+                        '<button data-meridian-id="registry-' + d.formID + '-forget" class="dismissed-action dismissed-action-forget" onclick="confirmForget(' + d.formID + ',\'' + escapeHtml(d.name).replace(/'/g, "\\'") + '\')">Forget</button>' +
                     '</div></td>' +
                 '</tr>';
             }
@@ -1861,6 +1889,10 @@
                 : 'All followers break off combat and return to you';
 
             if (!(_state.count > 0)) pBtn.classList.add('disabled');
+            pBtn.disabled = !(_state.count > 0);
+            ['group-summon', 'group-follow', 'group-wait'].forEach(function(id) {
+                document.getElementById(id).disabled = !(_state.count > 0);
+            });
         }
 
         function toggleNotifications(muted) {
@@ -1920,7 +1952,10 @@
                 _modalCloseTimer = null;
             }
             overlay.classList.remove('closing');
+            overlay.inert = false;
             overlay.classList.add('open');
+            document.getElementById('panel').inert = true;
+            window.HordeController && HordeController.modalOpened();
         }
 
         function closeModal() {
@@ -1930,16 +1965,32 @@
             // Play the out animation, then actually hide. Timeout (not
             // animationend) so a dropped event can never wedge the modal open.
             overlay.classList.add('closing');
+            overlay.inert = true;
             _modalCloseTimer = setTimeout(function() {
                 _modalCloseTimer = null;
                 overlay.classList.remove('open');
                 overlay.classList.remove('closing');
+                document.getElementById('panel').inert = false;
+                window.HordeController && HordeController.modalClosed();
             }, 160);
         }
 
         function confirmModal() {
-            if (_modalCallback) _modalCallback();
+            var callback = _modalCallback;
+            _modalCallback = null;
+            if (callback) callback();
             closeModal();
+        }
+
+        function resetModal() {
+            if (_modalCloseTimer !== null) clearTimeout(_modalCloseTimer);
+            _modalCloseTimer = null;
+            _modalCallback = null;
+            var overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('open', 'closing');
+            overlay.inert = true;
+            document.getElementById('panel').inert = false;
+            window.HordeController && HordeController.modalClosed();
         }
 
         function doDismiss(formID) {
@@ -1989,7 +2040,7 @@
             }
             e.preventDefault();
             e.stopPropagation();
-            window.hordeClose && window.hordeClose('escape');
+            hordeRequestClose('escape');
         }, true);
 
         window.addEventListener('resize', hordeFitUI);
@@ -2000,5 +2051,6 @@
         renderFooter();
         renderDetail();
     </script>
+    <script src="controller.js"></script>
 </body>
 </html>

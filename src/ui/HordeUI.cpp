@@ -5,6 +5,7 @@
 #include "Settings.h"
 
 extern Meridian::UI::View::IViewAPI* g_MeridianView;
+extern Meridian::UI::Input::IInputAPI* g_MeridianInput;
 
 HordeUI& HordeUI::GetSingleton()
 {
@@ -24,8 +25,18 @@ void HordeUI::Initialize()
     viewInfo.viewName = "main";
     viewInfo.startUrl = "mod://horde/index.html";
     viewInfo.initiallyVisible = false;
-    viewInfo.onDOMReady = [](Meridian::UI::View::ViewHandle) {
+    viewInfo.onDOMReady = [](Meridian::UI::View::ViewHandle view) {
         logger::info("HordeUI: DOM ready");
+        // The helper is injected before DOM-ready, which can be later than
+        // the page's own scripts. Reinitialize after any browser reload.
+        g_MeridianView->ExecuteJavaScript(view, "window.HordeController && HordeController.initialize()");
+        SKSE::GetTaskInterface()->AddTask([view]() {
+            auto& ui = HordeUI::GetSingleton();
+            if (ui._view == view && ui.IsOpen()) {
+                g_MeridianView->ExecuteJavaScript(view, "hordeShowPanel()");
+                ui.PushStateToView();
+            }
+        });
     };
     _view = g_MeridianView->CreateView(&viewInfo);
 
@@ -35,7 +46,41 @@ void HordeUI::Initialize()
     }
 
     RegisterListeners();
+    ConfigureController();
     logger::info("HordeUI initialized");
+}
+
+void HordeUI::ConfigureController()
+{
+    if (!g_MeridianInput) return;
+
+    using namespace Meridian::UI::Input;
+    ViewInputConfig config{};
+    config.enabled = 1;
+    config.allowCursor = 1;
+    const auto configured = g_MeridianInput->ConfigureView(_view, &config);
+    if (configured != Result::Ok) {
+        logger::warn("HordeUI: controller opt-in failed ({}); retaining keyboard/mouse controls", static_cast<std::uint32_t>(configured));
+        return;
+    }
+
+    ShortcutInfo shortcut{};
+    shortcut.modifier = Control::LeftShoulder;
+    shortcut.button = Control::North;
+    // Meridian delivers shortcuts on the game thread and binds their lifetime
+    // to this view. The opener is independent of keyboard/favorites mode.
+    shortcut.callback = [](ShortcutHandle, void*) {
+        auto& ui = HordeUI::GetSingleton();
+        if (!ui.IsOpen()) ui.Toggle();
+    };
+    const auto registered = g_MeridianInput->RegisterShortcut(_view, &shortcut, &_controllerShortcut);
+    if (registered == Result::Ok) {
+        logger::info("HordeUI: controller enabled; LeftShoulder + North (LB + Y) opens Horde");
+    } else if (registered == Result::Conflict) {
+        logger::warn("HordeUI: controller opener conflicts with another view; open through Horde's power or keyboard shortcut");
+    } else {
+        logger::warn("HordeUI: controller opener unavailable ({}); menu navigation remains enabled", static_cast<std::uint32_t>(registered));
+    }
 }
 
 void HordeUI::Toggle()
@@ -43,6 +88,7 @@ void HordeUI::Toggle()
     if (!g_MeridianView || !g_MeridianView->IsValid(_view)) return;
 
     if (_isOpen) {
+        g_MeridianView->ExecuteJavaScript(_view, "window.hordeHidePanel && hordeHidePanel()");
         g_MeridianView->Unfocus(_view);
         g_MeridianView->Hide(_view);
         _isOpen = false;

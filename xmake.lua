@@ -3,7 +3,7 @@ includes('lib/commonlibsse-ng')
 
 set_project('Horde')
 set_version('2.0.0')
-set_license('MIT')
+set_license('GPL-3.0-or-later')
 
 set_languages('c++23')
 set_warnings('allextra')

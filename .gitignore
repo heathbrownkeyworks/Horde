@@ -36,6 +36,9 @@ signing/
 .vs/
 .vscode/
 .xmake/
+node_modules/
+test-results/
+playwright-report/
 build/
 dist/
 out/

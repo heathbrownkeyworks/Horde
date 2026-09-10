@@ -1,0 +1,42 @@
+/* Use the existing parchment/gold palette for shared Meridian focus. */
+html.horde-controller [data-meridian-focused] {
+    outline: 2px solid var(--amber-light);
+    outline-offset: -2px;
+}
+html.horde-controller .check-row:has([data-meridian-focused]),
+html.horde-controller .footer-toggle:has([data-meridian-focused]) {
+    outline: 2px solid var(--amber-light);
+    outline-offset: 3px;
+}
+.row-active:focus-visible { outline: 2px solid var(--amber-light); outline-offset: -2px; }
+button:disabled { opacity: 0.3; cursor: default; pointer-events: none; }
+html.horde-controller .app { height: calc(100% - 3rem); }
+#controllerHints {
+    position: fixed;
+    inset: auto 0 0;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    padding: 0 1rem;
+    background: var(--obsidian);
+    border-top: 1px solid var(--border-strong);
+    color: var(--fg-2);
+    font-size: 0.75rem;
+    z-index: 600;
+    pointer-events: none;
+}
+#controllerHints[hidden] { display: none; }
+#controllerHints strong { color: var(--amber-light); letter-spacing: 0.04em; }
+#controllerHints span { white-space: nowrap; }
+#controllerHints kbd {
+    display: inline-block;
+    min-width: 1.35rem;
+    padding: 0.1rem 0.3rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.25rem;
+    text-align: center;
+    color: var(--fg-1);
+    background: var(--surface);
+}

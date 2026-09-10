@@ -340,6 +340,22 @@ Assert-Contains `
     'if\s*\(\s*g_MeridianView\s*\)\s*\{\s*HordeUI::GetSingleton\(\)\.Initialize\(\);' `
     'HordeUI initialization must be gated narrowly on a successfully acquired Meridian interface.'
 
+# --- Optional Meridian.Input controller integration ---
+$controllerJs = Read-RepoFile 'view/controller.js'
+Assert-Contains $mainCpp 'OnInputLoaded\(\)[\s\S]*?Meridian::UI::Input::Query' `
+    'The optional Input/1 interface must be acquired alongside View/1 during kInputLoaded.'
+Assert-Contains $hordeUI 'if\s*\(\s*!g_MeridianInput\s*\)\s*return;' `
+    'Missing Input/1 must not prevent keyboard/mouse UI operation.'
+Assert-Contains $hordeUI 'config\.enabled\s*=\s*1;' 'Horde must opt its view into controller input.'
+Assert-Contains $hordeUI 'Result::Conflict' 'A controller opener conflict must have an explicit fallback.'
+Assert-Contains $hordeUI 'hordeHidePanel[\s\S]*?Unfocus\(_view\)[\s\S]*?Hide\(_view\)' `
+    'Native close must end page scopes before releasing the view.'
+Assert-Contains $controllerJs 'input\.attachNavigation' 'Horde must use Meridian navigation scopes.'
+Assert-Contains $controllerJs 'input\.getPrompt' 'Controller prompts must use the current bindings.'
+Assert-NotContains $controllerJs 'navigator\.getGamepads|XInputGetState|SendInput\(' `
+    'Horde must not add independent controller polling.'
+Assert-Contains $indexHtml '<script src="controller\.js"></script>' 'The controller consumer asset must be loaded.'
+
 if (-not (Test-Path -LiteralPath $passiveSpell)) {
     throw 'Horde_PowerPassiveAll spell record is missing from the plugin source.'
 }
@@ -368,6 +384,9 @@ Assert-Contains `
 # 9-15 every time. Verify the shipped binary still carries them.
 $espPath = Join-Path $repoRoot 'plugin/Horde.esp'
 if (Test-Path -LiteralPath $espPath) {
+    & node (Join-Path $PSScriptRoot 'horde_recruitment_inventory.mjs') $espPath
+    if ($LASTEXITCODE -ne 0) { throw 'Horde recruitment inventory checks failed.' }
+
     $espBytes = [System.IO.File]::ReadAllBytes($espPath)
     $needle = [System.Text.Encoding]::ASCII.GetBytes('PKDT')
     $found = 0

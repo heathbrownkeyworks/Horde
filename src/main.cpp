@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include "MeridianUIAPI/ViewDllLoader.h"
+#include "MeridianUIAPI/InputDllLoader.h"
 #include "RuntimeCompatibility.h"
 #include "Settings.h"
 #include "follower/FollowerManager.h"
@@ -39,6 +40,7 @@ SKSE_EXPORT bool SKSEPlugin_Query(SKSE::QueryInterface*, SKSE::PluginInfo* a_plu
 }
 
 Meridian::UI::View::IViewAPI* g_MeridianView = nullptr;
+Meridian::UI::Input::IInputAPI* g_MeridianInput = nullptr;
 
 // --- Keybind modifier state ---
 // File-scope so EventHandler can reset us when any menu opens/closes.
@@ -85,6 +87,13 @@ static void OnInputLoaded()
 
     Meridian::UI::Settings meridianSettings{};
     g_MeridianView = Meridian::UI::View::Query(&meridianSettings, "Horde");
+    g_MeridianInput = Meridian::UI::Input::Query(&meridianSettings, "Horde");
+
+    if (g_MeridianInput) {
+        logger::info("Horde: optional Meridian.Input/1 acquired");
+    } else {
+        logger::info("Horde: Meridian.Input/1 unavailable; keyboard/mouse and lesser powers remain available");
+    }
 
     if (g_MeridianView) {
         logger::info("Horde: Meridian.View/1 acquired during kInputLoaded");
