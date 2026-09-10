@@ -28,8 +28,8 @@ static_assert(
 
 static_assert(
     Plugin::RuntimeCompatibility::MakePluginVersionData().pluginVersion ==
-        REL::Version{ 2, 0, 0, 0 }.pack(),
-    "Horde plugin metadata must remain synchronized with version 2.0.0");
+        REL::Version{ 2, 1, 0, 0 }.pack(),
+    "Horde plugin metadata must remain synchronized with version 2.1.0");
 
 SKSE_EXPORT bool SKSEPlugin_Query(SKSE::QueryInterface*, SKSE::PluginInfo* a_pluginInfo)
 {

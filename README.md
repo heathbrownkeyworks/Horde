@@ -1,6 +1,6 @@
 # Horde
 
-Horde 2.0 is a lightweight, native follower manager for Skyrim Special Edition
+Horde 2.1.0 is a lightweight, native follower manager for Skyrim Special Edition
 and Anniversary Edition. It automatically tracks up to 20 followers using
 Skyrim's vanilla `DialogueFollower` system and presents the whole party through
 a Meridian UI panel, group lesser powers, or configurable hotkeys.

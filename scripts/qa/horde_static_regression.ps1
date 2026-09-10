@@ -243,7 +243,7 @@ $mainCpp = Read-RepoFile 'src/main.cpp'
 $settingsHeader = Read-RepoFile 'src/Settings.h'
 $passiveSpell = Join-Path $repoRoot 'plugin/Horde/Spells/Horde_PowerPassiveAll - 000837_Horde.esp.yaml'
 
-# --- Horde 2.0 / Skyrim 1.7.104 compatibility ---
+# --- Horde 2.1.0 / Skyrim 1.7.104 compatibility ---
 
 $xmake = Read-RepoFile 'xmake.lua'
 $pluginHeader = Read-RepoFile 'src/plugin.h'
@@ -254,13 +254,23 @@ $runtimeCompatibilityPath = Join-Path $repoRoot 'src/RuntimeCompatibility.h'
 
 Assert-Contains `
     $xmake `
-    'set_version\([''"]2\.0\.0[''"]\)' `
-    'The xmake project version must be Horde 2.0.0.'
+    'set_version\([''"]2\.1\.0[''"]\)' `
+    'The xmake project version must be Horde 2.1.0.'
 
 Assert-Contains `
     $pluginHeader `
-    'REL::Version\s+VERSION\s*\{\s*2\s*,\s*0\s*,\s*0\s*,\s*0\s*\}' `
-    'The runtime log/version constant must be Horde 2.0.0.'
+    'REL::Version\s+VERSION\s*\{\s*2\s*,\s*1\s*,\s*0\s*,\s*0\s*\}' `
+    'The runtime log/version constant must be Horde 2.1.0.'
+
+Assert-Contains `
+    (Read-RepoFile 'view/index.html') `
+    '<span class="panel-version">v2\.1\.0</span>' `
+    'The UI must display Horde v2.1.0.'
+
+Assert-Contains `
+    (Read-RepoFile 'README.md') `
+    'Horde 2\.1\.0 is a lightweight' `
+    'The README must identify Horde 2.1.0.'
 
 Assert-Contains `
     $commonLibCMake `
