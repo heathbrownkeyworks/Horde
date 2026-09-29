@@ -1,9 +1,14 @@
 # Horde
 
-Horde 2.1.0 is a lightweight, native follower manager for Skyrim Special Edition
+Horde 3.0 is a lightweight follower manager for Skyrim Special Edition
 and Anniversary Edition. It automatically tracks up to 20 followers using
 Skyrim's vanilla `DialogueFollower` system and presents the whole party through
-a Meridian UI panel, group lesser powers, or configurable hotkeys.
+a native Dear ImGui/DX11 panel, group lesser powers, or configurable hotkeys.
+
+Build and test coverage is documented in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md),
+[IMPROVEMENTS-VALIDATION.md](IMPROVEMENTS-VALIDATION.md), and
+[AUDIT-FIXES-VALIDATION.md](AUDIT-FIXES-VALIDATION.md). The current source includes
+changes awaiting in-game validation.
 
 ## Features
 
@@ -14,7 +19,7 @@ a Meridian UI panel, group lesser powers, or configurable hotkeys.
 - Follow All, Wait All, Summon All, and party-wide Passive commands.
 - Close, Normal, and Far follow-distance presets.
 - Optional per-follower Follow Close leash for companions who fall behind.
-- Friendly-fire protection refunds only the damage dealt and stops combat
+- Friendly-fire protection filters attributed teammate damage and stops combat
   between teammates.
 - Custom-framework detection leaves independently managed followers alone.
 - Recruitment does not grant the vanilla hidden follower bow or iron arrows;
@@ -22,9 +27,12 @@ a Meridian UI panel, group lesser powers, or configurable hotkeys.
 
 ### Sandboxing and homes
 
-- Per-follower idle sandboxing lets companions wander, sit, eat, and use nearby
-  furniture while the player is stationary, then resume following automatically.
-- Waiting followers can sandbox around their wait location.
+- Per-follower sandboxing lets companions use nearby furniture in safe locations
+  while keeping within an 800-unit area around the player. The engine switches
+  behavior when the player sneaks or either actor enters combat.
+- Waiting followers with sandboxing enabled use an 800-unit area around their
+  own wait location in safe locations. Other waiting followers use the existing
+  hold-position package. Waiting companions do not pursue the player.
 - Assign, change, or clear a home for any follower.
 - Dismissed followers can live and sandbox at their assigned homes.
 - Home assignments and follower state persist in the SKSE cosave.
@@ -50,10 +58,13 @@ a Meridian UI panel, group lesser powers, or configurable hotkeys.
 - Crosshair quick-open jumps directly to the targeted follower's detail screen.
 - Five lesser powers: Horde, Follow, Wait, Summon, and Passive.
 - Optional configurable keyboard controls, including group commands.
-- Optional controller navigation through Meridian.Input/1, with follower and
-  command focus, section switching, safe confirmations, contextual button hints,
-  and Meridian's shared stick cursor.
-- Keyboard input is contained while the Horde panel is open.
+- Native controller navigation with follower and command focus, section
+  switching, confirmation dialogs, button legends, and an optional stick cursor.
+- Full-screen roster and follower detail panels with a copper and amber palette,
+  Poppins/Montserrat fonts, and detailed icons.
+- Skyrim's native mouse cursor and sensitivity.
+- Keyboard, mouse-button, and gamepad shortcuts are filtered before other
+  Skyrim input listeners while Horde owns input.
 - Notifications can be disabled globally.
 - Vanilla Follow, Wait, and Dismiss dialogue is hidden for tracked followers;
   Trade and Command dialogue remains available.
@@ -76,17 +87,23 @@ quest after Horde, its winning Follower alias must also omit those two items.
 This prevents future recruitment grants; it does not remove items already
 stored in a follower's inventory.
 
-The unified native plugin supports Skyrim SE 1.5.97 and AE runtimes through
-1.7.104. Skyrim VR is not supported because Meridian UI does not currently
-provide Horde's required VR compositor and input backend.
+The DLL declares compatibility with SE 1.5.97 and AE through 1.7.104.
+Runtime-specific in-game checks are listed in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
+Skyrim VR is not supported.
 
 ## Runtime requirements
 
 - [SKSE64](https://skse.silverlock.org/) matching the installed Skyrim runtime
 - [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
   matching the installed runtime
-- [Meridian UI](https://github.com/heathbrownkeyworks/MeridianUI)
 - The release package's ESL-flagged `Horde.esp`
+- The package's five fonts in `Data/SKSE/Plugins/Horde/fonts/`
+
+ImGui and FreeType are compiled into Horde. Install the complete package into
+the Horde MO2 mod, including its five fonts and license files. Preserve
+`SKSE/Plugins/Horde/settings.json` when upgrading. Install the matching DLL and
+ESP together. Existing per-follower sandbox preferences are restored from the
+SKSE cosave; new fields have defaults for older saves.
 
 Horde should not be installed alongside another multi-follower framework.
 Testing on a new game is strongly recommended when replacing an existing
@@ -104,39 +121,37 @@ states, notification state, and party follow distance.
 
 ### Controllers
 
-Controller support uses `Meridian.Input/1`, available in Meridian UI 1.5.0.
-Horde detects that optional interface directly; older or custom Meridian builds
-without it keep working with mouse, keyboard, and the existing Horde lesser powers.
-
-Default Xbox-style controls (the footer adapts to Meridian's current bindings
-and Xbox, PlayStation, or generic prompt family):
+The bottom legend shows controller actions for the current section, confirmation,
+or cursor mode. It appears after controller activity and hides when mouse/keyboard
+input resumes. The optional `controllerGlyphs` setting accepts `xbox` (default),
+`playstation`, or `generic`; changing the labels does not change the bindings.
 
 | Control | Action |
 |---|---|
-| Hold LB, then press Y | Open Horde, in either favorites or keybind mode |
+| Cast the Horde lesser power from Favorites | Open Horde in Favorites mode |
 | D-pad / left stick | Move focus within the current section |
 | A | Select a follower and enter their commands, or activate the focused control |
 | LB / RB | Previous / next section: Followers, Commands or Dismissed, Group Orders, Settings |
 | B | Cancel a confirmation, return from a section, or close from Followers |
 | X | Group Orders from Followers; return to Followers from Commands |
 | Y | Open the dismissed registry from Followers, when entries exist |
-| Right-stick click | Toggle Meridian's shared cursor |
-| Right stick | Scroll the current area |
+| Right-stick click (R3) | Toggle cursor/navigation mode |
+| Right stick | Scroll the current section, or move the cursor when enabled |
 
-Open Horde from normal gameplay with other game menus closed: hold LB first,
-then tap Y. Once Horde is open, Y retains its dismissed-registry action.
+Use Favorites mode, select the Horde lesser power from Skyrim's Favorites menu,
+then cast it from normal gameplay with other game menus closed. The controller
+legend and navigation appear as usual. Once Horde is open, Y opens the dismissed
+registry.
 
 Dismiss, Forget, and active-follower Clear Home retain their confirmation dialogs,
 with Cancel initially focused. Focus is restored by follower identity after
 state updates, rather than by row number. Mouse use remains available at any time.
-Horde keeps its existing paused-menu behavior and sends commands through the same
-game-thread callbacks used by mouse controls.
+Horde pauses the game while open and captures menu input. Input coexistence and
+controller validation details are in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
 
-The opener is registered through Meridian's conflict checks. If another consumer
-already owns an overlapping shortcut, Horde logs that result without taking it
-over; the Horde lesser power and keyboard opener remain available. Meridian's
-global controller settings control dead zones, repeat timing, cursor speed and
-prompt family. Horde adds no independent controller polling or text-entry keyboard.
+Horde reserves no gamepad opening shortcut, leaving those buttons available to
+Skyrim and other mods during gameplay. Mouse, Tab/arrows/Enter, and Escape remain
+available inside Horde; Shift+H remains available in keybind mode.
 
 ## Building
 
@@ -147,42 +162,74 @@ After cloning, initialize the dependency and build the release target:
 
 ```powershell
 git submodule update --init --recursive
+# Stage development installs away from the active game/profile.
+$env:XSE_TES5_MODS_PATH = 'E:\tmp\Horde-build\stage'
+Remove-Item Env:XSE_TES5_GAME_PATH -ErrorAction SilentlyContinue
 xmake f -m release --skyrim_vr=n -y
 xmake -y Horde
 ```
 
 The release DLL is written to `build/windows/x64/release/Horde.dll`.
 
-Run the source and plugin regression checks with:
+Rebuild the matching ESP from its checked-in Spriggit source before packaging:
 
 ```powershell
+Spriggit.CLI.exe deserialize --InputPath plugin/Horde --OutputPath plugin/Horde.esp
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/qa/horde_static_regression.ps1
 ```
 
-Run the controller consumer tests with Node 20 or newer and a controller-enabled
-Meridian source checkout. The tests use its real injected helper, not a copied
-implementation shipped with Horde:
+The package YAML includes explicit numeric interrupt flags so Spriggit 0.40.0
+preserves the full values without a binary patch step.
+
+Stage a complete package in a new directory with a SHA-256 manifest:
 
 ```powershell
-npm --prefix scripts/qa ci
-node scripts/qa/node_modules/playwright/cli.js install chromium --only-shell
-$env:MERIDIAN_INPUT_HELPER = 'C:\path\to\MeridianUI\src\UIPlatform\Web\meridian-input.js'
-npm --prefix scripts/qa test
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -OutputDirectory E:\tmp\Horde-3.0
 ```
 
-These are browser/contract checks with simulated native transport. In-game
-controller operation, paused input capture, shortcut conflicts and hardware
-disconnect/reconnect must also be checked in Skyrim; browser tests do not certify
-those runtime behaviors.
+Use `-DllPath` to package an independently signed copy of the same built DLL.
+The script records its signature status and source revision. It refuses an
+existing destination and does not install into MO2. Keep the matching source
+checkout/archive alongside any binary you distribute.
 
-The binary `Horde.esp` is intentionally not stored in source control. Its
-Spriggit YAML source is under `plugin/Horde/` and targets Spriggit 0.40.0. To
-rebuild it with Spriggit CLI and restore the package interrupt-flag bits that
-are not represented by the YAML schema:
+Run the native screen, input, and follower runtime suites:
 
 ```powershell
-Spriggit.CLI.exe deserialize --InputPath plugin\Horde --OutputPath plugin\Horde.esp
-node plugin\patch_interrupt_flags.mjs
+xmake -y HordeImGuiScreenTests
+xmake run HordeImGuiScreenTests
+xmake -y HordeImGuiInputTests
+xmake run HordeImGuiInputTests
+xmake -y HordeFollowerRuntimeTests
+xmake run HordeFollowerRuntimeTests
+```
+
+Build the shared-screen DX11 preview:
+
+```powershell
+xmake -y HordeImGuiPreview
+build\windows\x64\release\HordeImGuiPreview.exe --fixture tools/imgui-preview/fixture.json --size 1920x1080 --shot E:/tmp/Horde-imgui/roster.png --frames 6
+```
+
+The test suite exercises real ImGui items and action payloads. The preview uses
+the same screen code and fonts as the DLL. Its fixture is synthetic; it includes
+names that Horde deliberately excludes in-game and is not a compatibility claim.
+Use `--screen dismissed` or `--screen modal`, `--controller`, `--cursor`,
+`--glyphs playstation` (also `xbox`/`generic`), or
+`--focus controller` for additional captures. Omitting `--shot` explicitly opens
+an interactive fixture preview. `--shot` keeps the window hidden.
+
+In-game validation is still required for SE/AE rendering, game pause/input
+capture, controller reconnect, coexisting native menus, load transitions, and
+follower actions. See [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
+
+The checked-in icon font can be regenerated from `assets/icons/` without
+changing its artwork. `glyphs.json` fixes the glyph order and code points.
+Node 24 or later and the pinned development packages are
+used only for this optional step:
+
+```powershell
+npm --prefix tools/imgui-preview ci
+npm --prefix tools/imgui-preview run icons
 ```
 
 `plugin/generate_dialogue_overrides.mjs` regenerates the vanilla dialogue
@@ -192,11 +239,16 @@ another mod's dialogue changes.
 
 ## Source layout
 
-- `src/` — SKSE plugin, follower state, behavior, serialization, and Meridian UI integration
-- `view/` — in-game HTML interface and bundled fonts
-- `plugin/Horde/` — Spriggit YAML source for the ESL-flagged plugin
-- `plugin/*.mjs` — deterministic plugin-source maintenance tools
-- `scripts/qa/` — static regression checks
+- `src/` - SKSE plugin, follower state, behavior, and serialization
+- `src/ui/imgui/` - native menu, input host, custom screen, and theme
+- `assets/fonts/` - runtime fonts and converted original icons
+- `assets/icons/` - editable SVG artwork and ordered glyph manifest
+- `tools/imgui-preview/` - standalone DX11 preview, fixtures, and font builder
+- `tests/` - native interaction, layout, input-routing, and follower runtime tests
+- `plugin/Horde/` - Spriggit YAML source for the ESL-flagged plugin
+- `plugin/generate_dialogue_overrides.mjs` - dialogue override generation
+- `scripts/qa/` - static regression and plugin inventory checks
+- `scripts/package.ps1` - complete package staging and SHA-256 manifest
 
 ## License
 
@@ -205,8 +257,7 @@ Modding Exception and GPL-3.0 Linking Exception in
 [EXCEPTIONS.md](EXCEPTIONS.md). Horde statically links CommonLibSSE-NG and is
 not distributed as MIT-only software.
 
-The bundled Poppins font files in `view/fonts/` are distributed under the
-[SIL Open Font License 1.1](view/fonts/OFL.txt). Copied Meridian UI integration
-headers remain MIT-licensed. See [LICENSING.md](LICENSING.md) and
+Bundled fonts and native dependencies retain their licenses in `licenses/`.
+See [LICENSING.md](LICENSING.md) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the exact boundaries and
 corresponding-source information.

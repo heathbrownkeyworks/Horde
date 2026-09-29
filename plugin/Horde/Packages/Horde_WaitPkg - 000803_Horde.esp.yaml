@@ -11,6 +11,12 @@ InteruptFlags:
 - AggroRadiusBehavior
 - AllowIdleChatter
 - WorldInteractions
+- 0x400
+- 0x800
+- 0x1000
+- 0x2000
+- 0x4000
+- 0x8000
 ScheduleMonth: -1
 ScheduleDayOfWeek: Any
 ScheduleHour: -1

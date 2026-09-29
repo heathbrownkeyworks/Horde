@@ -1,4 +1,4 @@
-# Local assistant and tool state
+# Local development tools
 .agents/
 .claude/
 .codex/
@@ -13,12 +13,15 @@ CLAUDE.md
 # Private documentation and release materials
 docs/
 screenshots/
-tests/
+tests/*
+!tests/ImGuiScreenTests.cpp
+!tests/ImGuiInputTests.cpp
+!tests/FollowerRuntimeTests.cpp
+!tests/RuntimeStubs.h
 mod-page.md
 patreon-release.md
 screenshot*.html
 /scripts/build-screenshots.mjs
-/view/icons.svg.html
 
 # Private signing material
 signing/

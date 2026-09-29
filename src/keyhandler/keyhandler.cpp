@@ -1,4 +1,6 @@
 #include "keyhandler.h"
+#include "ui/HordeUI.h"
+#include "ui/imgui/ImGuiHost.h"
 
 KeyHandler* KeyHandler::GetSingleton()
 {
@@ -96,6 +98,14 @@ void KeyHandler::Unregister(KeyHandlerEvent handle)
 
 RE::BSEventNotifyControl KeyHandler::ProcessEvent(RE::InputEvent* const* a_eventList, [[maybe_unused]] RE::BSTEventSource<RE::InputEvent*>* a_eventSource)
 {
+    // These are gameplay shortcuts. Native menu widgets own all keyboard
+    // input while Horde is open, including letters that match group hotkeys.
+    if (Horde::ImGuiUI::ImGuiHost::GetSingleton().OwnsInput()) {
+        return RE::BSEventNotifyControl::kContinue;
+    }
+    if (auto* ui = RE::UI::GetSingleton(); ui && ui->GameIsPaused()) {
+        return RE::BSEventNotifyControl::kContinue;
+    }
     if (!a_eventList) {
         return RE::BSEventNotifyControl::kContinue;
     }

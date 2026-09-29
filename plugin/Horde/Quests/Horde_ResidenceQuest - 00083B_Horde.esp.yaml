@@ -1,0 +1,10 @@
+FormKey: 00083B:Horde.esp
+EditorID: Horde_ResidenceQuest
+Name:
+  TargetLanguage: English
+  Value: Horde Follower Homes
+Flags:
+- StartGameEnabled
+Priority: 1
+QuestFormVersion: 65
+Type: Misc

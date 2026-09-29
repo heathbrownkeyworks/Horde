@@ -7,7 +7,7 @@ ModHeader:
   Flags:
   - Small
   Author: ColdSun
-  Description: Horde - Multi-Follower Management
+  Description: Horde 3.0 - Multi-Follower Management
   MasterReferences:
   - Master: Skyrim.esm
     FileSize: 0

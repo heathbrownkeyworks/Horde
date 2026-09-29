@@ -22,6 +22,7 @@ public:
     bool     GetUseKeybinds() const { return _useKeybinds; }
     bool     GetNotificationsEnabled() const { return _notificationsEnabled; }
     const std::string& GetFollowDistance() const { return _followDistance; }
+    const std::string& GetControllerGlyphs() const { return _controllerGlyphs; }
 
     void SetMaxFollowers(int v);
     void SetDefaultSandboxEnabled(bool v);
@@ -30,7 +31,7 @@ public:
     void SetNotificationsEnabled(bool v);
     void SetFollowDistance(const std::string& preset);
 
-    // Gate all Horde notifications through this — respects the mute setting
+    // Respect the global notification setting.
     static void Notify(const char* msg);
 
 private:
@@ -53,4 +54,5 @@ private:
     bool     _useKeybinds = false;
     bool     _notificationsEnabled = true;
     std::string _followDistance = "normal";  // "close", "normal", "far"
+    std::string _controllerGlyphs = "xbox";  // "xbox", "playstation", "generic"
 };

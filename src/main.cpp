@@ -1,12 +1,12 @@
 #include "pch.h"
 
-#include "MeridianUIAPI/ViewDllLoader.h"
-#include "MeridianUIAPI/InputDllLoader.h"
 #include "RuntimeCompatibility.h"
 #include "Settings.h"
 #include "follower/FollowerManager.h"
 #include "events/EventHandler.h"
+#include "events/HealthDamageHook.h"
 #include "ui/HordeUI.h"
+#include "ui/imgui/InputDispatchHook.h"
 #include "keyhandler/keyhandler.h"
 
 SKSE_PLUGIN_VERSION = Plugin::RuntimeCompatibility::MakePluginVersionData();
@@ -28,8 +28,8 @@ static_assert(
 
 static_assert(
     Plugin::RuntimeCompatibility::MakePluginVersionData().pluginVersion ==
-        REL::Version{ 2, 1, 0, 0 }.pack(),
-    "Horde plugin metadata must remain synchronized with version 2.1.0");
+        REL::Version{ 3, 0, 0, 0 }.pack(),
+    "Horde plugin metadata must remain synchronized with version 3.0.0");
 
 SKSE_EXPORT bool SKSEPlugin_Query(SKSE::QueryInterface*, SKSE::PluginInfo* a_pluginInfo)
 {
@@ -39,14 +39,8 @@ SKSE_EXPORT bool SKSEPlugin_Query(SKSE::QueryInterface*, SKSE::PluginInfo* a_plu
     return true;
 }
 
-Meridian::UI::View::IViewAPI* g_MeridianView = nullptr;
-Meridian::UI::Input::IInputAPI* g_MeridianInput = nullptr;
 
-// --- Keybind modifier state ---
-// File-scope so EventHandler can reset us when any menu opens/closes.
-// (Modal menus like OStim, SexLab, console, freecam UIs can swallow KEY_UP
-// events for the modifier key, leaving the cached state stuck at "held"
-// and bypassing the modifier requirement on group hotkeys.)
+// Menus can consume key releases. EventHandler resets these on menu transitions.
 namespace {
     std::atomic<bool> g_modifierHeld{false};
     std::atomic<bool> g_groupModHeld{false};
@@ -74,33 +68,12 @@ static void OnCosaveLoad(SKSE::SerializationInterface* a_intfc)
 
 static void OnCosaveRevert(SKSE::SerializationInterface*)
 {
+    HordeUI::GetSingleton().Close();
+    EventHandler::GetSingleton().SuspendSession();
     FollowerManager::GetSingleton().OnCosaveRevert();
 }
 
 // --- Messaging callbacks ---
-
-static void OnInputLoaded()
-{
-    if (g_MeridianView) {
-        return;
-    }
-
-    Meridian::UI::Settings meridianSettings{};
-    g_MeridianView = Meridian::UI::View::Query(&meridianSettings, "Horde");
-    g_MeridianInput = Meridian::UI::Input::Query(&meridianSettings, "Horde");
-
-    if (g_MeridianInput) {
-        logger::info("Horde: optional Meridian.Input/1 acquired");
-    } else {
-        logger::info("Horde: Meridian.Input/1 unavailable; keyboard/mouse and lesser powers remain available");
-    }
-
-    if (g_MeridianView) {
-        logger::info("Horde: Meridian.View/1 acquired during kInputLoaded");
-    } else {
-        logger::error("Horde: Failed to acquire Meridian.View/1 during kInputLoaded — browser UI disabled; core systems will continue.");
-    }
-}
 
 static void OnDataLoaded()
 {
@@ -112,11 +85,7 @@ static void OnDataLoaded()
     EventHandler::Register();
     EventHandler::GetSingleton().StartPolling();
 
-    if (g_MeridianView) {
-        HordeUI::GetSingleton().Initialize();
-    } else {
-        logger::warn("Horde: Meridian.View/1 unavailable — skipping browser UI initialization");
-    }
+    HordeUI::GetSingleton().Initialize();
 
     // Register Horde's configurable hotkeys.
     KeyHandler::RegisterSink();
@@ -138,7 +107,7 @@ static void OnDataLoaded()
         }
     });
 
-    // Group command shortcuts (default: Alt+F/W/S)
+    // Group command shortcuts (default: Alt+F/W/S/P)
     uint32_t groupMod   = settings.GetGroupModifierKey();
     uint32_t followKey  = settings.GetFollowAllKey();
     uint32_t waitKey    = settings.GetWaitAllKey();
@@ -279,8 +248,11 @@ void ToggleInputMode()
 
 static void OnPostLoadGame()
 {
-    SKSE::GetTaskInterface()->AddTask([]() {
+    const auto session = EventHandler::GetSingleton().Session();
+    SKSE::GetTaskInterface()->AddTask([session]() {
+        if (!EventHandler::GetSingleton().IsCurrentSession(session)) return;
         FollowerManager::GetSingleton().OnPostLoadGame();
+        EventHandler::GetSingleton().ResumeSession();
         if (!Settings::GetSingleton().GetUseKeybinds()) {
             GrantHordePowers();
         } else {
@@ -292,8 +264,13 @@ static void OnPostLoadGame()
 static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 {
     switch (message->type) {
-    case SKSE::MessagingInterface::kInputLoaded:
-        OnInputLoaded();
+    case SKSE::MessagingInterface::kPostPostLoad:
+        Horde::ImGuiUI::InstallInputDispatchHook();
+        Horde::InstallHealthDamageHook();
+        break;
+    case SKSE::MessagingInterface::kPreLoadGame:
+        EventHandler::GetSingleton().SuspendSession();
+        HordeUI::GetSingleton().Close();
         break;
     case SKSE::MessagingInterface::kDataLoaded:
         OnDataLoaded();

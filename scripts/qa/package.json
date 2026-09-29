@@ -1,7 +1,0 @@
-{
-  "name": "horde-ui-regression",
-  "private": true,
-  "type": "module",
-  "scripts": { "test": "node --test horde_controller.test.mjs" },
-  "devDependencies": { "playwright": "1.63.0" }
-}

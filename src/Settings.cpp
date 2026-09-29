@@ -40,18 +40,19 @@ void Settings::Load()
         _summonAllKey         = j.value("summonAllKey", _summonAllKey);
         _passiveAllKey        = j.value("passiveAllKey", _passiveAllKey);
         _maxFollowers         = j.value("maxFollowers", _maxFollowers);
+        // Hand-edited configs must also respect the available alias slots.
+        _maxFollowers         = std::clamp(_maxFollowers, 1, kMaxFollowerCeiling);
         _defaultSandboxEnabled = j.value("defaultSandboxEnabled", _defaultSandboxEnabled);
         _defaultFollowClose   = j.value("defaultFollowClose", _defaultFollowClose);
         _useKeybinds          = j.value("useKeybinds", _useKeybinds);
         _notificationsEnabled = j.value("notificationsEnabled", _notificationsEnabled);
         _followDistance       = j.value("followDistance", _followDistance);
+        const auto glyphs = j.value("controllerGlyphs", std::string("xbox"));
+        _controllerGlyphs = glyphs == "playstation" || glyphs == "generic" ? glyphs : "xbox";
 
         logger::info("Settings loaded from {}", path);
 
-        // One-shot migration: the old default was 10 and Horde now supports 20.
-        // Preserve explicit lower caps, but bump missing/default old configs.
-        // Scoped to v1 configs specifically — a later version bump must not
-        // re-run this and clobber a deliberately-chosen cap of 10.
+        // Migrate the v1 default cap from 10 to 20 once, preserving later choices.
         if (loadedVersion < 2) {
             if (!j.contains("maxFollowers") || _maxFollowers == 10) {
                 logger::info("Settings: Migrating maxFollowers from {} to {}", _maxFollowers, kMaxFollowerCeiling);
@@ -59,8 +60,7 @@ void Settings::Load()
             }
         }
 
-        // Rewrite whenever the config predates the current version so newly
-        // added keys (e.g. passiveAllKey) show up in the file and can be rebound.
+        // Expose new settings keys when upgrading older configs.
         if (loadedVersion < kSettingsVersion) {
             _settingsVersion = kSettingsVersion;
             Save();
@@ -94,6 +94,7 @@ void Settings::Save() const
     j["useKeybinds"]           = _useKeybinds;
     j["notificationsEnabled"]  = _notificationsEnabled;
     j["followDistance"]         = _followDistance;
+    j["controllerGlyphs"]       = _controllerGlyphs;
 
     std::ofstream file(path);
     if (file.is_open()) {

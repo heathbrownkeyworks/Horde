@@ -13,8 +13,11 @@ Aliases:
 - Name: Horde_Follower01
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -22,8 +25,11 @@ Aliases:
   Name: Horde_Follower02
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -31,8 +37,11 @@ Aliases:
   Name: Horde_Follower03
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -40,8 +49,11 @@ Aliases:
   Name: Horde_Follower04
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -49,8 +61,11 @@ Aliases:
   Name: Horde_Follower05
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -58,8 +73,11 @@ Aliases:
   Name: Horde_Follower06
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -67,8 +85,11 @@ Aliases:
   Name: Horde_Follower07
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -76,8 +97,11 @@ Aliases:
   Name: Horde_Follower08
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -85,8 +109,11 @@ Aliases:
   Name: Horde_Follower09
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -94,8 +121,11 @@ Aliases:
   Name: Horde_Follower10
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -103,8 +133,11 @@ Aliases:
   Name: Horde_Follower11
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -112,8 +145,11 @@ Aliases:
   Name: Horde_Follower12
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -121,8 +157,11 @@ Aliases:
   Name: Horde_Follower13
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -130,8 +169,11 @@ Aliases:
   Name: Horde_Follower14
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -139,8 +181,11 @@ Aliases:
   Name: Horde_Follower15
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -148,8 +193,11 @@ Aliases:
   Name: Horde_Follower16
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -157,8 +205,11 @@ Aliases:
   Name: Horde_Follower17
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -166,8 +217,11 @@ Aliases:
   Name: Horde_Follower18
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -175,8 +229,11 @@ Aliases:
   Name: Horde_Follower19
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null
@@ -184,8 +241,11 @@ Aliases:
   Name: Horde_Follower20
   Flags:
   - Optional
+  - StoresText
   - AllowReserved
   PackageData:
+  - 000839:Horde.esp
+  - 000830:Horde.esp
   - 000803:Horde.esp
   - 000802:Horde.esp
   VoiceTypes: Null

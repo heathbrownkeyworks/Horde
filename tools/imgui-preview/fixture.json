@@ -1,0 +1,1054 @@
+{
+  "followers": [
+    {
+      "formID": 1001,
+      "name": "Lydia",
+      "race": "Nord",
+      "className": "Housecarl",
+      "level": 42,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Steel Sword",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Steel Plate Armor",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1002,
+      "name": "Jenassa",
+      "race": "Dunmer",
+      "className": "Sellsword",
+      "level": 38,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 300,
+      "healthMax": 300,
+      "magicka": 120,
+      "magickaMax": 120,
+      "stamina": 288,
+      "staminaMax": 300,
+      "armorRating": 186,
+      "distance": 9,
+      "skills": {
+        "oneHanded": 72,
+        "twoHanded": 15,
+        "archery": 90,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 78,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15,
+        "sneak": 66
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Dwarven Bow",
+          "stat": 22,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Dwarven Arrow",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Scaled Armor",
+          "stat": 32,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Scaled Bracers",
+          "stat": 12,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Scaled Boots",
+          "stat": 12,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1003,
+      "name": "Mjoll the Lioness",
+      "race": "Nord",
+      "className": "Warrior",
+      "level": 45,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": false,
+      "isEssential": true,
+      "health": 560,
+      "healthMax": 560,
+      "magicka": 90,
+      "magickaMax": 100,
+      "stamina": 300,
+      "staminaMax": 300,
+      "armorRating": 298,
+      "distance": 6,
+      "skills": {
+        "oneHanded": 15,
+        "twoHanded": 94,
+        "archery": 15,
+        "block": 70,
+        "heavyArmor": 82,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Grimsever",
+          "stat": 31,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Iron Helmet",
+          "stat": 15,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Iron Armor",
+          "stat": 25,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Iron Gauntlets",
+          "stat": 10,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Iron Boots",
+          "stat": 10,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1004,
+      "name": "Marcurio",
+      "race": "Imperial",
+      "className": "Battlemage",
+      "level": 36,
+      "isWaiting": false,
+      "isPassive": true,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 240,
+      "healthMax": 260,
+      "magicka": 340,
+      "magickaMax": 340,
+      "stamina": 140,
+      "staminaMax": 150,
+      "armorRating": 96,
+      "distance": 11,
+      "skills": {
+        "oneHanded": 60,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 15,
+        "destruction": 88,
+        "restoration": 74,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Lightning Bolt",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Steel Sword",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Novice Robes",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Boots",
+          "stat": 4,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1005,
+      "name": "Aela the Huntress",
+      "race": "Nord",
+      "className": "Ranger",
+      "level": 43,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 420,
+      "healthMax": 460,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 300,
+      "staminaMax": 320,
+      "armorRating": 172,
+      "distance": 14,
+      "skills": {
+        "oneHanded": 70,
+        "twoHanded": 15,
+        "archery": 96,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 84,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Ancient Nord Bow",
+          "stat": 19,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Steel Arrow",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Ancient Nord Armor",
+          "stat": 30,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Wolf Gauntlets",
+          "stat": 12,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Wolf Boots",
+          "stat": 12,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1006,
+      "name": "Serana",
+      "race": "Nord",
+      "className": "Vampire",
+      "level": 50,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": false,
+      "isEssential": true,
+      "health": 500,
+      "healthMax": 500,
+      "magicka": 400,
+      "magickaMax": 400,
+      "stamina": 200,
+      "staminaMax": 200,
+      "armorRating": 128,
+      "distance": 5,
+      "homeWorldspace": true,
+      "homeName": "Lakeview Manor",
+      "skills": {
+        "oneHanded": 15,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 60,
+        "destruction": 90,
+        "restoration": 85,
+        "conjuration": 100
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Raise Zombie",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Vampiric Drain",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Vampire Royal Armor",
+          "stat": 26,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Vampire Gloves",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Vampire Boots",
+          "stat": 8,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1007,
+      "name": "Uthgerd the Unbroken",
+      "race": "Nord",
+      "className": "Warrior",
+      "level": 34,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 380,
+      "healthMax": 380,
+      "magicka": 90,
+      "magickaMax": 100,
+      "stamina": 260,
+      "staminaMax": 260,
+      "armorRating": 214,
+      "distance": 22,
+      "skills": {
+        "oneHanded": 80,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 74,
+        "heavyArmor": 76,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Steel War Axe",
+          "stat": 21,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Steel Shield",
+          "stat": 22,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Steel Armor",
+          "stat": 31,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1008,
+      "name": "Belrand",
+      "race": "Nord",
+      "className": "Spellsword",
+      "level": 39,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 340,
+      "healthMax": 360,
+      "magicka": 220,
+      "magickaMax": 240,
+      "stamina": 220,
+      "staminaMax": 220,
+      "armorRating": 158,
+      "distance": 8,
+      "skills": {
+        "oneHanded": 78,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 66,
+        "destruction": 74,
+        "restoration": 70,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Steel Sword",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Flames",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Leather Armor",
+          "stat": 26,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Leather Bracers",
+          "stat": 10,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Leather Boots",
+          "stat": 10,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1009,
+      "name": "Illia",
+      "race": "Breton",
+      "className": "Mage",
+      "level": 33,
+      "isWaiting": false,
+      "isPassive": true,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 220,
+      "healthMax": 240,
+      "magicka": 320,
+      "magickaMax": 320,
+      "stamina": 130,
+      "staminaMax": 150,
+      "armorRating": 42,
+      "distance": 13,
+      "skills": {
+        "oneHanded": 15,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 15,
+        "destruction": 82,
+        "restoration": 15,
+        "conjuration": 78,
+        "alteration": 60
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Ice Spike",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Conjure Familiar",
+          "stat": 0,
+          "isWeapon": true
+        },
+        "head": {
+          "name": "Hooded Robe",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Mage's Robes",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Boots",
+          "stat": 4,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1010,
+      "name": "Erik the Slayer",
+      "race": "Nord",
+      "className": "Warrior",
+      "level": 28,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 300,
+      "healthMax": 300,
+      "magicka": 90,
+      "magickaMax": 100,
+      "stamina": 230,
+      "staminaMax": 240,
+      "armorRating": 176,
+      "distance": 30,
+      "skills": {
+        "oneHanded": 15,
+        "twoHanded": 70,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 64,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Steel Greatsword",
+          "stat": 25,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Steel Armor",
+          "stat": 31,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1011,
+      "name": "Cosnach",
+      "race": "Breton",
+      "className": "Brawler",
+      "level": 24,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 260,
+      "healthMax": 260,
+      "magicka": 80,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 88,
+      "distance": 17,
+      "skills": {
+        "oneHanded": 62,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 54,
+        "heavyArmor": 50,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Iron Mace",
+          "stat": 16,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Fur Armor",
+          "stat": 20,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Fur Bracers",
+          "stat": 8,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Fur Boots",
+          "stat": 8,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1012,
+      "name": "Vorstag",
+      "race": "Nord",
+      "className": "Sellsword",
+      "level": 31,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": false,
+      "isEssential": false,
+      "health": 320,
+      "healthMax": 320,
+      "magicka": 90,
+      "magickaMax": 100,
+      "stamina": 250,
+      "staminaMax": 260,
+      "armorRating": 168,
+      "distance": 26,
+      "skills": {
+        "oneHanded": 72,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 60,
+        "heavyArmor": 68,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Steel Mace",
+          "stat": 22,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Iron Shield",
+          "stat": 20,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Iron Helmet",
+          "stat": 15,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Steel Armor",
+          "stat": 31,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Iron Gauntlets",
+          "stat": 10,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1013,
+      "name": "Ingjard",
+      "race": "Nord",
+      "className": "Dawnguard",
+      "level": 40,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 440,
+      "healthMax": 460,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 280,
+      "staminaMax": 300,
+      "armorRating": 244,
+      "distance": 7,
+      "skills": {
+        "oneHanded": 84,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 72,
+        "heavyArmor": 80,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Dawnguard War Axe",
+          "stat": 24,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Dawnguard Shield",
+          "stat": 28,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Dawnguard Helmet",
+          "stat": 20,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Dawnguard Heavy Armor",
+          "stat": 40,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Dawnguard Gauntlets",
+          "stat": 15,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Dawnguard Boots",
+          "stat": 15,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1014,
+      "name": "Golldir",
+      "race": "Nord",
+      "className": "Warrior",
+      "level": 27,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 290,
+      "healthMax": 300,
+      "magicka": 90,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 192,
+      "distance": 12,
+      "skills": {
+        "oneHanded": 68,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 62,
+        "heavyArmor": 70,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Ancient Nord Sword",
+          "stat": 18,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Steel Shield",
+          "stat": 22,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Iron Helmet",
+          "stat": 15,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Iron Armor",
+          "stat": 25,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Iron Gauntlets",
+          "stat": 10,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Iron Boots",
+          "stat": 10,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1015,
+      "name": "Annekke Crag-Jumper",
+      "race": "Nord",
+      "className": "Ranger",
+      "level": 29,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 280,
+      "healthMax": 300,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 260,
+      "staminaMax": 260,
+      "armorRating": 122,
+      "distance": 34,
+      "skills": {
+        "oneHanded": 58,
+        "twoHanded": 15,
+        "archery": 78,
+        "block": 15,
+        "heavyArmor": 15,
+        "lightArmor": 66,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Hunting Bow",
+          "stat": 14,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Iron Arrow",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Hide Armor",
+          "stat": 20,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Hide Bracers",
+          "stat": 7,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Hide Boots",
+          "stat": 7,
+          "isWeapon": false
+        }
+      }
+    },
+    {
+      "formID": 1016,
+      "name": "Roggi Knot-Beard",
+      "race": "Nord",
+      "className": "Miner",
+      "level": 22,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": false,
+      "isSandboxEnabled": true,
+      "isEssential": false,
+      "health": 250,
+      "healthMax": 260,
+      "magicka": 80,
+      "magickaMax": 100,
+      "stamina": 220,
+      "staminaMax": 240,
+      "armorRating": 104,
+      "distance": 19,
+      "skills": {
+        "oneHanded": 56,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 15,
+        "heavyArmor": 52,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Iron War Axe",
+          "stat": 14,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Miner’s Clothes",
+          "stat": 4,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "—",
+          "stat": 0,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Boots",
+          "stat": 4,
+          "isWeapon": false
+        }
+      }
+    }
+  ],
+  "maxFollowers": 20,
+  "count": 16,
+  "dismissedCount": 5,
+  "useKeybinds": false,
+  "notificationsEnabled": true,
+  "followDistance": "normal",
+  "dismissed": [
+    {
+      "formID": 2001,
+      "name": "Faendal",
+      "hasHome": true,
+      "homeName": "Riverwood"
+    },
+    {
+      "formID": 2002,
+      "name": "Sven",
+      "hasHome": false,
+      "homeName": ""
+    },
+    {
+      "formID": 2003,
+      "name": "Ria",
+      "hasHome": true,
+      "homeName": "Jorrvaskr, Whiterun"
+    },
+    {
+      "formID": 2004,
+      "name": "Argis the Bulwark",
+      "hasHome": true,
+      "homeName": "Vlindrel Hall, Markarth"
+    },
+    {
+      "formID": 2005,
+      "name": "Torvar",
+      "hasHome": false,
+      "homeName": ""
+    }
+  ]
+}

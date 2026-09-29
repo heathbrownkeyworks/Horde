@@ -9,9 +9,8 @@ public:
     static FollowerManager& GetSingleton();
 
     void Initialize();
-    void Save() const {}  // no-op — SKSE cosave handles persistence on game save
 
-    // SKSE cosave — per-save-game follower persistence
+    // Follower state is persisted by SKSE on game save.
     void OnCosaveRevert();
     void OnCosaveSave(SKSE::SerializationInterface* a_intfc);
     void OnCosaveLoad(SKSE::SerializationInterface* a_intfc);
@@ -21,15 +20,15 @@ public:
     void OnDialogueClose();
 
     // Follower operations
-    bool TrackFollower(RE::Actor* actor);
+    // Recruitment happens only through ScanForFollowers, which adopts actors
+    // vanilla DialogueFollowerScript.SetFollower has already promoted.
     bool UntrackFollower(RE::FormID formID);
 
     // Bulk operations
     void SummonAll();
     void FollowAll();
     void WaitAll();
-    // Group stand-down toggle: drops every follower out of combat and stops them
-    // re-engaging until switched back to aggressive.
+    // Stop combat for the party until passive mode is disabled.
     void SetPassiveAll(bool passive);
 
     // Per-follower operations
@@ -58,10 +57,10 @@ public:
     };
     std::vector<DismissedInfo> GetDismissedFollowers() const;
 
-    // Distance leash — teleports followers with FollowClose enabled
+    // Teleport distant followers with Follow Close enabled.
     void UpdateFollowCloseLeash();
 
-    // Cell transition — teleports stranded followers to the player
+    // Recover followers stranded across a cell transition.
     void TeleportStrandedFollowers();
 
     // State
@@ -71,8 +70,7 @@ public:
     bool IsTracked(RE::FormID formID) const;
     bool IsWaiting(RE::FormID formID) const;
     bool IsPassive(RE::FormID formID) const;
-    // True when there is at least one follower and every one of them is passive.
-    // Drives the Passive/Aggressive toggle label in the UI.
+    // False for an empty party.
     bool IsAllPassive() const;
 
     // Global gate
@@ -80,6 +78,7 @@ public:
 
     // State recovery (called after cosave load)
     void OnPostLoadGame();
+    void RefreshHomes();
 
     // Cosave record types
     static constexpr std::uint32_t kFollowerRecord = 'FLWR';
@@ -98,29 +97,21 @@ private:
     void SoftUntrack(RE::FormID formID);  // cleanup for externally-dismissed followers
     void ApplyPassive(RE::Actor* actor, bool passive, FollowerData& data);
 
-    // Essential is a TESNPC (actor base) flag, not a per-reference one, so two
-    // followers sharing a base share the flag. These helpers keep the shared
-    // form consistent and make sure Horde's override is always unwound.
+    // Essential flags belong to the shared actor base, not individual references.
     static void ApplyProtection(RE::TESNPC* actorBase, int protection);
     void ForceEssential(RE::Actor* actor);
-    // Reads the actor's true protection level. If another tracked follower
-    // already shares this actor base, Horde has already forced essential on it,
-    // so the live flags are not the original — inherit the recorded value.
+    // Reuse the captured protection when another follower shares this base.
     int  CaptureOriginalProtection(RE::Actor* actor, RE::TESNPC* actorBase) const;
-    // Restores originalProtection unless another still-tracked follower shares
-    // the same actor base and still wants Horde's essential override.
+    // Restore protection only when no other follower needs the shared override.
     void ReleaseEssential(RE::Actor* actor, RE::FormID formID, int originalProtection);
-    // Unwind every live essential override. Called on cosave revert so the
-    // previous save's followers do not stay essential in the shared form pool
-    // when a different save is loaded.
+    // Release shared form overrides before loading another save.
     void ReleaseAllEssential();
 
     std::vector<FollowerData> _followers;
     std::unordered_set<RE::FormID> _rejectedCustomFollowers;  // skip list for custom follower systems
     mutable std::recursive_mutex _mutex;
 
-    // Persistent registry — remembers every follower who has ever been in Horde.
-    // Replaces the old _homeCache. Serialized as its own cosave record ('RGST').
+    // Active and dismissed followers, serialized in the RGST cosave record.
     std::unordered_map<RE::FormID, RegistryEntry> _registry;
 
     void UpsertRegistry(RE::FormID formID, const std::string& name);
@@ -135,7 +126,6 @@ private:
         const std::string& homeName);
     bool RestoreOriginalEditorLocation(RE::Actor* actor, const RegistryEntry& entry, RE::FormID formID);
 
-    // Capture the actor's current vanilla editor location into the registry
-    // entry the first time we see them. No-op if already captured.
+    // Capture once, before a home assignment can override the editor location.
     void CaptureOriginalEditorLoc(RE::FormID formID, RE::Actor* actor);
 };

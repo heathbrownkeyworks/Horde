@@ -14,7 +14,17 @@ PackageManager& PackageManager::GetSingleton()
 void PackageManager::InitQuestCache()
 {
     _hordeQuest = RE::TESForm::LookupByEditorID<RE::TESQuest>("Horde_FollowerQuest");
+    _residenceQuest = RE::TESForm::LookupByEditorID<RE::TESQuest>("Horde_ResidenceQuest");
+    _residencePackage = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_ResidencePkg");
+    if (!_residenceQuest || !_residencePackage) {
+        logger::error("PackageManager: Home records missing; install the matching Horde.esp");
+    }
+    _sandboxEnabled = RE::TESForm::LookupByEditorID<RE::TESGlobal>("Horde_SandBoxEnabled");
+    _sandboxFaction = RE::TESForm::LookupByEditorID<RE::TESFaction>("Horde_SandboxEnabledFaction");
     _questCached = true;
+    if (!_sandboxEnabled || !_sandboxFaction) {
+        logger::error("PackageManager: Sandbox records missing; install the matching Horde.esp");
+    }
     if (_hordeQuest) {
         logger::info("PackageManager: Cached Horde_FollowerQuest {:08X}", _hordeQuest->GetFormID());
     } else {
@@ -80,10 +90,7 @@ void PackageManager::FillSlot(int slot, RE::Actor* actor)
         return;
     }
 
-    // Equivalent of Papyrus ForceRefTo:
-    // 1. Set fill type to Forced and store the actor handle
-    // 2. Update the quest's refAliasMap so GetIsAliasRef() works
-    // 3. The engine's package evaluator reads refAliasMap to resolve alias packages
+    // Match ForceRefTo: set the handle and refAliasMap for conditions and packages.
     refAlias->fillType = RE::BGSBaseAlias::FILL_TYPE::kForced;
     refAlias->fillData.forced.forcedRef = actor->GetHandle();
 
@@ -93,8 +100,7 @@ void PackageManager::FillSlot(int slot, RE::Actor* actor)
         quest->refAliasMap.insert({alias->aliasID, actor->GetHandle()});
     }
 
-    // Inject the alias instance into the actor's ExtraAliasInstanceArray
-    // so the engine evaluates our alias packages on this actor
+    // Register the alias packages with the actor's package evaluator.
     auto* aliasExtra = actor->extraList.GetByType<RE::ExtraAliasInstanceArray>();
     if (!aliasExtra) {
         auto* newExtra = new RE::ExtraAliasInstanceArray();
@@ -102,46 +108,48 @@ void PackageManager::FillSlot(int slot, RE::Actor* actor)
         aliasExtra = newExtra;
     }
 
-    // Check if already has our alias instance
-    bool alreadyHas = false;
-    {
-        RE::BSReadLockGuard readLock(aliasExtra->lock);
-        for (auto* inst : aliasExtra->aliases) {
-            if (inst && inst->quest == quest && inst->alias == refAlias) {
-                alreadyHas = true;
-                break;
-            }
+    // Populate the same fixed stack as the ESP. Refresh saved instances too:
+    // older cosaves may contain only wait/follow or the old active sandbox stack.
+    auto* pkgArray = new RE::BSTArray<RE::TESPackage*>();
+    for (auto* editorID : {"Horde_SandboxWaitPkg", "Horde_SandboxActivePkg",
+                           "Horde_WaitPkg", "Horde_FollowPkg"}) {
+        auto* package = RE::TESForm::LookupByEditorID<RE::TESPackage>(editorID);
+        if (package) {
+            pkgArray->push_back(package);
+        } else {
+            logger::error("PackageManager: Missing package {}", editorID);
         }
     }
 
-    if (!alreadyHas) {
-        // Build the instanced packages array from our ESP-defined packages.
-        // The engine does NOT auto-populate this from alias PackageData when we
-        // manually inject the alias instance — we must provide it.
-        auto* pkgArray = new RE::BSTArray<RE::TESPackage*>();
-        auto* waitPkg    = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_WaitPkg");
-        auto* followPkg  = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_FollowPkg");
-        if (waitPkg)    pkgArray->push_back(waitPkg);
-        if (followPkg)  pkgArray->push_back(followPkg);
+    auto* instData = static_cast<RE::BGSRefAliasInstanceData*>(
+        RE::malloc(sizeof(RE::BGSRefAliasInstanceData)));
+    if (!instData) {
+        delete pkgArray;
+        logger::error("PackageManager: Cannot allocate alias instance for slot {}", slot);
+        return;
+    }
+    std::memset(instData, 0, sizeof(RE::BGSRefAliasInstanceData));
+    instData->quest = quest;
+    instData->alias = refAlias;
+    instData->instancedPackages = pkgArray;
 
-        // Allocate alias instance via engine allocator
-        auto* instData = static_cast<RE::BGSRefAliasInstanceData*>(
-            RE::malloc(sizeof(RE::BGSRefAliasInstanceData)));
-        if (instData) {
-            std::memset(instData, 0, sizeof(RE::BGSRefAliasInstanceData));
-            instData->quest = quest;
-            instData->alias = refAlias;
-            instData->instancedPackages = pkgArray;
-
-            RE::BSWriteLockGuard writeLock(aliasExtra->lock);
-            aliasExtra->aliases.push_back(instData);
-        } else {
-            delete pkgArray;
+    {
+        RE::BSWriteLockGuard writeLock(aliasExtra->lock);
+        auto& arr = aliasExtra->aliases;
+        for (std::int32_t i = static_cast<std::int32_t>(arr.size()) - 1; i >= 0; --i) {
+            auto* previous = arr[i];
+            if (previous && previous->quest == quest && previous->alias == refAlias) {
+                delete previous->instancedPackages;
+                RE::free(previous);
+                arr.erase(arr.begin() + i);
+            }
         }
+        arr.push_back(instData);
     }
 
     // Clear any stale ExtraPackage — it overrides alias packages
     actor->extraList.RemoveByType(RE::ExtraDataType::kPackage);
+    actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
 
     logger::info("PackageManager: Filled slot {} with {} [{:08X}]",
         slot, actor->GetDisplayFullName(), actor->GetFormID());
@@ -237,7 +245,7 @@ void PackageManager::ClearDialogueFollowerAlias(RE::Actor* actor)
     auto* dfQuest = RE::TESForm::LookupByEditorID<RE::TESQuest>("DialogueFollower");
     if (!dfQuest) return;
 
-    // Phase 1: Under aliasExtra->lock, collect and remove DialogueFollower instances
+    // Remove only DialogueFollower instances while holding the actor alias lock.
     struct RemovedAlias {
         RE::TESQuest* quest;
         std::uint32_t aliasID;
@@ -259,7 +267,7 @@ void PackageManager::ClearDialogueFollowerAlias(RE::Actor* actor)
         }
     }
 
-    // Phase 2: Update refAliasMaps (no nested locks)
+    // Release the actor lock before taking quest locks.
     for (auto& r : removed) {
         if (r.quest) {
             RE::BSWriteLockGuard questLock(r.quest->aliasAccessLock);
@@ -273,205 +281,116 @@ void PackageManager::ClearDialogueFollowerAlias(RE::Actor* actor)
     }
 }
 
-void PackageManager::ClearCompetingAliasPackages(RE::Actor* actor)
-{
-    ClearDialogueFollowerAlias(actor);
-}
-
-// --- Rebuild alias instance (the engine caches instanced packages on creation) ---
-
-void PackageManager::RebuildHordeAliasInstance(RE::Actor* actor, bool includeSandboxActive)
-{
-    auto* quest = GetHordeQuest();
-    if (!quest || !actor) return;
-
-    auto* aliasExtra = actor->extraList.GetByType<RE::ExtraAliasInstanceArray>();
-    if (!aliasExtra) {
-        logger::warn("PackageManager: Rebuild — no ExtraAliasInstanceArray on {:08X}",
-            actor->GetFormID());
-        return;
-    }
-
-    // Phase 1: Find and remove the existing Horde alias instance
-    const RE::BGSBaseAlias* hordeAlias = nullptr;
-    {
-        RE::BSWriteLockGuard writeLock(aliasExtra->lock);
-        auto& arr = aliasExtra->aliases;
-        for (std::int32_t i = static_cast<std::int32_t>(arr.size()) - 1; i >= 0; --i) {
-            auto* inst = arr[i];
-            if (!inst || inst->quest != quest || !inst->alias) continue;
-
-            hordeAlias = inst->alias;
-            delete inst->instancedPackages;
-            RE::free(inst);
-            arr.erase(arr.begin() + i);
-            break;
-        }
-    }
-
-    if (!hordeAlias) {
-        logger::warn("PackageManager: Rebuild — no Horde alias found on {:08X}",
-            actor->GetFormID());
-        return;
-    }
-
-    // Phase 2: Build new package array
-    auto* pkgArray = new RE::BSTArray<RE::TESPackage*>();
-
-    if (includeSandboxActive) {
-        auto* sandboxActivePkg = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_SandboxActivePkg");
-        if (sandboxActivePkg) {
-            pkgArray->push_back(sandboxActivePkg);
-        } else {
-            logger::error("PackageManager: Horde_SandboxActivePkg not found — is Horde.esp loaded?");
-        }
-    }
-
-    auto* waitPkg    = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_WaitPkg");
-    auto* followPkg  = RE::TESForm::LookupByEditorID<RE::TESPackage>("Horde_FollowPkg");
-    if (waitPkg)    pkgArray->push_back(waitPkg);
-    if (followPkg)  pkgArray->push_back(followPkg);
-
-    logger::info("PackageManager: Rebuild — {} packages for {:08X} (sandbox={})",
-        pkgArray->size(), actor->GetFormID(), includeSandboxActive);
-
-    // Phase 3: Create fresh alias instance
-    auto* instData = static_cast<RE::BGSRefAliasInstanceData*>(
-        RE::malloc(sizeof(RE::BGSRefAliasInstanceData)));
-    if (!instData) {
-        delete pkgArray;
-        logger::error("PackageManager: Rebuild — malloc failed for alias instance");
-        return;
-    }
-
-    std::memset(instData, 0, sizeof(RE::BGSRefAliasInstanceData));
-    instData->quest = quest;
-    instData->alias = hordeAlias;
-    instData->instancedPackages = pkgArray;
-
-    {
-        RE::BSWriteLockGuard writeLock(aliasExtra->lock);
-        aliasExtra->aliases.push_back(instData);
-    }
-
-    // Phase 4: Re-insert refAliasMap so the engine still sees this actor as alias-bound.
-    // Without this, the package evaluator may skip our alias's packages because
-    // GetIsAliasRef() returns false.
-    {
-        RE::BSWriteLockGuard questLock(quest->aliasAccessLock);
-        quest->refAliasMap.erase(hordeAlias->aliasID);
-        quest->refAliasMap.insert({hordeAlias->aliasID, actor->GetHandle()});
-    }
-
-    // Phase 5: Clear stale package execution state and force re-evaluation.
-    // ExtraPackage holds the currently-running package index/state — must be cleared.
-    // ExtraPackageStartLocation holds the stale start position from the old package.
-    actor->extraList.RemoveByType(RE::ExtraDataType::kPackage);
-    actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
-    actor->EvaluatePackage(true, false);
-
-    logger::info("PackageManager: Rebuild complete for {:08X}", actor->GetFormID());
-}
-
-// --- Sandbox ---
-
-void PackageManager::ApplySandbox(RE::Actor* actor, bool silent)
-{
-    if (!actor) return;
-
-    RE::FormID formID = actor->GetFormID();
-    if (_sandboxActors.count(formID)) return;
-
-    if (FollowerManager::GetSingleton().IsWaiting(formID)) {
-        logger::info("PackageManager: Skipped active sandbox for waiting follower {:08X}; Horde_WaitPkg handles wait sandbox",
-            formID);
-        return;
-    }
-
-    // Move the shared idle sandbox marker to the sandbox center.
-    // Waiting followers never use this package; Horde_WaitPkg sandboxes them
-    // around their current position without a shared marker.
-    auto* idleMarker = RE::TESForm::LookupByEditorID<RE::TESObjectREFR>("Horde_IdleSandboxMarker");
-    if (idleMarker && _sandboxActors.empty()) {
-        auto* player = RE::PlayerCharacter::GetSingleton();
-        if (player) {
-            idleMarker->MoveTo(player);
-            logger::info("PackageManager: Moved idle sandbox marker to player position");
-        }
-    }
-
-    // Clear vanilla DialogueFollower only. Third-party quest aliases may carry
-    // unrelated packages and should remain intact.
-    ClearCompetingAliasPackages(actor);
-
-    RebuildHordeAliasInstance(actor, true);
-    _sandboxActors.insert(formID);
-
-    if (!silent) {
-        auto msg = std::string(actor->GetDisplayFullName()) + " is now sandboxing.";
-        Settings::Notify(msg.c_str());
-    }
-
-    logger::info("PackageManager: Sandbox applied to {} [{:08X}]",
-        actor->GetDisplayFullName(), formID);
-}
-
-void PackageManager::RemoveSandbox(RE::Actor* actor, bool silent)
-{
-    if (!actor) return;
-
-    RE::FormID formID = actor->GetFormID();
-    auto it = _sandboxActors.find(formID);
-    if (it == _sandboxActors.end()) return;
-
-    RebuildHordeAliasInstance(actor, false);
-    _sandboxActors.erase(it);
-
-    if (!silent) {
-        auto msg = std::string(actor->GetDisplayFullName()) + " stopped sandboxing.";
-        Settings::Notify(msg.c_str());
-    }
-
-    logger::info("PackageManager: Sandbox removed for {} [{:08X}]",
-        actor->GetDisplayFullName(), formID);
-}
-
-bool PackageManager::HasSandbox(RE::Actor* actor) const
+bool PackageManager::HasAnimalAlias(RE::Actor* actor) const
 {
     if (!actor) return false;
-    return _sandboxActors.count(actor->GetFormID()) > 0;
+    auto* quest = RE::TESForm::LookupByEditorID<RE::TESQuest>("DialogueFollower");
+    if (!quest) return false;
+    RE::BSReadLockGuard lock(quest->aliasAccessLock);
+    auto it = quest->refAliasMap.find(1);  // DialogueFollower's Animal alias
+    return it != quest->refAliasMap.end() && it->second.get().get() == actor;
 }
 
-void PackageManager::ForgetSandboxActor(RE::FormID formID)
+void PackageManager::ReleaseAnimal(RE::Actor* actor)
 {
-    if (_sandboxActors.erase(formID) > 0) {
-        logger::info("PackageManager: Dropped sandbox bookkeeping for {:08X}", formID);
-    }
-}
-
-void PackageManager::SuspendSandbox()
-{
-    if (_sandboxActors.empty() && !_followersAreSandboxing) return;
-
-    // Snapshot first — RemoveSandbox mutates _sandboxActors.
-    std::vector<RE::FormID> active(_sandboxActors.begin(), _sandboxActors.end());
-    for (auto id : active) {
-        auto* actor = RE::TESForm::LookupByID<RE::Actor>(id);
-        if (actor) {
-            RemoveSandbox(actor, true);
-        } else {
-            // Actor no longer resolvable — drop the entry so the shared idle
-            // marker is not pinned forever by a dead FormID.
-            ForgetSandboxActor(id);
+    if (!actor) return;
+    actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kVariable04, 0.0f);
+    // Another animal may already occupy the vanilla slot during replacement.
+    auto* quest = RE::TESForm::LookupByEditorID<RE::TESQuest>("DialogueFollower");
+    if (quest) {
+        RE::BSReadLockGuard lock(quest->aliasAccessLock);
+        auto it = quest->refAliasMap.find(1);
+        if (it != quest->refAliasMap.end()) {
+            auto current = it->second.get();
+            if (current && current.get() != actor) return;
         }
     }
+    if (auto* count = RE::TESForm::LookupByEditorID<RE::TESGlobal>("PlayerAnimalCount")) {
+        count->value = 0.0f;
+    }
+}
 
-    _sandboxActors.clear();
-    _followersAreSandboxing = false;
-    _idleTimer = 0.0f;
-    _idleTickValid = false;
+bool PackageManager::EnsureResidencePackage(RE::Actor* actor)
+{
+    if (!_questCached) InitQuestCache();
+    if (!actor || !_residenceQuest || !_residencePackage) return false;
+    auto* extra = actor->extraList.GetByType<RE::ExtraAliasInstanceArray>();
+    if (!extra) {
+        extra = new RE::ExtraAliasInstanceArray();
+        actor->extraList.Add(extra);
+    }
+    RE::BSWriteLockGuard lock(extra->lock);
+    for (auto* instance : extra->aliases) {
+        if (instance && instance->quest == _residenceQuest && !instance->alias) return false;
+    }
+    auto* instance = static_cast<RE::BGSRefAliasInstanceData*>(RE::malloc(sizeof(RE::BGSRefAliasInstanceData)));
+    if (!instance) return false;
+    std::memset(instance, 0, sizeof(RE::BGSRefAliasInstanceData));
+    instance->quest = _residenceQuest;
+    auto* packages = new RE::BSTArray<RE::TESPackage*>();
+    packages->push_back(_residencePackage);
+    instance->instancedPackages = packages;
+    extra->aliases.push_back(instance);
+    return true;
+}
 
-    logger::info("PackageManager: Sandbox suspended ({} actor(s) released)", active.size());
+bool PackageManager::ClearResidencePackage(RE::Actor* actor)
+{
+    if (!_questCached) InitQuestCache();
+    if (!actor || !_residenceQuest) return false;
+    auto* extra = actor->extraList.GetByType<RE::ExtraAliasInstanceArray>();
+    if (!extra) return false;
+    bool changed = false;
+    RE::BSWriteLockGuard lock(extra->lock);
+    for (std::int32_t i = static_cast<std::int32_t>(extra->aliases.size()) - 1; i >= 0; --i) {
+        auto* instance = extra->aliases[i];
+        if (!instance || instance->quest != _residenceQuest || instance->alias) continue;
+        delete instance->instancedPackages;
+        RE::free(instance);
+        extra->aliases.erase(extra->aliases.begin() + i);
+        changed = true;
+    }
+    return changed;
+}
+
+// --- Engine-driven sandbox settings ---
+
+void PackageManager::SyncSandboxSettings()
+{
+    if (!_questCached) InitQuestCache();
+    if (!_sandboxEnabled || !_sandboxFaction) return;
+
+    const auto& followers = FollowerManager::GetSingleton().GetFollowers();
+    bool anyEnabled = false;
+    for (const auto& follower : followers) {
+        anyEnabled = anyEnabled || follower.isSandboxEnabled;
+    }
+    const float enabledValue = anyEnabled ? 1.0f : 0.0f;
+    const bool globalChanged = _sandboxEnabled->value != enabledValue;
+    _sandboxEnabled->value = enabledValue;
+
+    for (const auto& follower : followers) {
+        auto* actor = RE::TESForm::LookupByID<RE::Actor>(follower.actorFormID);
+        if (!actor) continue;
+        const bool preferenceChanged = actor->IsInFaction(_sandboxFaction) != follower.isSandboxEnabled;
+        if (preferenceChanged) {
+            if (follower.isSandboxEnabled) {
+                actor->AddToFaction(_sandboxFaction, 0);
+            } else {
+                actor->RemoveFromFaction(_sandboxFaction);
+            }
+        }
+        if ((preferenceChanged || globalChanged) && !actor->IsDead()) {
+            actor->EvaluatePackage(true, false);
+        }
+    }
+}
+
+void PackageManager::ClearSandboxState(RE::Actor* actor)
+{
+    if (actor && _sandboxFaction && actor->IsInFaction(_sandboxFaction)) {
+        actor->RemoveFromFaction(_sandboxFaction);
+    }
 }
 
 void PackageManager::ClearDismissedSandbox(RE::Actor* actor)
@@ -494,131 +413,12 @@ void PackageManager::ClearDismissedSandbox(RE::Actor* actor)
         if (inst->quest != quest) continue;
         if (inst->alias != nullptr) continue;  // our real alias instances have alias set
 
-        // This is a dismissed sandbox — clean it up
         delete inst->instancedPackages;
         RE::free(inst);
         arr.erase(arr.begin() + i);
 
         logger::info("PackageManager: Cleared stale dismissed sandbox from {:08X}",
             actor->GetFormID());
-    }
-}
-
-void PackageManager::UpdateIdleSandbox()
-{
-    auto* player = RE::PlayerCharacter::GetSingleton();
-    if (!player) return;
-
-    auto& mgr = FollowerManager::GetSingleton();
-    auto& followers = mgr.GetFollowers();
-
-    // Accumulate real elapsed seconds. The idle threshold used to be added in
-    // fixed 5.0f steps that assumed the poll interval, which made a single tick
-    // of stillness trip it and coupled the threshold to the polling cadence.
-    auto now = std::chrono::steady_clock::now();
-    float elapsed = 0.0f;
-    if (_idleTickValid) {
-        elapsed = std::chrono::duration<float>(now - _lastIdleTick).count();
-        // Guard against a stalled game / long load producing a huge delta.
-        if (elapsed < 0.0f || elapsed > 30.0f) elapsed = 0.0f;
-    }
-    _lastIdleTick = now;
-    _idleTickValid = true;
-
-    // Prune bookkeeping for actors that are no longer tracked followers, so a
-    // dismissed or unloaded actor can never pin the shared idle marker.
-    if (!_sandboxActors.empty()) {
-        for (auto it = _sandboxActors.begin(); it != _sandboxActors.end();) {
-            if (!mgr.IsTracked(*it)) {
-                logger::info("PackageManager: Pruned stale sandbox entry {:08X}", *it);
-                it = _sandboxActors.erase(it);
-            } else {
-                ++it;
-            }
-        }
-    }
-
-    bool anySandboxEnabled = false;
-    for (auto& f : followers) {
-        if (f.isSandboxEnabled && !f.isWaiting) {
-            anySandboxEnabled = true;
-            break;
-        }
-    }
-
-    if (!anySandboxEnabled) {
-        if (_followersAreSandboxing) {
-            for (auto& f : followers) {
-                auto* actor = RE::TESForm::LookupByID<RE::Actor>(f.actorFormID);
-                if (actor && HasSandbox(actor)) {
-                    RemoveSandbox(actor, true);
-                }
-            }
-            _followersAreSandboxing = false;
-            _idleTimer = 0.0f;
-        }
-        return;
-    }
-
-    // Combat cancels sandbox outright. Standing still to aim a bow or hold a
-    // spell is not idling, and followers wandering off mid-fight reads as a bug.
-    bool inCombat = player->IsInCombat();
-    if (!inCombat) {
-        for (auto& f : followers) {
-            auto* actor = RE::TESForm::LookupByID<RE::Actor>(f.actorFormID);
-            if (actor && !actor->IsDead() && actor->IsInCombat()) {
-                inCombat = true;
-                break;
-            }
-        }
-    }
-
-    auto playerPos = player->GetPosition();
-    float dist = playerPos.GetDistance(_lastPlayerPos);
-
-    // Crouching signals combat intent — treat as movement to cancel sandbox
-    if (inCombat || dist > kMovementThreshold || player->IsSneaking()) {
-        _lastPlayerPos = playerPos;
-        _idleTimer = 0.0f;
-
-        if (_followersAreSandboxing) {
-            for (auto& f : followers) {
-                if (f.isSandboxEnabled && !f.isWaiting) {
-                    auto* actor = RE::TESForm::LookupByID<RE::Actor>(f.actorFormID);
-                    if (actor && HasSandbox(actor)) {
-                        RemoveSandbox(actor, true);
-                    }
-                }
-            }
-            _followersAreSandboxing = false;
-            logger::info("PackageManager: {} — followers resume following",
-                inCombat ? "Combat started" : "Player moving");
-        }
-    } else {
-        _idleTimer += elapsed;
-
-        if (!_followersAreSandboxing && _idleTimer >= kIdleThreshold) {
-            for (auto& f : followers) {
-                if (f.isSandboxEnabled && !f.isWaiting) {
-                    auto* actor = RE::TESForm::LookupByID<RE::Actor>(f.actorFormID);
-                    if (actor && !HasSandbox(actor)) {
-                        ApplySandbox(actor, true);
-                    }
-                }
-            }
-            _followersAreSandboxing = true;
-            logger::info("PackageManager: Player idle — followers sandboxing");
-        } else if (_followersAreSandboxing) {
-            // Apply sandbox to any followers enabled after the initial batch
-            for (auto& f : followers) {
-                if (f.isSandboxEnabled && !f.isWaiting) {
-                    auto* actor = RE::TESForm::LookupByID<RE::Actor>(f.actorFormID);
-                    if (actor && !HasSandbox(actor)) {
-                        ApplySandbox(actor, true);
-                    }
-                }
-            }
-        }
     }
 }
 
@@ -673,12 +473,16 @@ void PackageManager::ApplyFollowDistance(const std::string& preset)
 
 void PackageManager::Reset()
 {
+    // Revert calls this before discarding the old save's followers.
+    if (_sandboxEnabled) _sandboxEnabled->value = 0.0f;
+    for (const auto& follower : FollowerManager::GetSingleton().GetFollowers()) {
+        ClearSandboxState(RE::TESForm::LookupByID<RE::Actor>(follower.actorFormID));
+    }
     _hordeQuest = nullptr;
+    _residenceQuest = nullptr;
+    _residencePackage = nullptr;
+    _sandboxEnabled = nullptr;
+    _sandboxFaction = nullptr;
     _questCached = false;
-    _sandboxActors.clear();
-    _lastPlayerPos = {0, 0, 0};
-    _idleTimer = 0.0f;
-    _followersAreSandboxing = false;
-    _idleTickValid = false;
     logger::info("PackageManager: Reset");
 }

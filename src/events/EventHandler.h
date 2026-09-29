@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 #include <mutex>
-#include <unordered_map>
+#include "events/ScanWindow.h"
 
 class EventHandler :
     public RE::BSTEventSink<RE::MenuOpenCloseEvent>,
@@ -17,6 +17,11 @@ public:
 
     void StartPolling();
     void StopPolling();
+    void SuspendSession();
+    void ResumeSession();
+    std::uint64_t Session() const { return _session.load(); }
+    bool IsCurrentSession(std::uint64_t session) const { return _session.load() == session; }
+    bool ShouldBlockTeamDamage(RE::Actor* target, RE::Actor* attacker, float damage);
 
 private:
     EventHandler() = default;
@@ -45,39 +50,20 @@ private:
         const RE::TESSpellCastEvent* event,
         RE::BSTEventSource<RE::TESSpellCastEvent>*) override;
 
-    // Open a short window during which the existing poll thread ticks quickly,
-    // instead of spawning a detached thread per delay step. syncDialogue routes
-    // the fast ticks through OnDialogueClose() so vanilla wait/follow commands
-    // are picked up as well as new recruits.
+    // Temporarily poll faster; syncDialogue also adopts vanilla wait/follow changes.
     void RequestFastScan(int windowMs, bool syncDialogue);
 
-    // Health baseline for intra-team friendly fire, so a blocked hit restores
-    // only the damage actually taken rather than healing the target to full.
-    float ConsumeHealthDeficit(RE::Actor* actor);
-    void  RefreshHealthBaseline(RE::Actor* actor);
-
-    // Combat/package state must never be mutated from inside combat event
-    // dispatch — doing so re-enters the same event on the same stack. These
-    // queue the work onto the game thread instead, coalescing event storms.
+    // Defer combat changes to avoid re-entering TESCombatEvent dispatch.
     void RequestTeamStandDown();
 
     std::atomic<bool> _polling{false};
     std::atomic<bool> _standDownPending{false};
     std::atomic<int64_t> _lastCellLoadScan{0};  // debounce cell load scans (ms since epoch)
-    std::atomic<int64_t> _fastScanUntil{0};     // ms since epoch; 0 = normal cadence
-    std::atomic<bool> _fastScanSyncDialogue{false};
-
-    std::unordered_map<RE::FormID, float> _healthBaseline;
-    std::mutex _healthBaselineMutex;
+    Horde::ScanWindow _scanWindow;
+    std::atomic<std::uint64_t> _session{0};
+    std::atomic<bool> _sessionReady{false};
 
 public:
-    // Refresh the friendly-fire health baseline for the player and every tracked
-    // follower. Called from the poll tick so damage from non-hit sources (falls,
-    // traps, poison) cannot accumulate into an over-heal.
-    void RefreshHealthBaselines();
-
-    // Pull every passive follower out of combat. Runs on the game thread only —
-    // queued from the combat event sink, and also called from the poll tick as a
-    // backstop in case a combat event was missed.
+    // Game thread only; the poll tick also calls this to recover missed combat events.
     void RunTeamStandDown();
 };

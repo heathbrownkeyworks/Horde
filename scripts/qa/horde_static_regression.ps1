@@ -1,3 +1,5 @@
+param([string]$PluginPath)
+
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -60,28 +62,46 @@ Assert-NotContains `
 
 Assert-Contains `
     $followerManager `
-    'void FollowerManager::SetDismissedHome[\s\S]*?ApplyHomeEditorLocation' `
+    'void FollowerManager::SetDismissedHome[\s\S]*?RefreshHomes\(\)' `
     'SetDismissedHome must apply the new home to the actor when loaded.'
 
 Assert-Contains `
     $followerManager `
-    'void FollowerManager::ClearHome[\s\S]*?RestoreOriginalEditorLocation' `
+    'void FollowerManager::ClearHome[\s\S]*?RefreshHomes\(\)' `
     'ClearHome must restore the captured original editor location for active followers.'
 
 Assert-Contains `
     $followerManager `
-    'void FollowerManager::ClearDismissedHome[\s\S]*?ClearDismissedSandbox' `
+    'void FollowerManager::RefreshHomes[\s\S]*?ClearDismissedSandbox' `
     'ClearDismissedHome must clean stale dismissed sandbox aliases from older saves.'
 
-Assert-Contains `
+Assert-NotContains `
     $packageManager `
-    'void PackageManager::ClearCompetingAliasPackages\(RE::Actor\* actor\)\s*\{\s*ClearDialogueFollowerAlias\(actor\);' `
-    'ClearCompetingAliasPackages must be scoped to vanilla DialogueFollower cleanup.'
+    'ClearCompetingAliasPackages' `
+    'The ClearCompetingAliasPackages wrapper must stay removed; ClearDialogueFollowerAlias is the only entry point.'
 
 Assert-NotContains `
     $settings `
     'if\s*\(\s*_maxFollowers\s*<\s*kMaxFollowerCeiling\s*\)' `
     'Settings load must not reset every lower maxFollowers value to 20.'
+
+# Hand-edited caps must remain within the available alias slots.
+Assert-Contains `
+    $settings `
+    '_maxFollowers\s*=\s*std::clamp\(_maxFollowers,\s*1,\s*kMaxFollowerCeiling\)' `
+    'Settings load must clamp maxFollowers to the alias-slot range.'
+
+Assert-NotContains `
+    $followerManager `
+    'bool FollowerManager::TrackFollower' `
+    'The unused TrackFollower path must stay removed; ScanForFollowers is the only recruitment route.'
+
+# Forgetting a dismissed follower erases the only record of its original editor
+# location, so the home has to be unwound first.
+Assert-Contains `
+    $followerManager `
+    'void FollowerManager::ForgetFollower[\s\S]*?RestoreOriginalEditorLocation[\s\S]*?_registry\.erase\(it\)' `
+    'ForgetFollower must restore the original editor location before erasing the registry entry.'
 
 Assert-Contains `
     $settings `
@@ -93,7 +113,7 @@ Assert-NotContains `
     'RE::DebugNotification' `
     'The removed CommonLibSSE-NG DebugNotification API must not be used.'
 
-# --- 1.8.1 hardening pass ---
+# Follower lifecycle and package ownership
 
 $eventHandler = Read-RepoFile 'src/events/EventHandler.cpp'
 $hordeUI = Read-RepoFile 'src/ui/HordeUI.cpp'
@@ -106,23 +126,57 @@ Assert-NotContains `
 
 Assert-Contains `
     $eventHandler `
-    'SuspendSandbox\(\)[\s\S]*?TeleportStrandedFollowers\(\)' `
-    'Cell load must suspend sandbox before running stranded-follower recovery.'
+    'mgr\.ScanForFollowers\(\);[\s\S]{0,150}?mgr\.TeleportStrandedFollowers\(\)' `
+    'Cell load must still scan and recover stranded followers with engine-driven sandboxing.'
 
-Assert-Contains `
-    $packageManager `
-    'bool inCombat = player->IsInCombat\(\);' `
-    'UpdateIdleSandbox must cancel sandbox during combat.'
+Assert-NotContains ($packageManager + $eventHandler) `
+    'UpdateIdleSandbox|RebuildHordeAliasInstance|Horde_IdleSandboxMarker|_sandboxActors|_idleTimer' `
+    'Sandbox selection must use engine conditions, without marker movement, idle polling, or package-stack churn.'
 
-Assert-NotContains `
-    $packageManager `
-    '_idleTimer \+= 5\.0f;' `
-    'Idle timer must accumulate real elapsed seconds, not a hardcoded poll interval.'
+Assert-Contains $packageManager `
+    '"Horde_SandboxWaitPkg",\s*"Horde_SandboxActivePkg",\s*"Horde_WaitPkg",\s*"Horde_FollowPkg"' `
+    'Runtime alias package priority must match the compiled ESP.'
+
+Assert-Contains $packageManager `
+    'previous->quest == quest && previous->alias == refAlias' `
+    'Save-load refill must refresh only the matching Horde alias instance.'
+
+Assert-Contains $packageManager `
+    'anyEnabled = anyEnabled \|\| follower\.isSandboxEnabled' `
+    'The sandbox global must include opted-in waiting followers.'
+
+Assert-Contains $packageManager `
+    'IsInFaction\(_sandboxFaction\) != follower\.isSandboxEnabled' `
+    'Per-follower saved sandbox preferences must be synchronized independently.'
+
+Assert-Contains $packageManager `
+    'preferenceChanged \|\| globalChanged' `
+    'Sandbox synchronization must only re-evaluate packages when settings change.'
+
+Assert-Contains $followerManager `
+    'void FollowerManager::SetSandbox[\s\S]*?data->isSandboxEnabled = enabled;\s*PackageManager::GetSingleton\(\)\.SyncSandboxSettings\(\)' `
+    'Sandbox toggles must immediately synchronize the saved preference.'
+
+Assert-Contains $followerManager `
+    'void FollowerManager::UpdateDialogueGate\(\)\s*\{\s*PackageManager::GetSingleton\(\)\.SyncSandboxSettings\(\)' `
+    'The lifecycle gate must restore sandbox state on track, scan, dismiss and post-load.'
+
+Assert-Contains $followerManager `
+    'void FollowerManager::OnPostLoadGame[\s\S]*?UpdateDialogueGate\(\)' `
+    'Old-save recovery must synchronize the new global from persisted per-follower state.'
+
+Assert-Contains $followerManager `
+    'PackageManager::GetSingleton\(\)\.Reset\(\);\s*_followers\.clear\(\)' `
+    'Revert must release sandbox state before dropping the previous save''s followers.'
+
+Assert-Contains $followerManager `
+    'void FollowerManager::Summon\([\s\S]*?SetPosition\(behind, true\);\s*//[^\r\n]*\s*actor->extraList\.RemoveByType\(RE::ExtraDataType::kPackageStartLocation\);\s*actor->EvaluatePackage' `
+    'Summoning a waiting follower must reset its old package start location.'
 
 Assert-Contains `
     $followerManager `
-    'bool FollowerManager::UntrackFollower[\s\S]*?ForgetSandboxActor\(formID\)' `
-    'UntrackFollower must drop sandbox bookkeeping even when the actor fails to resolve.'
+    'bool FollowerManager::UntrackFollower[\s\S]*?ClearSandboxState\(actor\)' `
+    'Dismissal must remove the Horde-owned sandbox preference faction.'
 
 Assert-Contains `
     $followerManager `
@@ -132,12 +186,18 @@ Assert-Contains `
 Assert-NotContains `
     $eventHandler `
     'RestoreActorValue\(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, 999999\.0f\)' `
-    'Friendly fire must restore only the damage dealt, not heal the target to full.'
+    'Friendly fire must never heal the target to full.'
 
-Assert-Contains `
-    $eventHandler `
-    'RestoreActorValue\(RE::ActorValue::kHealth, deficit\)' `
-    'Friendly-fire recovery must use the CommonLibSSE-NG 7 actor-value API.'
+Assert-NotContains $eventHandler 'RestoreActorValue|_healthBaseline|ConsumeHealthDeficit' `
+    'Friendly-fire filtering must never refund sampled health deficits.'
+Assert-Contains (Read-RepoFile 'src/events/HealthDamageHook.cpp') 'write_vfunc\(0x104, Thunk\)' `
+    'Attributed damage must be filtered at Actor::HandleHealthDamage.'
+Assert-Contains $eventHandler 'if \(block\) RequestTeamStandDown\(\)' `
+    'Friendly hits must defer combat cleanup to the game thread.'
+Assert-NotContains $hordeUI 'GetArmorRating\(\)\s*/' `
+    'CommonLib armor ratings are already scaled.'
+Assert-Contains $followerManager 'ReadCosavePayload\(\*a_intfc, length\)' `
+    'Cosave allocation must follow bounded exact-length reads.'
 
 Assert-NotContains `
     $eventHandler `
@@ -166,7 +226,7 @@ Assert-NotContains `
 
 Assert-Contains `
     $hordeUI `
-    'AddTask\(\[distancePreset\]\(\)[\s\S]{0,300}?ApplyFollowDistance\(distancePreset\)' `
+    'RunOnGameThread\(\[distancePreset\]\(\)[\s\S]{0,300}?ApplyFollowDistance\(distancePreset\)' `
     'ApplyFollowDistance must be dispatched to the game thread, not run on the UI callback thread.'
 
 Assert-NotContains `
@@ -181,7 +241,7 @@ Assert-NotContains `
 
 # --- Group passive (stand-down) toggle ---
 
-$indexHtml = Read-RepoFile 'view/index.html'
+$nativeScreen = Read-RepoFile 'src/ui/imgui/HordeScreen.cpp'
 
 Assert-Contains `
     $followerManager `
@@ -198,23 +258,24 @@ Assert-Contains `
     'passiveStandDown = actorIsFollower && mgr\.IsPassive' `
     'Passive followers must be pulled out of any combat, not just intra-team combat.'
 
-# Re-entrancy guard. Calling StopCombat()/EvaluatePackage() inside TESCombatEvent
-# dispatch makes the attacker's combat controller re-acquire the follower and
-# re-fire the same event on the same stack, recursing until the stack overflows
-# (which SEH crash loggers cannot capture, so it crashes with no crash log).
+# Scope these checks to combat dispatch; the deferred worker must call StopCombat.
+$combatHandler = [regex]::Match($eventHandler,
+    '(?s)RE::BSEventNotifyControl EventHandler::ProcessEvent\(\s*const RE::TESCombatEvent\*.*?(?=\r?\nvoid EventHandler::RequestTeamStandDown\()').Value
+if (-not $combatHandler) { throw 'Could not locate the TESCombatEvent handler.' }
+
 Assert-Contains `
-    $eventHandler `
-    'passiveStandDown[\s\S]{0,1200}?RequestTeamStandDown\(\)' `
+    $combatHandler `
+    'passiveStandDown[\s\S]*?RequestTeamStandDown\(\)' `
     'Combat event must queue a deferred stand-down, not mutate combat state inline.'
 
 Assert-NotContains `
-    $eventHandler `
-    'passiveStandDown\s*=\s*actorIsFollower[\s\S]{0,700}?actor->StopCombat\(\)' `
+    $combatHandler `
+    'actor->StopCombat\(' `
     'Combat event handler must not call StopCombat() synchronously - it re-enters the same event.'
 
 Assert-NotContains `
-    $eventHandler `
-    'passiveStandDown\s*=\s*actorIsFollower[\s\S]{0,700}?actor->EvaluatePackage\(' `
+    $combatHandler `
+    'actor->EvaluatePackage\(' `
     'Combat event handler must not call EvaluatePackage() synchronously inside combat dispatch.'
 
 Assert-Contains `
@@ -228,13 +289,13 @@ Assert-Contains `
     'UI must expose the group passive listener.'
 
 Assert-Contains `
-    $indexHtml `
-    'id="btnPassiveAll"' `
+    $nativeScreen `
+    '"passive-all"' `
     'Main window must carry the Passive/Aggressive toggle button.'
 
 Assert-Contains `
-    $indexHtml `
-    "allPassive \? 'Aggressive' : 'Passive'" `
+    $nativeScreen `
+    'passive\s*\?\s*"Aggressive"\s*:\s*"Passive"' `
     'Passive button must relabel to Aggressive while the group is standing down.'
 
 # --- Horde: Passive power / keybind ---
@@ -243,7 +304,7 @@ $mainCpp = Read-RepoFile 'src/main.cpp'
 $settingsHeader = Read-RepoFile 'src/Settings.h'
 $passiveSpell = Join-Path $repoRoot 'plugin/Horde/Spells/Horde_PowerPassiveAll - 000837_Horde.esp.yaml'
 
-# --- Horde 2.1.0 / Skyrim 1.7.104 compatibility ---
+# --- Horde 3.0 / Skyrim 1.7.104 compatibility ---
 
 $xmake = Read-RepoFile 'xmake.lua'
 $pluginHeader = Read-RepoFile 'src/plugin.h'
@@ -254,23 +315,23 @@ $runtimeCompatibilityPath = Join-Path $repoRoot 'src/RuntimeCompatibility.h'
 
 Assert-Contains `
     $xmake `
-    'set_version\([''"]2\.1\.0[''"]\)' `
-    'The xmake project version must be Horde 2.1.0.'
+    'set_version\([''"]3\.0\.0[''"]\)' `
+    'The xmake project version must be Horde 3.0.0.'
 
 Assert-Contains `
     $pluginHeader `
-    'REL::Version\s+VERSION\s*\{\s*2\s*,\s*1\s*,\s*0\s*,\s*0\s*\}' `
-    'The runtime log/version constant must be Horde 2.1.0.'
+    'REL::Version\s+VERSION\s*\{\s*3\s*,\s*0\s*,\s*0\s*,\s*0\s*\}' `
+    'The runtime log/version constant must be Horde 3.0.0.'
 
 Assert-Contains `
-    (Read-RepoFile 'view/index.html') `
-    '<span class="panel-version">v2\.1\.0</span>' `
-    'The UI must display Horde v2.1.0.'
+    (Read-RepoFile 'src/ui/imgui/HordeScreen.cpp') `
+    '"v3\.0"' `
+    'The UI must display Horde v3.0.'
 
 Assert-Contains `
     (Read-RepoFile 'README.md') `
-    'Horde 2\.1\.0 is a lightweight' `
-    'The README must identify Horde 2.1.0.'
+    'Horde\s+3\.0' `
+    'The README must identify Horde 3.0.'
 
 Assert-Contains `
     $commonLibCMake `
@@ -318,53 +379,20 @@ Assert-Contains `
     'SKSEPlugin_Query' `
     'Horde must retain the legacy SKSEPlugin_Query export for Skyrim SE 1.5.97.'
 
-# --- Meridian.View startup lifecycle ---
-
-Assert-Contains `
-    $mainCpp `
-    'void OnInputLoaded\(\)[\s\S]*?Meridian::UI::View::Query' `
-    'Meridian.View/1 must be acquired during kInputLoaded on Meridian''s CEF application thread.'
-
-Assert-Contains `
-    $mainCpp `
-    'case\s+SKSE::MessagingInterface::kInputLoaded:\s*OnInputLoaded\(\);' `
-    'The SKSE message handler must route kInputLoaded to Meridian acquisition.'
-
-Assert-NotContains `
-    $mainCpp `
-    'void OnDataLoaded\(\)[\s\S]*?Meridian::UI::View::Query' `
-    'OnDataLoaded must not perform first Meridian/CEF initialization from its worker thread.'
-
-Assert-NotContains `
-    $mainCpp `
-    'void OnDataLoaded\(\)[\s\S]*?if\s*\(\s*!g_MeridianView\s*\)\s*\{[\s\S]{0,300}?return\s*;' `
-    'A missing Meridian UI must not return before Horde core systems and input paths initialize.'
-
-Assert-Contains `
-    $mainCpp `
-    'void OnDataLoaded\(\)[\s\S]*?FollowerManager::GetSingleton\(\)\.Initialize\(\)[\s\S]*?EventHandler::Register\(\)[\s\S]*?KeyHandler::RegisterSink\(\)' `
-    'OnDataLoaded must always initialize Horde core systems and hotkeys independently of the optional UI.'
-
-Assert-Contains `
-    $mainCpp `
-    'if\s*\(\s*g_MeridianView\s*\)\s*\{\s*HordeUI::GetSingleton\(\)\.Initialize\(\);' `
-    'HordeUI initialization must be gated narrowly on a successfully acquired Meridian interface.'
-
-# --- Optional Meridian.Input controller integration ---
-$controllerJs = Read-RepoFile 'view/controller.js'
-Assert-Contains $mainCpp 'OnInputLoaded\(\)[\s\S]*?Meridian::UI::Input::Query' `
-    'The optional Input/1 interface must be acquired alongside View/1 during kInputLoaded.'
-Assert-Contains $hordeUI 'if\s*\(\s*!g_MeridianInput\s*\)\s*return;' `
-    'Missing Input/1 must not prevent keyboard/mouse UI operation.'
-Assert-Contains $hordeUI 'config\.enabled\s*=\s*1;' 'Horde must opt its view into controller input.'
-Assert-Contains $hordeUI 'Result::Conflict' 'A controller opener conflict must have an explicit fallback.'
-Assert-Contains $hordeUI 'hordeHidePanel[\s\S]*?Unfocus\(_view\)[\s\S]*?Hide\(_view\)' `
-    'Native close must end page scopes before releasing the view.'
-Assert-Contains $controllerJs 'input\.attachNavigation' 'Horde must use Meridian navigation scopes.'
-Assert-Contains $controllerJs 'input\.getPrompt' 'Controller prompts must use the current bindings.'
-Assert-NotContains $controllerJs 'navigator\.getGamepads|XInputGetState|SendInput\(' `
-    'Horde must not add independent controller polling.'
-Assert-Contains $indexHtml '<script src="controller\.js"></script>' 'The controller consumer asset must be loaded.'
+# --- Native ImGui startup / game-thread boundary ---
+$nativeHost = Read-RepoFile 'src/ui/imgui/ImGuiHost.cpp'
+$nativeMenu = Read-RepoFile 'src/ui/imgui/HordeMenu.cpp'
+Assert-NotContains $mainCpp 'ViewDllLoader|InputDllLoader|GetProcAddress' 'The native runtime must not acquire an external UI API.'
+Assert-NotContains $hordeUI 'ExecuteJavaScript|RegisterListener\(|CreateView\(' 'The native facade must not depend on a browser.'
+Assert-Contains $mainCpp 'void OnDataLoaded\(\)[\s\S]*?FollowerManager::GetSingleton\(\)\.Initialize\(\)[\s\S]*?HordeUI::GetSingleton\(\)\.Initialize\(\)[\s\S]*?KeyHandler::RegisterSink\(\)' 'Native UI, follower systems and hotkeys must initialize together.'
+Assert-Contains $hordeUI 'void HordeUI::Dispatch[\s\S]*?AddTask[\s\S]*?host\.Generation\(\)\s*!=\s*generation' 'Native commands must be game-thread tasks guarded by their opening generation.'
+Assert-Contains $nativeMenu 'F::kPausesGame' 'Horde must retain its paused menu behavior.'
+Assert-Contains $nativeHost 'ImGui_ImplDX11_RenderDrawData' 'The native host must render through DX11.'
+Assert-NotContains $nativeHost 'ImGui_ImplWin32_NewFrame|XInputGetState|SendInput\(' 'Runtime controller input must use Skyrim events without independent polling.'
+Assert-NotContains $nativeHost 'HordeUI::GetSingleton\(\)\.Toggle\(' 'Controller input must not open Horde; use the lesser power.'
+Assert-Contains $nativeHost 'if \(s\.held\.load\(\) == 0\)\s*s\.armed = true' 'Held controller buttons must be released before menu navigation begins.'
+Assert-Contains $mainCpp 'kPreLoadGame:[\s\S]{0,120}HordeUI::GetSingleton\(\)\.Close\(\)' 'Save loading must close the native menu.'
+Assert-Contains $nativeHost 'ContextScope' 'Rendering must restore another native mod''s ImGui context.'
 
 if (-not (Test-Path -LiteralPath $passiveSpell)) {
     throw 'Horde_PowerPassiveAll spell record is missing from the plugin source.'
@@ -390,12 +418,18 @@ Assert-Contains `
     '_passiveAllKey' `
     'Passive keybind must be configurable in settings.'
 
-# The ESP is rebuilt from YAML by Spriggit, which drops PACK InterruptFlags bits
-# 9-15 every time. Verify the shipped binary still carries them.
-$espPath = Join-Path $repoRoot 'plugin/Horde.esp'
+# Explicit numeric interrupt flags preserve the full values through Spriggit.
+# Verify the compiled artifact as well as the source and lifecycle contracts.
+$espPath = if ($PluginPath) { $PluginPath } else { Join-Path $repoRoot 'plugin/Horde.esp' }
 if (Test-Path -LiteralPath $espPath) {
     & node (Join-Path $PSScriptRoot 'horde_recruitment_inventory.mjs') $espPath
     if ($LASTEXITCODE -ne 0) { throw 'Horde recruitment inventory checks failed.' }
+
+    & node (Join-Path $PSScriptRoot 'horde_plugin_improvements.mjs') $espPath
+    if ($LASTEXITCODE -ne 0) { throw 'Horde plugin improvements checks failed.' }
+
+    & node (Join-Path $PSScriptRoot 'horde_release_fixes.mjs') $espPath
+    if ($LASTEXITCODE -ne 0) { throw 'Horde release repair checks failed.' }
 
     $espBytes = [System.IO.File]::ReadAllBytes($espPath)
     $needle = [System.Text.Encoding]::ASCII.GetBytes('PKDT')
@@ -411,7 +445,7 @@ if (Test-Path -LiteralPath $espPath) {
     }
     if ($found -eq 0) { throw 'No PKDT subrecords found in Horde.esp - package data is missing.' }
     if ($unpatched -gt 0) {
-        throw "Horde.esp has $unpatched package(s) missing InterruptFlags bits 9-15. Run: node plugin/patch_interrupt_flags.mjs"
+        throw "Horde.esp has $unpatched package(s) missing InterruptFlags bits 9-15. Restore the explicit numeric flags in package YAML and rebuild with Spriggit."
     }
     Write-Host "  Verified InterruptFlags on $found package(s) in Horde.esp."
 }

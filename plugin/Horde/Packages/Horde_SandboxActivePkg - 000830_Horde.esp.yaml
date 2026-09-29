@@ -2,6 +2,7 @@ FormKey: 000830:Horde.esp
 EditorID: Horde_SandboxActivePkg
 Flags:
 - AllowSwimming
+- WeaponsUnequipped
 Type: Package
 PreferredSpeed: Run
 InteruptFlags:
@@ -14,13 +15,98 @@ InteruptFlags:
 - AggroRadiusBehavior
 - AllowIdleChatter
 - WorldInteractions
+- 0x400
+- 0x800
+- 0x1000
+- 0x2000
+- 0x4000
+- 0x8000
 ScheduleMonth: -1
 ScheduleDayOfWeek: Any
 ScheduleHour: -1
 ScheduleMinute: -1
 Unknown3: 0x000000
-PackageTemplate: 01C254:Skyrim.esm
-DataInputVersion: 10
+Conditions:
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetInFactionConditionData
+    Faction: 00083A:Horde.esp
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetGlobalValueConditionData
+    Global: 000838:Horde.esp
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetPlayerTeammateConditionData
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: GetActorValueConditionData
+    ActorValue: WaitingForPlayer
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: IsSneakingConditionData
+    RunOnType: Reference
+    Reference: 000014:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: IsInCombatConditionData
+    RunOnType: Reference
+    Reference: 000014:Skyrim.esm
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: IsInCombatConditionData
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 013168:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 01CD5A:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 01CB87:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 0FC1A3:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 013167:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Flags:
+  - OR
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 01CB86:Skyrim.esm
+  ComparisonValue: 1
+- MutagenObjectType: ConditionFloat
+  Data:
+    MutagenObjectType: LocationHasKeywordConditionData
+    Keyword: 013166:Skyrim.esm
+  ComparisonValue: 1
+PackageTemplate: 06C872:Skyrim.esm
+DataInputVersion: 11
 Data:
 - Key: 0
   Value:
@@ -28,53 +114,71 @@ Data:
     Location:
       Target:
         MutagenObjectType: LocationTarget
-        Link: 000831:Horde.esp
-      Radius: 1024
+        Link: 000014:Skyrim.esm
+      Radius: 800
+- Key: 32
+  Value:
+    MutagenObjectType: PackageDataTarget
+    Type: SingleRef
+    Target:
+      MutagenObjectType: PackageTargetSpecificReference
+      Reference: 000014:Skyrim.esm
+- Key: 36
+  Value:
+    MutagenObjectType: PackageDataLocation
+    Location:
+      Target:
+        MutagenObjectType: LocationTarget
+        Link: 000014:Skyrim.esm
+      Radius: 800
+- Key: 34
+  Value:
+    MutagenObjectType: PackageDataLocation
+    Location:
+      Target:
+        MutagenObjectType: LocationTarget
+        Link: 000014:Skyrim.esm
+- Key: 14
+  Value:
+    MutagenObjectType: PackageDataBool
 - Key: 1
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Eating
     Data: True
 - Key: 3
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Sleeping
     Data: True
 - Key: 4
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Conversation
     Data: True
 - Key: 5
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Idle Markers
     Data: True
 - Key: 6
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Sitting
+    Data: True
+- Key: 38
+  Value:
+    MutagenObjectType: PackageDataBool
     Data: True
 - Key: 7
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Allow Wandering
-    Data: True
-- Key: 14
+- Key: 25
   Value:
     MutagenObjectType: PackageDataBool
-    Name: Unlock On Arrival?
+- Key: 27
+  Value:
+    MutagenObjectType: PackageDataBool
 - Key: 29
   Value:
     MutagenObjectType: PackageDataFloat
-    Name: Energy
     Data: 50
-- Key: 31
-  Value:
-    MutagenObjectType: PackageDataBool
-    Name: Allow Special Furniture
-    Data: True
-XnamMarker: 0x0A
+XnamMarker: 0x27
 OnBegin:
   Topics:
   - MutagenObjectType: TopicReference

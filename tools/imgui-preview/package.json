@@ -1,0 +1,10 @@
+{
+  "name": "horde-imgui-icon-build",
+  "private": true,
+  "type": "module",
+  "scripts": { "icons": "cd ../.. && node tools/imgui-preview/build-icons.mjs" },
+  "devDependencies": {
+    "svg2ttf": "6.1.0",
+    "svgicons2svgfont": "16.0.0"
+  }
+}

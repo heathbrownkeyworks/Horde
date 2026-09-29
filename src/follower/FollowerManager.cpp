@@ -2,8 +2,10 @@
 #include "follower/FollowerManager.h"
 #include "package/PackageManager.h"
 #include "Settings.h"
+#include "follower/CosaveReader.h"
 
 #include <cmath>
+#include <charconv>
 #include <filesystem>
 #include <thread>
 
@@ -43,11 +45,7 @@ FollowerData* FollowerManager::FindFollower(RE::FormID formID)
     return nullptr;
 }
 
-// --- Essential / protection ---
-//
-// Essential lives on the shared TESNPC, so it must be applied and unwound with
-// care: two followers built on the same actor base share one flag, and the flag
-// survives in the global form pool across save loads unless we release it.
+// Essential flags are shared by all references to a TESNPC and survive save loads.
 
 void FollowerManager::ApplyProtection(RE::TESNPC* actorBase, int protection)
 {
@@ -74,8 +72,7 @@ int FollowerManager::CaptureOriginalProtection(RE::Actor* actor, RE::TESNPC* act
 {
     if (!actorBase) return 0;
 
-    // A follower already tracked on this same base means Horde has clobbered
-    // the flags. Reading them now would record "essential" as the original.
+    // A shared base may already carry Horde's override; reuse its saved protection.
     for (const auto& other : _followers) {
         auto* otherActor = ResolveActor(other.actorFormID);
         if (otherActor && otherActor != actor && otherActor->GetActorBase() == actorBase) {
@@ -104,7 +101,7 @@ void FollowerManager::ReleaseEssential(RE::Actor* actor, RE::FormID formID, int 
 
         auto* otherActor = ResolveActor(other.actorFormID);
         if (otherActor && otherActor->GetActorBase() == actorBase) {
-            logger::info("Horde: Kept essential on base {:08X} — still shared with {}",
+            logger::info("Horde: Kept essential on base {:08X} - still shared with {}",
                 actorBase->GetFormID(), other.name);
             return;
         }
@@ -131,16 +128,20 @@ void FollowerManager::OnCosaveRevert()
 {
     std::lock_guard<std::recursive_mutex> lock(_mutex);
 
-    // Unwind Horde's essential override before dropping the follower list.
-    // TESNPC flags live in the global form pool, so without this a follower made
-    // essential in save A would stay essential after loading save B.
+    // Restore shared actor bases before discarding the previous save's state.
     ReleaseAllEssential();
 
+    for (const auto& [id, entry] : _registry) {
+        if (auto* actor = ResolveActor(id)) {
+            PackageManager::GetSingleton().ClearResidencePackage(actor);
+            if (entry.homeRestorePending) RestoreOriginalEditorLocation(actor, entry, id);
+        }
+    }
+    PackageManager::GetSingleton().Reset();
     _followers.clear();
     _registry.clear();
     _rejectedCustomFollowers.clear();
-    PackageManager::GetSingleton().Reset();
-    logger::info("Horde: Cosave revert — essential overrides released, follower list and registry cleared");
+    logger::info("Horde: Cosave revert - essential overrides released, follower list and registry cleared");
 }
 
 void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
@@ -151,6 +152,10 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
     {
         nlohmann::json j = _followers;
         std::string data = j.dump();
+        if (data.size() > Horde::kMaxCosavePayload) {
+            logger::error("Horde: Cosave payload exceeds the supported size");
+            return;
+        }
 
         if (!a_intfc->OpenRecord(kFollowerRecord, kCosaveVersion)) {
             logger::error("Horde: Failed to open FLWR cosave record");
@@ -158,8 +163,10 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
         }
 
         std::uint32_t len = static_cast<std::uint32_t>(data.size());
-        a_intfc->WriteRecordData(len);
-        a_intfc->WriteRecordData(data.c_str(), len);
+        if (!a_intfc->WriteRecordData(len) || !a_intfc->WriteRecordData(data.c_str(), len)) {
+            logger::error("Horde: Failed to write complete cosave record");
+            return;
+        }
 
         logger::info("Horde: Cosave saved {} followers ({} bytes)", _followers.size(), len);
     }
@@ -167,11 +174,15 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
     // Record 2: follower registry
     {
         // Serialize as {"formID": RegistryEntry, ...} with string keys
-        nlohmann::json j;
+        nlohmann::json j = nlohmann::json::object();
         for (auto& [fid, entry] : _registry) {
             j[std::to_string(fid)] = entry;
         }
         std::string data = j.dump();
+        if (data.size() > Horde::kMaxCosavePayload) {
+            logger::error("Horde: Cosave payload exceeds the supported size");
+            return;
+        }
 
         if (!a_intfc->OpenRecord(kRegistryRecord, kCosaveVersion)) {
             logger::error("Horde: Failed to open RGST cosave record");
@@ -179,8 +190,10 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
         }
 
         std::uint32_t len = static_cast<std::uint32_t>(data.size());
-        a_intfc->WriteRecordData(len);
-        a_intfc->WriteRecordData(data.c_str(), len);
+        if (!a_intfc->WriteRecordData(len) || !a_intfc->WriteRecordData(data.c_str(), len)) {
+            logger::error("Horde: Failed to write complete cosave record");
+            return;
+        }
 
         logger::info("Horde: Cosave saved {} registry entries ({} bytes)", _registry.size(), len);
     }
@@ -197,17 +210,42 @@ void FollowerManager::OnCosaveLoad(SKSE::SerializationInterface* a_intfc)
             continue;
         }
 
-        std::uint32_t strLen = 0;
-        a_intfc->ReadRecordData(strLen);
-        std::string data(strLen, '\0');
-        a_intfc->ReadRecordData(data.data(), strLen);
+        if (type != kFollowerRecord && type != kRegistryRecord) continue;
+        std::optional<std::string> payload;
+        try {
+            payload = Horde::ReadCosavePayload(*a_intfc, length);
+        } catch (const std::exception& e) {
+            logger::error("Horde: Cannot read cosave record: {}", e.what());
+            continue;
+        }
+        if (!payload) {
+            logger::warn("Horde: Skipping truncated or oversized cosave record {:08X}", type);
+            continue;
+        }
+        const auto& data = *payload;
 
         if (type == kFollowerRecord) {
             try {
                 nlohmann::json j = nlohmann::json::parse(data);
-                _followers = j.get<std::vector<FollowerData>>();
 
-                for (auto& f : _followers) {
+                // Decode entry by entry so a single bad record costs one
+                // follower instead of the entire roster.
+                if (!j.is_array()) {
+                    logger::error("Horde: FLWR cosave payload is not an array");
+                    continue;
+                }
+                std::vector<FollowerData> loadedFollowers;
+                std::uint32_t skipped = 0;
+                for (const auto& entry : j) {
+                    try {
+                        loadedFollowers.push_back(entry.get<FollowerData>());
+                    } catch (const std::exception& e) {
+                        logger::warn("Horde: Skipping unreadable follower record: {}", e.what());
+                        skipped++;
+                    }
+                }
+
+                for (auto& f : loadedFollowers) {
                     RE::FormID resolved = 0;
                     if (a_intfc->ResolveFormID(f.actorFormID, resolved)) {
                         f.actorFormID = resolved;
@@ -226,35 +264,67 @@ void FollowerManager::OnCosaveLoad(SKSE::SerializationInterface* a_intfc)
                     }
                 }
 
-                auto before = _followers.size();
-                _followers.erase(
-                    std::remove_if(_followers.begin(), _followers.end(),
+                auto before = loadedFollowers.size();
+                loadedFollowers.erase(
+                    std::remove_if(loadedFollowers.begin(), loadedFollowers.end(),
                         [](const FollowerData& f) { return f.actorFormID == 0; }),
-                    _followers.end());
+                    loadedFollowers.end());
 
-                if (_followers.size() < before) {
-                    logger::warn("Horde: Removed {} followers with unresolvable FormIDs", before - _followers.size());
+                if (loadedFollowers.size() < before) {
+                    logger::warn("Horde: Removed {} followers with unresolvable FormIDs", before - loadedFollowers.size());
                 }
 
-                logger::info("Horde: Cosave loaded {} followers", _followers.size());
+                std::unordered_set<RE::FormID> seenActors;
+                std::unordered_set<int> seenSlots;
+                std::erase_if(loadedFollowers, [&](const FollowerData& f) { return !seenActors.insert(f.actorFormID).second; });
+                for (auto& f : loadedFollowers) {
+                    if (f.aliasSlot < 0 || f.aliasSlot >= 20 || !seenSlots.insert(f.aliasSlot).second) f.aliasSlot = -1;
+                }
+                // Reserve valid saved slots before assigning replacements, so a
+                // repaired entry cannot steal a later follower's valid slot.
+                for (auto& f : loadedFollowers) {
+                    if (f.aliasSlot >= 0) continue;
+                    for (int slot = 0; slot < 20; ++slot) {
+                        if (seenSlots.insert(slot).second) { f.aliasSlot = slot; break; }
+                    }
+                }
+                _followers = std::move(loadedFollowers);
+                logger::info("Horde: Cosave loaded {} followers ({} unreadable entries dropped)",
+                    _followers.size(), skipped);
             } catch (const std::exception& e) {
                 logger::error("Horde: Failed to parse FLWR cosave: {}", e.what());
-                _followers.clear();
             }
         } else if (type == kRegistryRecord) {
             try {
                 nlohmann::json j = nlohmann::json::parse(data);
-                _registry.clear();
+                if (!j.is_object()) {
+                    logger::error("Horde: RGST cosave payload is not an object");
+                    continue;
+                }
+                std::unordered_map<RE::FormID, RegistryEntry> loadedRegistry;
 
                 for (auto& [key, val] : j.items()) {
-                    RE::FormID oldID = static_cast<RE::FormID>(std::stoul(key));
-                    RE::FormID resolved = 0;
-                    if (!a_intfc->ResolveFormID(oldID, resolved)) {
-                        logger::warn("Horde: Registry — failed to resolve {:08X}, dropping", oldID);
+                    // Recover valid entries independently of malformed siblings.
+                    RE::FormID oldID = 0;
+                    const auto result = std::from_chars(key.data(), key.data() + key.size(), oldID);
+                    if (result.ec != std::errc{} || result.ptr != key.data() + key.size() || oldID == 0) {
+                        logger::warn("Horde: Registry has invalid FormID key '{}', dropping", key);
                         continue;
                     }
 
-                    RegistryEntry entry = val.get<RegistryEntry>();
+                    RE::FormID resolved = 0;
+                    if (!a_intfc->ResolveFormID(oldID, resolved)) {
+                        logger::warn("Horde: Registry - failed to resolve {:08X}, dropping", oldID);
+                        continue;
+                    }
+
+                    RegistryEntry entry;
+                    try {
+                        entry = val.get<RegistryEntry>();
+                    } catch (const std::exception& e) {
+                        logger::warn("Horde: Registry - unreadable entry for {:08X}: {}", oldID, e.what());
+                        continue;
+                    }
 
                     if (entry.homeWorldspace != 0) {
                         RE::FormID resolvedHome = 0;
@@ -272,21 +342,22 @@ void FollowerManager::OnCosaveLoad(SKSE::SerializationInterface* a_intfc)
                         if (a_intfc->ResolveFormID(entry.originalEditorLocFormID, resolvedOrig)) {
                             entry.originalEditorLocFormID = resolvedOrig;
                         } else {
-                            // Original editor loc form no longer exists — drop it.
-                            // We'll recapture next time the follower is recruited.
+                            // Original editor loc form no longer exists - drop it.
+                            // Keep the capture flag so the current Horde home
+                            // cannot become the original on re-recruitment.
                             entry.originalEditorLocFormID = 0;
                             entry.originalEditorLocX = entry.originalEditorLocY = entry.originalEditorLocZ = 0.0f;
                             entry.originalEditorLocRot = 0.0f;
                         }
                     }
 
-                    _registry[resolved] = std::move(entry);
+                    loadedRegistry[resolved] = std::move(entry);
                 }
 
+                _registry = std::move(loadedRegistry);
                 logger::info("Horde: Cosave loaded {} registry entries", _registry.size());
             } catch (const std::exception& e) {
                 logger::error("Horde: Failed to parse RGST cosave: {}", e.what());
-                _registry.clear();
             }
         } else {
             logger::warn("Horde: Unknown cosave record type {:08X}", type);
@@ -296,7 +367,6 @@ void FollowerManager::OnCosaveLoad(SKSE::SerializationInterface* a_intfc)
 
 void FollowerManager::Initialize()
 {
-    // Follower data is now loaded via cosave callbacks, not from JSON
     logger::info("Horde: FollowerManager initialized");
 }
 
@@ -307,6 +377,7 @@ bool FollowerManager::IsAtCap() const
 
 void FollowerManager::UpdateDialogueGate()
 {
+    PackageManager::GetSingleton().SyncSandboxSettings();
     auto* global = GetPlayerFollowerCount();
     if (!global) {
         logger::warn("Horde: Could not find PlayerFollowerCount global");
@@ -319,116 +390,6 @@ void FollowerManager::UpdateDialogueGate()
         logger::info("Horde: Dialogue gate {} ({}/{})", newVal > 0 ? "CLOSED" : "OPEN",
             GetCount(), Settings::GetSingleton().GetMaxFollowers());
     }
-}
-
-bool FollowerManager::TrackFollower(RE::Actor* actor)
-{
-    std::lock_guard<std::recursive_mutex> lock(_mutex);
-
-    if (!actor) {
-        logger::warn("Horde: TrackFollower called with null actor");
-        return false;
-    }
-
-    RE::FormID formID = actor->GetFormID();
-
-    if (FindFollower(formID)) {
-        logger::info("Horde: Actor {:08X} already tracked", formID);
-        return false;
-    }
-
-    if (IsAtCap()) {
-        logger::warn("Horde: Cannot track actor {:08X}, at follower cap", formID);
-        return false;
-    }
-
-    // Only track vanilla DialogueFollower-based followers
-    auto& pkgMgr = PackageManager::GetSingleton();
-    if (!pkgMgr.HasDialogueFollowerAlias(actor)) {
-        logger::info("Horde: Rejecting {} ({:08X}) — no DialogueFollower alias (custom follower system)",
-            actor->GetDisplayFullName(), formID);
-        return false;
-    }
-
-    // Find an empty alias slot in our quest
-    int slot = pkgMgr.FindEmptySlot();
-    if (slot == -1) {
-        logger::warn("Horde: No empty alias slot for {:08X}", formID);
-        Settings::Notify("Follower limit reached.");
-        return false;
-    }
-
-    FollowerData data;
-    data.actorFormID = formID;
-    data.name = actor->GetDisplayFullName();
-    data.level = actor->GetLevel();
-    data.aliasSlot = slot;
-
-    auto* actorBase = actor->GetActorBase();
-    if (actorBase && actorBase->npcClass) {
-        data.className = actorBase->npcClass->GetFullName();
-    }
-
-    data.originalAggression = actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kAggression);
-
-    // Save original protection level and make essential
-    if (actorBase) {
-        data.originalProtection = CaptureOriginalProtection(actor, actorBase);
-        actorBase->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kEssential);
-    }
-
-    auto& settings = Settings::GetSingleton();
-    data.isSandboxEnabled = settings.GetDefaultSandboxEnabled();
-
-    data.isPassive = false;
-    data.isWaiting = false;
-    data.isFollowClose = settings.GetDefaultFollowClose();
-
-    _followers.push_back(data);
-    UpsertRegistry(formID, data.name);
-    CaptureOriginalEditorLoc(formID, actor);
-    RestoreHome(_followers.back());
-    if (_followers.back().homeWorldspace != 0) {
-        ApplyHomeEditorLocation(
-            actor,
-            _followers.back().homeWorldspace,
-            _followers.back().homeX,
-            _followers.back().homeY,
-            _followers.back().homeZ,
-            _followers.back().homeName);
-    }
-
-    // Clean up any stale dismissed sandbox from a previous dismiss cycle
-    pkgMgr.ClearDismissedSandbox(actor);
-
-    // Fill our alias slot — this gives the actor our follow/wait/sandbox packages.
-    // We intentionally leave the DialogueFollower alias intact so vanilla's
-    // dismiss/wait/follow dialogue options continue to work.
-    pkgMgr.FillSlot(slot, actor);
-
-    if (auto* faction = GetCurrentFollowerFaction(); faction && !actor->IsInFaction(faction)) {
-        actor->AddToFaction(faction, 0);
-    }
-    actor->GetActorRuntimeData().boolBits.set(RE::Actor::BOOL_BITS::kPlayerTeammate);
-
-    if (auto* hordeFaction = GetHordeFollowerFaction()) {
-        actor->AddToFaction(hordeFaction, 1);
-    }
-
-    // Set sandbox opt-in if enabled
-    if (data.isSandboxEnabled) {
-        // sandbox opt-in is tracked in FollowerData; applied dynamically by UpdateIdleSandbox
-    }
-
-    actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, 0.0f);
-    actor->EvaluatePackage(true, false);
-
-    logger::info("Horde: Tracked follower {} ({:08X}) in slot {}, protection={}, total: {}",
-        data.name, formID, slot, data.originalProtection, _followers.size());
-
-    Save();
-    UpdateDialogueGate();
-    return true;
 }
 
 bool FollowerManager::UntrackFollower(RE::FormID formID)
@@ -445,23 +406,16 @@ bool FollowerManager::UntrackFollower(RE::FormID formID)
 
     auto* actor = ResolveActor(formID);
     if (actor) {
-        // Restore original aggression
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kAggression, it->originalAggression);
 
-        // Restore original protection level
         auto* actorBase = actor->GetActorBase();
         ReleaseEssential(actor, formID, it->originalProtection);
 
-        // Remove from factions
         auto* faction = GetCurrentFollowerFaction();
         if (faction) {
             actor->AddToFaction(faction, -1);
         }
-        // Mark as a dismissed follower, mirroring vanilla DialogueFollowerScript.DismissFollower.
-        // Required so custom followers' "Follow me" re-recruit dialogue — which is gated on
-        // GetInFaction DismissedFollowerFaction == 1 — reappears after a Horde-UI dismiss.
-        // (SoftUntrack does not need this: that path means vanilla dialogue already dismissed
-        // them and set the faction itself.)
+        // Match vanilla dismissal so dialogue gated by DismissedFollowerFaction reappears.
         if (auto* dismissedFaction = RE::TESForm::LookupByEditorID<RE::TESFaction>("DismissedFollowerFaction")) {
             if (!actor->IsInFaction(dismissedFaction)) {
                 actor->AddToFaction(dismissedFaction, 0);
@@ -471,54 +425,30 @@ bool FollowerManager::UntrackFollower(RE::FormID formID)
         if (hordeFaction && actor->IsInFaction(hordeFaction)) {
             actor->RemoveFromFaction(hordeFaction);
         }
-        PackageManager::GetSingleton().RemoveSandbox(actor, true);
+        PackageManager::GetSingleton().ClearSandboxState(actor);
 
-        // Clear teammate flag
         actor->GetActorRuntimeData().boolBits.reset(RE::Actor::BOOL_BITS::kPlayerTeammate);
 
-        // Set WaitingForPlayer to 0
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, 0.0f);
 
-        // Set editor location to assigned home. This lets the normal package
-        // chain take over after dismissal without a slot-scoped Horde alias.
-        if (it->homeWorldspace != 0) {
-            ApplyHomeEditorLocation(actor, it->homeWorldspace, it->homeX, it->homeY, it->homeZ, it->homeName);
-        }
+        // Release the animal gate before removing the alias that identifies it.
+        auto& packages = PackageManager::GetSingleton();
+        if (it->isAnimal || packages.HasAnimalAlias(actor)) packages.ReleaseAnimal(actor);
 
-        // Clear our alias slot
-        bool hasHome = it->homeWorldspace != 0;
         PackageManager::GetSingleton().ClearSlot(it->aliasSlot);
 
-        // Clear the vanilla DialogueFollower alias. This matches what
-        // vanilla DialogueFollowerScript.DismissFollower() does via
-        // pFollowerAlias.Clear() and is required to actually stop the
-        // follower from following. Without this, the vanilla follow
-        // package on the DialogueFollower alias keeps running until the
-        // next scan cycle notices faction/teammate state has gone stale.
-        // (v1.6.1 masked this by injecting a higher-priority Horde sandbox
-        // package that overrode the vanilla package; v1.7.0's conditional
-        // gate removed that mask and exposed the missing cleanup.)
+        // Clearing faction and teammate state does not remove vanilla alias packages.
         PackageManager::GetSingleton().ClearDialogueFollowerAlias(actor);
         PackageManager::GetSingleton().ClearDismissedSandbox(actor);
 
-        // Release the follower to the regular editor-location package chain.
-        // Dismissed followers must not use per-slot Horde home packages because
-        // those slots are reused by active followers.
-        if (hasHome) {
-            logger::info("Horde: Released {:08X} to editor-location package chain (home={})",
-                formID, it->homeName);
-        } else {
-            logger::info("Horde: Released {:08X} to vanilla package chain (no Horde home)", formID);
-        }
         actor->EvaluatePackage(true, false);
 
-        // Notify player
         auto msg = std::string(it->name) + " has been dismissed from your service.";
         Settings::Notify(msg.c_str());
 
         logger::info("Horde: Dismissed {:08X} from player service", formID);
 
-        // Hireling re-hire fix
+        // Clear hireling employment and preserve eligibility for rehire.
         {
             auto* hirelingFaction = RE::TESForm::LookupByEditorID<RE::TESFaction>("CurrentHireling");
             if (hirelingFaction && actor->IsInFaction(hirelingFaction)) {
@@ -539,17 +469,12 @@ bool FollowerManager::UntrackFollower(RE::FormID formID)
         }
     }
 
-    // Drop sandbox bookkeeping unconditionally — if ResolveActor failed above,
-    // the block that calls RemoveSandbox was skipped entirely and the FormID
-    // would otherwise stay in the sandbox set forever, pinning the idle marker.
-    PackageManager::GetSingleton().ForgetSandboxActor(formID);
-
     std::string name = it->name;
     _followers.erase(it);
+    RefreshHomes();
 
     logger::info("Horde: Untracked follower {} ({:08X}), total: {}", name, formID, _followers.size());
 
-    Save();
     UpdateDialogueGate();
     return true;
 }
@@ -566,19 +491,14 @@ void FollowerManager::SoftUntrack(RE::FormID formID)
     if (actor) {
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kAggression, it->originalAggression);
 
-        // Restore original protection level
         ReleaseEssential(actor, formID, it->originalProtection);
 
-        PackageManager::GetSingleton().RemoveSandbox(actor, true);
+        PackageManager::GetSingleton().ClearSandboxState(actor);
         auto* hordeFaction = GetHordeFollowerFaction();
         if (hordeFaction && actor->IsInFaction(hordeFaction)) {
             actor->RemoveFromFaction(hordeFaction);
         }
     }
-
-    // Drop sandbox bookkeeping unconditionally — an unresolvable actor would
-    // otherwise leave a dead FormID pinning the shared idle marker.
-    PackageManager::GetSingleton().ForgetSandboxActor(formID);
 
     // Clear alias slot
     if (it->aliasSlot >= 0) {
@@ -587,8 +507,9 @@ void FollowerManager::SoftUntrack(RE::FormID formID)
 
     std::string name = it->name;
     _followers.erase(it);
+    RefreshHomes();
 
-    logger::info("Horde: Soft-untracked {} ({:08X}) — dismissed via dialogue, total: {}",
+    logger::info("Horde: Soft-untracked {} ({:08X}) - dismissed via dialogue, total: {}",
         name, formID, _followers.size());
 }
 
@@ -600,10 +521,7 @@ void FollowerManager::ApplyPassive(RE::Actor* actor, bool passive, FollowerData&
         }
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kAggression, 0.0f);
 
-        // Aggression only governs whether an actor *starts* a fight — it does
-        // not end one already in progress. Break combat explicitly so the
-        // follower disengages and the follow package pulls them back to the
-        // player instead of finishing their current target.
+        // Zero aggression does not end combat already in progress.
         actor->StopCombat();
         actor->StopAlarmOnActor();
         actor->EvaluatePackage(true, false);
@@ -639,6 +557,9 @@ void FollowerManager::Summon(RE::FormID formID, bool silent)
         pos.z
     };
     actor->SetPosition(behind, true);
+    // A summoned waiting follower must use the new position as its wait center.
+    actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
+    actor->EvaluatePackage(true, false);
 
     if (!silent) {
         auto msg = std::string("You have summoned ") + actor->GetDisplayFullName() + ".";
@@ -651,7 +572,7 @@ void FollowerManager::SummonAll()
 {
     std::lock_guard<std::recursive_mutex> lock(_mutex);
     for (auto& f : _followers) {
-        Summon(f.actorFormID, true);  // silent — single group notification below
+        Summon(f.actorFormID, true);  // silent - single group notification below
     }
     if (!_followers.empty()) {
         Settings::Notify("You have summoned all of your followers.");
@@ -672,10 +593,8 @@ void FollowerManager::SetFollow(RE::FormID formID, bool silent)
 
     auto* actor = ResolveActor(formID);
     if (actor) {
-        // Remove wait-sandbox if active — the idle system will re-apply if needed
-        if (PackageManager::GetSingleton().HasSandbox(actor)) {
-            PackageManager::GetSingleton().RemoveSandbox(actor, true);
-        }
+        // Reset the old wait center when switching back to follow.
+        actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, 0.0f);
         actor->EvaluatePackage(true, false);
     }
@@ -685,7 +604,6 @@ void FollowerManager::SetFollow(RE::FormID formID, bool silent)
         Settings::Notify(msg.c_str());
     }
 
-    Save();
     logger::info("Horde: {:08X} set to follow", formID);
 }
 
@@ -704,21 +622,18 @@ void FollowerManager::SetWait(RE::FormID formID, bool silent)
     auto* actor = ResolveActor(formID);
     if (actor) {
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, 1.0f);
-        if (PackageManager::GetSingleton().HasSandbox(actor)) {
-            PackageManager::GetSingleton().RemoveSandbox(actor, true);
-        }
+        // Anchor a fresh waiting package at this follower's current position.
+        actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
         actor->EvaluatePackage(true, false);
     }
 
     if (!silent) {
-        // Horde_WaitPkg holds position — it deliberately has none of the sandbox
-        // behaviour keys enabled, so a waiting follower stays put regardless of
-        // their idle-sandbox setting. Don't claim otherwise.
+        // The engine selects safe-location wait sandbox only for opted-in actors;
+        // other followers use the existing hold-position wait package.
         auto msg = data->name + " is now waiting.";
         Settings::Notify(msg.c_str());
     }
 
-    Save();
     logger::info("Horde: {:08X} set to wait", formID);
 }
 
@@ -734,11 +649,9 @@ void FollowerManager::SetPassive(RE::FormID formID, bool passive, bool silent)
 
     auto* actor = ResolveActor(formID);
     if (!actor) {
-        // Still record the intent — OnPostLoadGame re-applies passive when the
-        // actor loads back in.
+        // Preserve the preference for post-load recovery.
         data->isPassive = passive;
         logger::warn("Horde: SetPassive - actor {:08X} not loaded, state recorded only", formID);
-        Save();
         return;
     }
 
@@ -750,7 +663,6 @@ void FollowerManager::SetPassive(RE::FormID formID, bool passive, bool silent)
         Settings::Notify(msg.c_str());
     }
 
-    Save();
 }
 
 void FollowerManager::SetPassiveAll(bool passive)
@@ -764,7 +676,7 @@ void FollowerManager::SetPassiveAll(bool passive)
     }
 
     for (auto id : ids) {
-        SetPassive(id, passive, true);  // silent — single group notification below
+        SetPassive(id, passive, true);  // silent - single group notification below
     }
 
     if (!ids.empty()) {
@@ -801,13 +713,9 @@ void FollowerManager::SetEssential(RE::FormID formID, bool essential)
     data->isEssential = essential;
 
     if (essential) {
-        // Re-apply Horde's forced essential.
         actorBase->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kEssential);
     } else {
-        // Clear our forced essential and restore the actor's original protection
-        // level. This lets quests like Boethiah's Calling kill the follower.
-        // ReleaseEssential keeps the flag if another tracked follower shares
-        // this actor base and still wants the override.
+        // Restore original protection unless another follower needs the shared override.
         ReleaseEssential(actor, formID, data->originalProtection);
     }
 
@@ -816,7 +724,6 @@ void FollowerManager::SetEssential(RE::FormID formID, bool essential)
         : " is no longer essential and can be killed.");
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: {:08X} essential set to {} (originalProtection={})",
         formID, essential, data->originalProtection);
 }
@@ -833,25 +740,11 @@ void FollowerManager::SetSandbox(RE::FormID formID, bool enabled)
 
     data->isSandboxEnabled = enabled;
 
-    auto* actor = ResolveActor(formID);
-    if (actor) {
-        auto& pkgMgr = PackageManager::GetSingleton();
-        if (data->isWaiting) {
-            // Waiting followers already sandbox via Horde_WaitPkg. Do not use
-            // the shared idle marker for them.
-            if (pkgMgr.HasSandbox(actor)) {
-                pkgMgr.RemoveSandbox(actor, true);
-            }
-        } else if (!enabled) {
-            pkgMgr.RemoveSandbox(actor, true);
-        }
-        actor->EvaluatePackage(true, false);
-    }
+    PackageManager::GetSingleton().SyncSandboxSettings();
 
-    auto msg = data->name + (enabled ? " will sandbox when idle." : " will no longer sandbox.");
+    auto msg = data->name + (enabled ? " will sandbox in safe locations." : " will no longer sandbox.");
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: {:08X} sandbox set to {}", formID, enabled);
 }
 
@@ -902,7 +795,7 @@ void FollowerManager::FollowAll()
         }
     }
     for (auto id : ids) {
-        SetFollow(id, true);  // silent — single group notification below
+        SetFollow(id, true);  // silent - single group notification below
     }
     if (!ids.empty()) {
         Settings::Notify("All followers are now following.");
@@ -919,7 +812,7 @@ void FollowerManager::WaitAll()
         }
     }
     for (auto id : ids) {
-        SetWait(id, true);  // silent — single group notification below
+        SetWait(id, true);  // silent - single group notification below
     }
     if (!ids.empty()) {
         Settings::Notify("All followers are now waiting.");
@@ -939,13 +832,7 @@ void FollowerManager::ScanForFollowers()
 
     auto& pkgMgr = PackageManager::GetSingleton();
 
-    // Build set of currently detected follower FormIDs
     std::set<RE::FormID> detectedIDs;
-    std::set<RE::FormID> trackedBeforeScan;
-    for (const auto& f : _followers) {
-        trackedBeforeScan.insert(f.actorFormID);
-    }
-
     for (auto& handle : processLists->highActorHandles) {
         auto actorPtr = handle.get();
         if (!actorPtr) continue;
@@ -957,24 +844,17 @@ void FollowerManager::ScanForFollowers()
     }
 
     bool newFollowerDetectedThisScan = false;
-    for (auto id : detectedIDs) {
-        if (trackedBeforeScan.find(id) == trackedBeforeScan.end()) {
-            newFollowerDetectedThisScan = true;
-            break;
-        }
-    }
 
-    // Track new followers
     for (auto id : detectedIDs) {
         if (FindFollower(id)) continue;
 
         auto* actor = ResolveActor(id);
         if (!actor) continue;
 
-        // Reject custom-voiced followers (no DialogueFollower alias)
+        // Only adopt followers recruited through the vanilla DialogueFollower quest.
         if (!pkgMgr.HasDialogueFollowerAlias(actor)) {
             if (_rejectedCustomFollowers.insert(id).second) {
-                logger::info("Horde: Skipping {} ({:08X}) — custom follower system",
+                logger::info("Horde: Skipping {} ({:08X}) - custom follower system",
                     actor->GetDisplayFullName(), id);
                 auto msg = std::string(actor->GetDisplayFullName()) +
                     " uses a custom follower system and was not added to Horde.";
@@ -993,6 +873,7 @@ void FollowerManager::ScanForFollowers()
         data.name = actor->GetDisplayFullName();
         data.level = actor->GetLevel();
         data.aliasSlot = slot;
+        data.isAnimal = pkgMgr.HasAnimalAlias(actor);
 
         auto* actorBase = actor->GetActorBase();
         if (actorBase && actorBase->npcClass) {
@@ -1013,25 +894,18 @@ void FollowerManager::ScanForFollowers()
         data.isFollowClose = settings.GetDefaultFollowClose();
 
         _followers.push_back(data);
+        newFollowerDetectedThisScan = true;
         UpsertRegistry(id, data.name);
         CaptureOriginalEditorLoc(id, actor);
         RestoreHome(_followers.back());
-        if (_followers.back().homeWorldspace != 0) {
-            ApplyHomeEditorLocation(
-                actor,
-                _followers.back().homeWorldspace,
-                _followers.back().homeX,
-                _followers.back().homeY,
-                _followers.back().homeZ,
-                _followers.back().homeName);
+        pkgMgr.ClearResidencePackage(actor);
+        auto& home = _registry.at(id);
+        if (home.homeRestorePending && RestoreOriginalEditorLocation(actor, home, id)) {
+            home.homeRestorePending = false;
         }
 
         pkgMgr.ClearDismissedSandbox(actor);
         pkgMgr.FillSlot(slot, actor);
-
-        if (data.isSandboxEnabled) {
-            // sandbox opt-in is tracked in FollowerData; applied dynamically by UpdateIdleSandbox
-        }
 
         actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, 0.0f);
         actor->EvaluatePackage(true, false);
@@ -1046,14 +920,8 @@ void FollowerManager::ScanForFollowers()
             data.name, id, slot, data.originalProtection);
     }
 
-    // Detect dialogue-dismissed followers: if a tracked follower has lost BOTH
-    // faction membership AND teammate status, vanilla's dismiss dialogue ran.
-    // SoftUntrack them instead of fighting the dismiss by re-adding.
-    //
-    // IMPORTANT: When vanilla recruits a NEW follower, it dismisses the PREVIOUS
-    // one first (clears faction + teammate) before adding the new one. If we detect
-    // a new untracked follower in the same scan, the old follower's state loss is
-    // vanilla's recruit-dismiss cycle — we should re-add, not SoftUntrack.
+    // Vanilla recruitment dismisses the previous follower. Preserve that follower
+    // only if this scan accepted a new recruit; otherwise honor external dismissal.
     {
         if (!newFollowerDetectedThisScan) {
             std::vector<RE::FormID> dialogueDismissed;
@@ -1091,8 +959,7 @@ void FollowerManager::ScanForFollowers()
             fixed = true;
         }
 
-        // Ensure Horde tracker faction membership (rank 1 = tracked by Horde).
-        // Used by EventHandler to identify tracked followers for branch suppression.
+        // Rank 1 suppresses vanilla management dialogue through INFO conditions.
         auto* hordeFaction = GetHordeFollowerFaction();
         if (!hordeFaction) {
             logger::warn("Horde: GetHordeFollowerFaction() returned null for {}", f.name);
@@ -1128,8 +995,8 @@ void FollowerManager::ScanForFollowers()
         }
     }
 
-    Save();
     UpdateDialogueGate();
+    RefreshHomes();
     logger::trace("Horde: Scan complete, {} followers tracked", _followers.size());
 }
 
@@ -1137,25 +1004,19 @@ void FollowerManager::OnDialogueClose()
 {
     std::lock_guard<std::recursive_mutex> lock(_mutex);
 
-    // Sync Horde state with any changes vanilla's dialogue scripts made.
-    // Vanilla's TIF fragments fire Wait/Follow/Dismiss commands that change
-    // WaitingForPlayer AV and faction/teammate status. Instead of fighting
-    // these changes, we detect and sync to them.
+    // Adopt wait/follow changes made by vanilla dialogue before repairing follower state.
     for (auto& f : _followers) {
         auto* actor = ResolveActor(f.actorFormID);
         if (!actor) continue;
 
-        // Check if vanilla changed WaitingForPlayer (wait/follow via dialogue)
         float currentWait = actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kWaitingForPlayer);
         bool vanillaWaiting = currentWait >= 1.0f;
 
         if (vanillaWaiting != f.isWaiting) {
             f.isWaiting = vanillaWaiting;
 
-            if (vanillaWaiting) {
-                // Vanilla set wait — remove sandbox if active
-                PackageManager::GetSingleton().RemoveSandbox(actor, true);
-            }
+            actor->extraList.RemoveByType(RE::ExtraDataType::kPackageStartLocation);
+            actor->EvaluatePackage(true, false);
 
             auto msg = f.name + (vanillaWaiting ? " is now waiting." : " is following you.");
             Settings::Notify(msg.c_str());
@@ -1165,7 +1026,6 @@ void FollowerManager::OnDialogueClose()
         }
     }
 
-    Save();
     ScanForFollowers();
 }
 
@@ -1176,7 +1036,6 @@ void FollowerManager::OnPostLoadGame()
     auto* faction = GetCurrentFollowerFaction();
     auto& pkgMgr = PackageManager::GetSingleton();
 
-    // Initialize quest cache first
     pkgMgr.InitQuestCache();
 
     int recovered = 0;
@@ -1194,11 +1053,10 @@ void FollowerManager::OnPostLoadGame()
             continue;
         }
 
-        // Re-fill alias slot — ForceRefTo aliases are runtime-only, not persisted
+        // Re-fill alias slot - ForceRefTo aliases are runtime-only, not persisted
         if (it->aliasSlot >= 0) {
             pkgMgr.FillSlot(it->aliasSlot, actor);
         } else {
-            // No slot assigned — assign one
             int slot = pkgMgr.FindEmptySlot();
             if (slot >= 0) {
                 it->aliasSlot = slot;
@@ -1222,7 +1080,6 @@ void FollowerManager::OnPostLoadGame()
             actor->GetActorRuntimeData().boolBits.set(RE::Actor::BOOL_BITS::kPlayerTeammate);
         }
 
-        // Re-apply passive
         if (it->isPassive) {
             ApplyPassive(actor, true, *it);
         }
@@ -1232,23 +1089,19 @@ void FollowerManager::OnPostLoadGame()
             if (it->isEssential) {
                 actorBase->actorData.actorBaseFlags.set(RE::ACTOR_BASE_DATA::Flag::kEssential);
             } else {
-                ApplyProtection(actorBase, it->originalProtection);
+                ReleaseEssential(actor, it->actorFormID, it->originalProtection);
             }
         }
 
-        // Re-apply wait state
         actor->AsActorValueOwner()->SetActorValue(
             RE::ActorValue::kWaitingForPlayer, it->isWaiting ? 1.0f : 0.0f);
 
-        // Re-apply the home as an editor location. ForceRefTo aliases and actor
-        // runtime data are not persisted, so this has to be redone every load.
-        if (it->homeWorldspace != 0) {
-            ApplyHomeEditorLocation(actor, it->homeWorldspace, it->homeX, it->homeY, it->homeZ, it->homeName);
-        }
+        it->isAnimal = it->isAnimal || pkgMgr.HasAnimalAlias(actor);
 
         // Ensure follower exists in registry (backfill for saves made before registry existed)
         UpsertRegistry(it->actorFormID, it->name);
         SyncRegistryHome(*it);
+        CaptureOriginalEditorLoc(it->actorFormID, actor);
 
         actor->EvaluatePackage(true, false);
 
@@ -1256,11 +1109,12 @@ void FollowerManager::OnPostLoadGame()
         ++it;
     }
 
+    RefreshHomes();
+
     // Apply saved follow distance preset to package data
     pkgMgr.ApplyFollowDistance(Settings::GetSingleton().GetFollowDistance());
 
     UpdateDialogueGate();
-    Save();
 
     logger::info("Horde: Post-load recovery complete: {} recovered, {} removed, {} registry entries",
         recovered, removed, _registry.size());
@@ -1281,7 +1135,6 @@ void FollowerManager::SetFollowClose(RE::FormID formID, bool enabled)
     auto msg = data->name + (enabled ? " will now teleport when falling behind." : " will no longer auto-teleport.");
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: {:08X} followClose set to {}", formID, enabled);
 }
 
@@ -1298,14 +1151,7 @@ void FollowerManager::SetHome(RE::FormID formID)
     auto* player = RE::PlayerCharacter::GetSingleton();
     if (!player) return;
 
-    if (data->aliasSlot < 0) {
-        logger::warn("Horde: SetHome - {:08X} has no alias slot", formID);
-        return;
-    }
-
-    // Store home data for display and editor location on dismiss.
-    // Homes are driven entirely by the actor's editor location — the old
-    // per-slot XMarker / Horde_HomeSandbox package pair is gone.
+    // Store the destination now; apply it only after dismissal.
     auto* worldspace = player->GetWorldspace();
     if (!worldspace) {
         auto* cell = player->GetParentCell();
@@ -1330,15 +1176,13 @@ void FollowerManager::SetHome(RE::FormID formID)
         data->homeName = "Unknown Location";
     }
 
+    if (auto* actor = ResolveActor(formID)) CaptureOriginalEditorLoc(formID, actor);
     SyncRegistryHome(*data);
-    if (auto* actor = ResolveActor(formID)) {
-        ApplyHomeEditorLocation(actor, data->homeWorldspace, data->homeX, data->homeY, data->homeZ, data->homeName);
-    }
+    RefreshHomes();
 
     auto msg = data->name + "'s home has been set to " + data->homeName + ".";
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: {:08X} home set to {} ({}, {}, {})",
         formID, data->homeName, data->homeX, data->homeY, data->homeZ);
 }
@@ -1360,18 +1204,11 @@ void FollowerManager::ClearHome(RE::FormID formID)
     data->homeName.clear();
     SyncRegistryHome(*data);
 
-    if (auto* actor = ResolveActor(formID)) {
-        if (auto regIt = _registry.find(formID); regIt != _registry.end()) {
-            RestoreOriginalEditorLocation(actor, regIt->second, formID);
-        }
-        PackageManager::GetSingleton().ClearDismissedSandbox(actor);
-        actor->EvaluatePackage(true, false);
-    }
+    RefreshHomes();
 
     auto msg = data->name + " no longer has an assigned home.";
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: {:08X} home cleared", formID);
 }
 
@@ -1394,14 +1231,12 @@ void FollowerManager::CaptureOriginalEditorLoc(RE::FormID formID, RE::Actor* act
     auto it = _registry.find(formID);
     if (it == _registry.end()) return;
 
-    // Already captured — don't overwrite. Horde may have clobbered editorLocForm
-    // since the first capture, and we want to keep the true original.
-    if (it->second.originalEditorLocFormID != 0) return;
+    // Never replace the original location with an assigned Horde home.
+    if (it->second.originalEditorLocCaptured) return;
 
     auto& rt = actor->GetActorRuntimeData();
-    if (!rt.editorLocForm) return;
-
-    it->second.originalEditorLocFormID = rt.editorLocForm->GetFormID();
+    it->second.originalEditorLocCaptured = true;
+    it->second.originalEditorLocFormID = rt.editorLocForm ? rt.editorLocForm->GetFormID() : 0;
     it->second.originalEditorLocX = rt.editorLocCoord.x;
     it->second.originalEditorLocY = rt.editorLocCoord.y;
     it->second.originalEditorLocZ = rt.editorLocCoord.z;
@@ -1419,10 +1254,10 @@ bool FollowerManager::ApplyHomeEditorLocation(
     float z,
     const std::string& homeName)
 {
-    if (!actor || homeFormID == 0) return false;
+    if (!actor || homeFormID == 0 || !std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) return false;
 
     auto* homeForm = RE::TESForm::LookupByID(homeFormID);
-    if (!homeForm) {
+    if (!homeForm || (!homeForm->As<RE::TESWorldSpace>() && !homeForm->As<RE::TESObjectCELL>())) {
         logger::warn("Horde: Cannot apply home editor location for {:08X}; form {:08X} not found",
             actor->GetFormID(), homeFormID);
         return false;
@@ -1440,10 +1275,10 @@ bool FollowerManager::ApplyHomeEditorLocation(
 
 bool FollowerManager::RestoreOriginalEditorLocation(RE::Actor* actor, const RegistryEntry& entry, RE::FormID formID)
 {
-    if (!actor || entry.originalEditorLocFormID == 0) return false;
+    if (!actor || !entry.originalEditorLocCaptured) return false;
 
-    auto* origForm = RE::TESForm::LookupByID(entry.originalEditorLocFormID);
-    if (!origForm) {
+    auto* origForm = entry.originalEditorLocFormID ? RE::TESForm::LookupByID(entry.originalEditorLocFormID) : nullptr;
+    if (entry.originalEditorLocFormID && !origForm) {
         logger::warn("Horde: Cannot restore original editor location for {:08X}; form {:08X} not found",
             formID, entry.originalEditorLocFormID);
         return false;
@@ -1497,20 +1332,19 @@ void FollowerManager::SummonDismissed(RE::FormID formID)
     std::lock_guard<std::recursive_mutex> lock(_mutex);
 
     if (_registry.find(formID) == _registry.end()) {
-        logger::warn("Horde: SummonDismissed — {:08X} not in registry", formID);
+        logger::warn("Horde: SummonDismissed - {:08X} not in registry", formID);
         return;
     }
 
-    // Don't summon active followers through this path
     if (FindFollower(formID)) {
-        logger::warn("Horde: SummonDismissed — {:08X} is active, use Summon instead", formID);
+        logger::warn("Horde: SummonDismissed - {:08X} is active, use Summon instead", formID);
         return;
     }
 
     auto* actor = ResolveActor(formID);
     if (!actor) {
-        Settings::Notify("Cannot summon — follower is not loaded.");
-        logger::warn("Horde: SummonDismissed — {:08X} not loaded", formID);
+        Settings::Notify("Cannot summon - follower is not loaded.");
+        logger::warn("Horde: SummonDismissed - {:08X} not loaded", formID);
         return;
     }
 
@@ -1537,10 +1371,11 @@ void FollowerManager::SummonDismissed(RE::FormID formID)
 void FollowerManager::SetDismissedHome(RE::FormID formID)
 {
     std::lock_guard<std::recursive_mutex> lock(_mutex);
+    if (FindFollower(formID)) { SetHome(formID); return; }
 
     auto it = _registry.find(formID);
     if (it == _registry.end()) {
-        logger::warn("Horde: SetDismissedHome — {:08X} not in registry", formID);
+        logger::warn("Horde: SetDismissedHome - {:08X} not in registry", formID);
         return;
     }
 
@@ -1568,53 +1403,33 @@ void FollowerManager::SetDismissedHome(RE::FormID formID)
         it->second.homeName = "Unknown Location";
     }
 
-    if (auto* actor = ResolveActor(formID)) {
-        CaptureOriginalEditorLoc(formID, actor);
-        ApplyHomeEditorLocation(
-            actor,
-            it->second.homeWorldspace,
-            it->second.homeX,
-            it->second.homeY,
-            it->second.homeZ,
-            it->second.homeName);
-        PackageManager::GetSingleton().ClearDismissedSandbox(actor);
-        actor->EvaluatePackage(true, false);
-    }
+    RefreshHomes();
 
     auto msg = it->second.name + "'s home has been set to " + it->second.homeName + ".";
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: Dismissed {:08X} home set to {}", formID, it->second.homeName);
 }
 
 void FollowerManager::ClearDismissedHome(RE::FormID formID)
 {
     std::lock_guard<std::recursive_mutex> lock(_mutex);
+    if (FindFollower(formID)) { ClearHome(formID); return; }
 
     auto it = _registry.find(formID);
     if (it == _registry.end()) {
-        logger::warn("Horde: ClearDismissedHome — {:08X} not in registry", formID);
+        logger::warn("Horde: ClearDismissedHome - {:08X} not in registry", formID);
         return;
-    }
-
-    // Restore the actor's vanilla editor location if we previously clobbered
-    // it during dismissal. This lets Hearthfire stewards, third-party home
-    // mods, etc. resume normal behavior after the user clears a Horde home.
-    if (auto* actor = ResolveActor(formID)) {
-        RestoreOriginalEditorLocation(actor, it->second, formID);
-        PackageManager::GetSingleton().ClearDismissedSandbox(actor);
-        actor->EvaluatePackage(true, false);
     }
 
     it->second.homeWorldspace = 0;
     it->second.homeX = it->second.homeY = it->second.homeZ = 0.0f;
     it->second.homeName.clear();
+    RefreshHomes();
 
     auto msg = it->second.name + " no longer has an assigned home.";
     Settings::Notify(msg.c_str());
 
-    Save();
     logger::info("Horde: Dismissed {:08X} home cleared", formID);
 }
 
@@ -1625,13 +1440,25 @@ void FollowerManager::ForgetFollower(RE::FormID formID)
     auto it = _registry.find(formID);
     if (it == _registry.end()) return;
 
-    // Safety: don't forget active followers
     if (FindFollower(formID)) {
-        logger::warn("Horde: ForgetFollower — {:08X} is active, cannot forget", formID);
+        logger::warn("Horde: ForgetFollower - {:08X} is active, cannot forget", formID);
         return;
     }
 
     std::string name = it->second.name;
+
+    auto* actor = ResolveActor(formID);
+    if (it->second.homeRestorePending &&
+        (!actor || !RestoreOriginalEditorLocation(actor, it->second, formID))) {
+        Settings::Notify("Horde: This follower's home cannot be restored yet. Try again when they are available.");
+        return;
+    }
+    if (actor) {
+        PackageManager::GetSingleton().ClearResidencePackage(actor);
+        PackageManager::GetSingleton().ClearDismissedSandbox(actor);
+        actor->EvaluatePackage(true, false);
+    }
+
     _registry.erase(it);
 
     auto msg = name + " has been forgotten.";
@@ -1646,7 +1473,7 @@ std::vector<FollowerManager::DismissedInfo> FollowerManager::GetDismissedFollowe
 
     std::vector<DismissedInfo> result;
     for (auto& [fid, entry] : _registry) {
-        // Skip active followers — they're managed from their detail cards
+        // Skip active followers - they're managed from their detail cards
         bool isActive = false;
         for (auto& f : _followers) {
             if (f.actorFormID == fid) { isActive = true; break; }
@@ -1665,7 +1492,7 @@ void FollowerManager::UpdateFollowCloseLeash()
     auto* player = RE::PlayerCharacter::GetSingleton();
     if (!player) return;
 
-    constexpr float kLeashDistance = 3000.0f;   // ~42 meters — teleport threshold
+    constexpr float kLeashDistance = 3000.0f;   // Teleport threshold in game units.
     constexpr float kBehindDist   = 250.0f;     // same offset as Summon
 
     auto playerPos = player->GetPosition();
@@ -1680,7 +1507,7 @@ void FollowerManager::UpdateFollowCloseLeash()
         float dist = actor->GetPosition().GetDistance(playerPos);
         if (dist < kLeashDistance) continue;
 
-        // Teleport behind the player — same logic as Summon
+        // Teleport behind the player - same logic as Summon
         actor->MoveTo(player);
         RE::NiPoint3 behind{
             playerPos.x - kBehindDist * std::sin(heading),
@@ -1705,10 +1532,8 @@ void FollowerManager::TeleportStrandedFollowers()
 
     auto* playerWorld = player->GetWorldspace();
 
-    // NOTE: sandboxing followers are deliberately NOT skipped here. They are the
-    // ones most likely to be stranded — a follower wandering 1024 units from the
-    // player misses the engine's teammate hand-off when the player uses a load
-    // door. Callers suspend sandbox before invoking this.
+    // Sandboxing followers still need recovery when they miss the teammate
+    // hand-off through a load door. Only waiting followers stay behind.
     for (auto& f : _followers) {
         if (f.isWaiting) continue;
 
@@ -1723,9 +1548,41 @@ void FollowerManager::TeleportStrandedFollowers()
         auto* actorWorld = actor->GetWorldspace();
         if (playerWorld && actorWorld && playerWorld == actorWorld) continue;
 
-        // Different worldspace or interior/exterior mismatch — teleport to player
+        // Different worldspace or interior/exterior mismatch - teleport to player
         actor->MoveTo(player);
 
-        logger::info("Horde: Stranded follower {} — teleported to player's cell", f.name);
+        logger::info("Horde: Stranded follower {} - teleported to player's cell", f.name);
+    }
+}
+
+void FollowerManager::RefreshHomes()
+{
+    std::lock_guard<std::recursive_mutex> lock(_mutex);
+    auto& packages = PackageManager::GetSingleton();
+    auto* faction = GetCurrentFollowerFaction();
+    for (auto& [id, entry] : _registry) {
+        auto* actor = ResolveActor(id);
+        if (!actor) continue;  // Retry when the reference becomes available.
+        packages.ClearDismissedSandbox(actor);
+        const bool dismissed = !FindFollower(id) && !actor->IsPlayerTeammate() &&
+            (!faction || !actor->IsInFaction(faction)) && !actor->IsDead();
+        bool changed = false;
+        if (entry.homeWorldspace && dismissed) {
+            CaptureOriginalEditorLoc(id, actor);
+            const auto& rt = actor->GetActorRuntimeData();
+            const bool same = rt.editorLocForm && rt.editorLocForm->GetFormID() == entry.homeWorldspace &&
+                rt.editorLocCoord.x == entry.homeX && rt.editorLocCoord.y == entry.homeY && rt.editorLocCoord.z == entry.homeZ;
+            if (!same && !ApplyHomeEditorLocation(actor, entry.homeWorldspace,
+                    entry.homeX, entry.homeY, entry.homeZ, entry.homeName)) continue;
+            entry.homeRestorePending = true;
+            changed = packages.EnsureResidencePackage(actor) || !same;
+        } else {
+            changed = packages.ClearResidencePackage(actor);
+            if (entry.homeRestorePending && RestoreOriginalEditorLocation(actor, entry, id)) {
+                entry.homeRestorePending = false;
+                changed = true;
+            }
+        }
+        if (changed && !actor->IsDead()) actor->EvaluatePackage(true, false);
     }
 }

@@ -1,0 +1,21 @@
+[
+  "health",
+  "magicka",
+  "stamina",
+  "armor",
+  "sword",
+  "shield",
+  "helmet",
+  "chestplate",
+  "gauntlet",
+  "boot",
+  "oneHanded",
+  "twoHanded",
+  "archery",
+  "block",
+  "heavyArmor",
+  "lightArmor",
+  "destruction",
+  "restoration",
+  "conjuration"
+]

@@ -1,8 +1,7 @@
 #pragma once
 #include "pch.h"
 
-// Lightweight entry for the persistent follower registry.
-// Tracks every follower who has ever been in Horde, even after dismissal.
+// Persistent identity and home state for active and dismissed followers.
 struct RegistryEntry {
     std::string name;
     RE::FormID  homeWorldspace = 0;
@@ -10,8 +9,9 @@ struct RegistryEntry {
     std::string homeName;
 
     // Cached original editor location, captured once on first recruitment.
-    // Used to restore the vanilla editorLocForm/Coord/Rot if the user clears
-    // a Horde home. 0 = not captured (or actor had no editor location).
+    // A captured null location is distinct from a location not yet captured.
+    bool        originalEditorLocCaptured = false;
+    bool        homeRestorePending = false;
     RE::FormID  originalEditorLocFormID = 0;
     float       originalEditorLocX = 0.0f;
     float       originalEditorLocY = 0.0f;
@@ -27,6 +27,8 @@ inline void to_json(nlohmann::json& j, const RegistryEntry& e) {
         {"homeY", e.homeY},
         {"homeZ", e.homeZ},
         {"homeName", e.homeName},
+        {"originalEditorLocCaptured", e.originalEditorLocCaptured},
+        {"homeRestorePending", e.homeRestorePending},
         {"originalEditorLocFormID", e.originalEditorLocFormID},
         {"originalEditorLocX", e.originalEditorLocX},
         {"originalEditorLocY", e.originalEditorLocY},
@@ -36,13 +38,19 @@ inline void to_json(nlohmann::json& j, const RegistryEntry& e) {
 }
 
 inline void from_json(const nlohmann::json& j, RegistryEntry& e) {
-    j.at("name").get_to(e.name);
+    // Missing fields use defaults. The loader catches type errors per entry.
+    e.name = j.value("name", std::string(""));
     e.homeWorldspace = j.value("homeWorldspace", static_cast<RE::FormID>(0));
     e.homeX = j.value("homeX", 0.0f);
     e.homeY = j.value("homeY", 0.0f);
     e.homeZ = j.value("homeZ", 0.0f);
     e.homeName = j.value("homeName", std::string(""));
     e.originalEditorLocFormID = j.value("originalEditorLocFormID", static_cast<RE::FormID>(0));
+    // Old saves with a home and no original form used zero for an original null.
+    // Do not recapture their already-overridden runtime location as the original.
+    e.originalEditorLocCaptured = j.value("originalEditorLocCaptured",
+        e.originalEditorLocFormID != 0 || e.homeWorldspace != 0);
+    e.homeRestorePending = j.value("homeRestorePending", e.homeWorldspace != 0);
     e.originalEditorLocX = j.value("originalEditorLocX", 0.0f);
     e.originalEditorLocY = j.value("originalEditorLocY", 0.0f);
     e.originalEditorLocZ = j.value("originalEditorLocZ", 0.0f);
@@ -60,11 +68,9 @@ struct FollowerData {
     bool        isPassive = false;
     bool        isWaiting = false;
     bool        isFollowClose = false;
+    bool        isAnimal = false;
 
-    // True (default) = Horde forces actor essential while tracked.
-    // False = user toggled essential off (e.g. for Boethiah's Calling).
-    // On dismissal, the actor is always restored to originalProtection
-    // regardless of this flag.
+    // Force essential while tracked; dismissal always restores originalProtection.
     bool        isEssential = true;
 
     // Original protection level: 0=mortal, 1=protected, 2=essential
@@ -92,6 +98,7 @@ inline void to_json(nlohmann::json& j, const FollowerData& d) {
         {"isPassive", d.isPassive},
         {"isWaiting", d.isWaiting},
         {"isFollowClose", d.isFollowClose},
+        {"isAnimal", d.isAnimal},
         {"isEssential", d.isEssential},
         {"originalProtection", d.originalProtection},
         {"aliasSlot", d.aliasSlot},
@@ -104,8 +111,10 @@ inline void to_json(nlohmann::json& j, const FollowerData& d) {
 }
 
 inline void from_json(const nlohmann::json& j, FollowerData& d) {
-    j.at("formID").get_to(d.actorFormID);
-    j.at("name").get_to(d.name);
+    // Missing fields use defaults. The loader catches type errors per entry
+    // and prunes zero or unresolvable actor IDs.
+    d.actorFormID = j.value("formID", static_cast<RE::FormID>(0));
+    d.name = j.value("name", std::string(""));
     d.className = j.value("className", std::string(""));
     d.level = j.value("level", 1);
     d.originalAggression = j.value("originalAggression", 1.0f);
@@ -113,6 +122,7 @@ inline void from_json(const nlohmann::json& j, FollowerData& d) {
     d.isPassive = j.value("isPassive", false);
     d.isWaiting = j.value("isWaiting", false);
     d.isFollowClose = j.value("isFollowClose", false);
+    d.isAnimal = j.value("isAnimal", false);
     d.isEssential = j.value("isEssential", true);
     d.originalProtection = j.value("originalProtection", 0);
     d.aliasSlot = j.value("aliasSlot", -1);

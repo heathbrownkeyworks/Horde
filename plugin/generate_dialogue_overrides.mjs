@@ -1,25 +1,8 @@
 #!/usr/bin/env node
-// Generates INFO override YAMLs for Horde.esp that suppress vanilla follower
-// dismiss/wait/follow dialogue for Horde-tracked followers.
-//
-// Each override copies the source INFO and appends:
-//   GetInFaction Horde_FollowerFaction < 1
-// Horde followers are at rank 1, so this condition fails -> option hidden.
-// Non-Horde actors are not in the faction -> condition passes -> option shows.
-//
-// IMPORTANT — pick the right source.
-// These are full-record overrides. Whatever is in the source dump is what Horde
-// ships, so generating from raw Skyrim.esm makes Horde revert any other mod's
-// edits to these topics (USSEP fixes, Relationship Dialogue Overhaul, etc.) when
-// Horde wins the conflict. Generate from a Spriggit dump of the LOAD ORDER
-// WINNER for these three topics, not from vanilla, whenever another mod in the
-// target load order touches them.
-//
-// Usage:
-//   node generate_dialogue_overrides.mjs [sourceDialogTopicsDir] [outputDialogTopicsDir]
-//
-// The source is required so the caller deliberately chooses the winning
-// records. Output defaults to the checked-in Horde DialogTopics directory.
+// Copy the winning dismiss/wait/follow INFO records and append a condition
+// hiding them for Horde-tracked actors (Horde_FollowerFaction rank 1).
+// Use a Spriggit dump of the load-order winner to preserve other mods' edits.
+// Usage: node generate_dialogue_overrides.mjs <sourceDialogTopicsDir> [outputDialogTopicsDir]
 
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
 import { join } from 'path';
@@ -60,7 +43,7 @@ function addHordeCondition(content) {
         if (line === 'Conditions:') {
             condStart = i;
         } else if (condStart >= 0 && condEnd < 0) {
-            // Inside conditions block — end when we hit another top-level key
+            // The next top-level key ends the conditions block.
             if (line.length > 0 && !line.startsWith(' ') && !line.startsWith('-') && !line.startsWith('\r')) {
                 condEnd = i;
                 break;
@@ -69,7 +52,7 @@ function addHordeCondition(content) {
     }
 
     if (condStart < 0) {
-        // No existing conditions block — append one
+        // Add a conditions block if none exists.
         return content.trimEnd() + '\nConditions:\n' + NEW_CONDITION + '\n';
     }
 
@@ -89,7 +72,7 @@ for (const topic of TOPICS) {
     const hordeDir = join(OUTPUT_BASE, topic, 'Responses');
     mkdirSync(hordeDir, { recursive: true });
 
-    // Also need RecordData.yaml for the topic folder
+    // Preserve the parent topic record when supplied.
     const vanillaTopicRecord = join(SOURCE_BASE, topic, 'RecordData.yaml');
     try {
         const topicContent = readFileSync(vanillaTopicRecord, 'utf8');
