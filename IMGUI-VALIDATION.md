@@ -1,6 +1,6 @@
 # Horde native UI validation
 
-Horde 3.0 uses Dear ImGui/DX11. Follower package and persistence checks are
+Horde 3.0.1 uses Dear ImGui/DX11. Follower package and persistence checks are
 documented in [IMPROVEMENTS-VALIDATION.md](IMPROVEMENTS-VALIDATION.md) and
 [AUDIT-FIXES-VALIDATION.md](AUDIT-FIXES-VALIDATION.md).
 The UI design is maintained in `src/ui/imgui/HordeScreen.cpp` and `Theme.h`;

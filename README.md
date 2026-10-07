@@ -1,6 +1,6 @@
 # Horde
 
-Horde 3.0 is a lightweight follower manager for Skyrim Special Edition
+Horde 3.0.1 is a lightweight follower manager for Skyrim Special Edition
 and Anniversary Edition. It automatically tracks up to 20 followers using
 Skyrim's vanilla `DialogueFollower` system and presents the whole party through
 a native Dear ImGui/DX11 panel, group lesser powers, or configurable hotkeys.
@@ -199,7 +199,7 @@ preserves the full values without a binary patch step.
 Stage a complete package in a new directory with a SHA-256 manifest:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -OutputDirectory E:\tmp\Horde-3.0
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -OutputDirectory E:\tmp\Horde-3.0.1
 ```
 
 Use `-DllPath` to package an independently signed copy of the same built DLL.

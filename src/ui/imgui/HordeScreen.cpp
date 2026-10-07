@@ -218,7 +218,7 @@ void DrawRoster(Canvas &c, const Model &model, float half, float height)
 {
     const auto &followers = Array(model, "followers");
     c.Title(36, 23, "HORDE", 26, 210);
-    c.Text(166, 39, "v3.0", 11, Alpha(Palette::CopperLight, 0.6f), c.f.medium);
+    c.Text(166, 39, "v3.0.1", 11, Alpha(Palette::CopperLight, 0.6f), c.f.medium);
     c.Text(half - 250, 37,
            std::to_string(followers.size()) + " / " + Number(Num(model, "maxFollowers", 20)) + " followers", 13,
            Palette::Muted, c.f.body, 222, true);

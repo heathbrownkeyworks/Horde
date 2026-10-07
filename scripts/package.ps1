@@ -39,7 +39,7 @@ $files = @(Get-ChildItem -LiteralPath $destination -File -Recurse | Sort-Object 
 })
 $signature = Get-AuthenticodeSignature -LiteralPath (Join-Path $pluginDirectory 'Horde.dll')
 $manifest = [ordered]@{
-    variant='Horde 3.0'; version='3.0.0'; ui='Dear ImGui / DX11'
+    variant='Horde 3.0.1'; version='3.0.1'; ui='Dear ImGui / DX11'
     sourceRevision=$revision.Trim(); sourceDirty=$sourceDirty
     commonLibRevision=(& git -C (Join-Path $repoRoot 'lib/commonlibsse-ng') rev-parse HEAD).Trim()
     createdUtc=[DateTime]::UtcNow.ToString('o'); inGameValidation='NOT RUN'; vrSupported=$false

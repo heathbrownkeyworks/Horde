@@ -304,7 +304,7 @@ $mainCpp = Read-RepoFile 'src/main.cpp'
 $settingsHeader = Read-RepoFile 'src/Settings.h'
 $passiveSpell = Join-Path $repoRoot 'plugin/Horde/Spells/Horde_PowerPassiveAll - 000837_Horde.esp.yaml'
 
-# --- Horde 3.0 / Skyrim 1.7.104 compatibility ---
+# --- Horde 3.0.1 / Skyrim 1.7.104 compatibility ---
 
 $xmake = Read-RepoFile 'xmake.lua'
 $pluginHeader = Read-RepoFile 'src/plugin.h'
@@ -315,23 +315,23 @@ $runtimeCompatibilityPath = Join-Path $repoRoot 'src/RuntimeCompatibility.h'
 
 Assert-Contains `
     $xmake `
-    'set_version\([''"]3\.0\.0[''"]\)' `
-    'The xmake project version must be Horde 3.0.0.'
+    'set_version\([''"]3\.0\.1[''"]\)' `
+    'The xmake project version must be Horde 3.0.1.'
 
 Assert-Contains `
     $pluginHeader `
-    'REL::Version\s+VERSION\s*\{\s*3\s*,\s*0\s*,\s*0\s*,\s*0\s*\}' `
-    'The runtime log/version constant must be Horde 3.0.0.'
+    'REL::Version\s+VERSION\s*\{\s*3\s*,\s*0\s*,\s*1\s*,\s*0\s*\}' `
+    'The runtime log/version constant must be Horde 3.0.1.'
 
 Assert-Contains `
     (Read-RepoFile 'src/ui/imgui/HordeScreen.cpp') `
-    '"v3\.0"' `
-    'The UI must display Horde v3.0.'
+    '"v3\.0\.1"' `
+    'The UI must display Horde v3.0.1.'
 
 Assert-Contains `
     (Read-RepoFile 'README.md') `
-    'Horde\s+3\.0' `
-    'The README must identify Horde 3.0.'
+    'Horde\s+3\.0\.1' `
+    'The README must identify Horde 3.0.1.'
 
 Assert-Contains `
     $commonLibCMake `

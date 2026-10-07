@@ -1,6 +1,6 @@
 # Horde follower lifecycle validation
 
-Horde 3.0 includes the following follower lifecycle and persistence repairs.
+Horde 3.0.1 includes the following follower lifecycle and persistence repairs.
 Automated verification results are recorded below. Skyrim release validation is
 **NOT RUN**; controller test status is tracked in
 [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
