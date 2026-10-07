@@ -109,6 +109,21 @@ Horde should not be installed alongside another multi-follower framework.
 Testing on a new game is strongly recommended when replacing an existing
 framework.
 
+### Font fallback
+
+The bundled Poppins and Montserrat fonts retain their existing appearance.
+Characters they lack use installed Windows fonts: Segoe UI for Cyrillic and
+Greek, then Microsoft YaHei/SimSun, Yu Gothic/Meiryo/MS Gothic, and Malgun Gothic
+for Chinese, Japanese, and Korean. Shared CJK characters prefer the font for
+Windows' display language. The same fallback applies to every text weight,
+including follower names, equipment, homes, and confirmation dialogs.
+
+Windows font files are read locally and are not included in Horde's package.
+Missing system fonts are skipped. If an East Asian language still shows missing
+characters, install its Windows language or supplemental font feature and
+restart Skyrim. See Microsoft's [font installation guidance](https://learn.microsoft.com/windows/deployment/windows-10-missing-fonts).
+This adds character coverage; it does not translate Horde's English interface.
+
 ## Controls and settings
 
 The default mode grants the five Horde lesser powers on save load. Keybind mode

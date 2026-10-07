@@ -131,7 +131,7 @@ bool LoadFixture(const std::string &path, Model &model)
         return false;
     }
 }
-bool SetScreen(const std::string &name, ScreenState &state)
+bool SetScreen(const std::string &name, ScreenState &state, const Model &model)
 {
     if (name == "main")
         return true;
@@ -143,8 +143,12 @@ bool SetScreen(const std::string &name, ScreenState &state)
     }
     if (name == "modal")
     {
-        Confirm(state, "Confirm Dismiss", "Dismiss Lydia from your horde? They will return to their home.", "Dismiss",
-                {"hordeDismiss", {{"formID", 1001}}});
+        const auto followers = model.value("followers", Model::array());
+        const auto follower = followers.empty() ? Model::object() : followers.front();
+        Confirm(state, "Confirm Dismiss",
+                "Dismiss " + follower.value("name", std::string("Unknown")) +
+                    " from your horde? They will return to their home.",
+                "Dismiss", {"hordeDismiss", {{"formID", follower.value("formID", 0u)}}});
         return true;
     }
     std::fprintf(stderr, "Unknown screen: %s\n", name.c_str());
@@ -277,7 +281,7 @@ int main(int argc, char **argv)
     if (!LoadFixture(options.fixture, model))
         return 2;
     ScreenState screen;
-    if (!SetScreen(options.screen, screen))
+    if (!SetScreen(options.screen, screen, model))
         return 2;
     if (!SetVariant(options.variant, screen, model))
         return 2;

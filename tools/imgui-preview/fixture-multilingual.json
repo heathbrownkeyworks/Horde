@@ -1,0 +1,367 @@
+{
+  "followers": [
+    {
+      "formID": 1001,
+      "name": "Лидия",
+      "race": "Норд",
+      "className": "Воин",
+      "level": 42,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Стальной меч",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Стальная броня",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      },
+      "homeWorldspace": 60,
+      "homeName": "Дом тёплых ветров"
+    },
+    {
+      "formID": 1002,
+      "name": "莉迪亚",
+      "race": "诺德人",
+      "className": "战士",
+      "level": 42,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "钢剑",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "钢制盔甲",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      },
+      "homeWorldspace": 60,
+      "homeName": "雪漫城的微风阁"
+    },
+    {
+      "formID": 1003,
+      "name": "リディア",
+      "race": "ノルド",
+      "className": "戦士",
+      "level": 42,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "鋼鉄の剣",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "鋼鉄の鎧",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      },
+      "homeWorldspace": 60,
+      "homeName": "ホワイトランのブリーズホーム"
+    },
+    {
+      "formID": 1004,
+      "name": "Λυδία",
+      "race": "Νορδός",
+      "className": "Πολεμιστής",
+      "level": 42,
+      "isWaiting": true,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "Σπαθί",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "Πανοπλία",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      },
+      "homeWorldspace": 60,
+      "homeName": "Σπίτι"
+    },
+    {
+      "formID": 1005,
+      "name": "리디아",
+      "race": "노드",
+      "className": "전사",
+      "level": 42,
+      "isWaiting": false,
+      "isPassive": false,
+      "isFollowClose": true,
+      "isSandboxEnabled": true,
+      "isEssential": true,
+      "health": 486,
+      "healthMax": 540,
+      "magicka": 100,
+      "magickaMax": 100,
+      "stamina": 240,
+      "staminaMax": 240,
+      "armorRating": 312,
+      "distance": 4,
+      "skills": {
+        "oneHanded": 92,
+        "twoHanded": 15,
+        "archery": 15,
+        "block": 80,
+        "heavyArmor": 85,
+        "lightArmor": 15,
+        "destruction": 15,
+        "restoration": 15,
+        "conjuration": 15
+      },
+      "equipment": {
+        "rightHand": {
+          "name": "강철 검",
+          "stat": 20,
+          "isWeapon": true
+        },
+        "leftHand": {
+          "name": "Banded Iron Shield",
+          "stat": 24,
+          "isWeapon": false
+        },
+        "head": {
+          "name": "Steel Helmet",
+          "stat": 18,
+          "isWeapon": false
+        },
+        "body": {
+          "name": "강철 갑옷",
+          "stat": 44,
+          "isWeapon": false
+        },
+        "hands": {
+          "name": "Steel Gauntlets",
+          "stat": 14,
+          "isWeapon": false
+        },
+        "feet": {
+          "name": "Steel Boots",
+          "stat": 14,
+          "isWeapon": false
+        }
+      },
+      "homeWorldspace": 60,
+      "homeName": "화이트런의 집"
+    }
+  ],
+  "maxFollowers": 20,
+  "count": 5,
+  "dismissedCount": 5,
+  "useKeybinds": false,
+  "notificationsEnabled": true,
+  "followDistance": "normal",
+  "dismissed": [
+    {
+      "formID": 2001,
+      "name": "Лидия",
+      "hasHome": true,
+      "homeName": "Дом тёплых ветров"
+    },
+    {
+      "formID": 2002,
+      "name": "莉迪亚",
+      "hasHome": true,
+      "homeName": "雪漫城的微风阁"
+    },
+    {
+      "formID": 2003,
+      "name": "リディア",
+      "hasHome": true,
+      "homeName": "ホワイトランのブリーズホーム"
+    },
+    {
+      "formID": 2004,
+      "name": "Λυδία",
+      "hasHome": true,
+      "homeName": "Σπίτι"
+    },
+    {
+      "formID": 2005,
+      "name": "리디아",
+      "hasHome": true,
+      "homeName": "화이트런의 집"
+    }
+  ]
+}

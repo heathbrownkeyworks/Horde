@@ -10,10 +10,15 @@ editable icon sources and their fixed glyph order live in `assets/icons/`.
 
 - Build the release DLL, native screen/input suites, and shared-screen DX11
   preview with MSVC/xmake, using the pinned dependencies.
-- Run the screen suite: 1,184 assertions cover action payloads, selection/focus
+- Run the screen suite: 1,363 assertions cover action payloads, selection/focus
   identity through reorder, missing actors, empty roster/registry, long names,
   confirmations with Cancel selected, disabled frames, controller sections and
   back actions, and bounds at 1280x720, 1920x1080, 2560x1440, and 3440x1440.
+- Font checks use the production loader and installed Windows fonts to verify
+  Cyrillic, Greek, Chinese, Japanese, Korean, and Latin glyphs in all four text
+  faces. They rasterize actual characters at two sizes, render the multilingual
+  fixture, and exercise context recreation and missing bundled fonts. Install
+  the corresponding Windows fonts before running this coverage check.
 - Run the input suite: 46 assertions cover keyboard/mouse/controller shortcut
   containment, held/released ownership across close, distinct trigger/device
   identities, native cursor motion, neutral sticks, disconnect reset, unchanged
@@ -25,6 +30,10 @@ editable icon sources and their fixed glyph order live in `assets/icons/`.
 - Capture the shared-screen DX11 preview for the roster, dismissed registry,
   confirmation, empty roster, 720p, and ultrawide controller layouts. The fonts,
   copper/amber palette, equal columns, detail panels, and action bar must match.
+- Use `tools/imgui-preview/fixture-multilingual.json` for localized follower,
+  equipment, and home names. Check the roster, details, registry and confirmation
+  at 1080p and a 720p controller layout. Compare the English fixture against its
+  pre-fallback capture to confirm the bundled fonts and icons remain unchanged.
 - Inspect DLL imports, then sign with a timestamp and stage the complete
   package using `scripts/package.ps1`. Verify its SHA-256 manifest and retain
   the exact source revision and dependency revision with the build evidence.
@@ -49,6 +58,23 @@ receipts record actual check results, source revision, signatures, and hashes.
   neutral sticks, connection state, and releases of pre-existing presses pass.
   Independent OS polling and script-opened menus are outside this boundary.
 - Skyrim VR is unsupported pending a dedicated rendering/input implementation.
+
+## Font fallback validation, 2026-10-07
+
+- The coverage test failed on Cyrillic U+0416 with the original font loader.
+  With Windows fallbacks, all four text faces rasterize the tested Cyrillic,
+  Greek, Chinese, Japanese, Korean, and Latin characters at 14px and 24px.
+- The release DLL and shared-screen DX11 preview build successfully. The screen
+  suite passes 1,363 assertions and input routing passes 46. Static regression
+  and the 1,024 compiled package-condition scenarios also pass.
+- The English 1080p fixture capture is byte-identical before and after the font
+  change. Multilingual roster, equipment, home, registry, confirmation, and 720p
+  controller captures display the supplied characters.
+- These checks used the local Windows installation with Segoe UI, Microsoft
+  YaHei, Yu Gothic, and Malgun Gothic available. System fonts are shared from
+  memory and remain available across ImGui context recreation.
+- Localized Skyrim rendering and physical-controller checks for this build are
+  **NOT RUN**. The font change does not translate interface labels.
 
 ## Controller test status, 2026-09-29
 

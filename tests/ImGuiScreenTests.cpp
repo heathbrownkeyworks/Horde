@@ -99,6 +99,49 @@ struct Harness
 int main()
 {
     {
+        Harness h(true);
+        constexpr ImWchar characters[] = {0x0416, 0x044F, 0x0401, 0x03A9, 0x4E2D, 0x9F8D,
+                                         0x6F22, 0x3042, 0x30AB, 0xD55C, 0x0041, 0x00E9};
+        for (ImFont *font : {h.fonts.body, h.fonts.medium, h.fonts.bold, h.fonts.heading})
+        {
+            for (const ImWchar codepoint : characters)
+            {
+                Check(font->IsGlyphInFont(codepoint), "text font covers Unicode character " + std::to_string(codepoint));
+                for (const float size : {14.0f, 24.0f})
+                {
+                    const auto *glyph = font->GetFontBaked(size)->FindGlyphNoFallback(codepoint);
+                    Check(glyph && glyph->Visible && glyph->Codepoint == codepoint,
+                          "rasterize actual Unicode glyph at UI size " + std::to_string(size));
+                }
+            }
+        }
+        Check(h.fonts.icons->Sources.Size == 1, "system fonts do not merge into the icon font");
+        std::ifstream fixture("tools/imgui-preview/fixture-multilingual.json");
+        fixture >> h.model;
+        for (const auto &follower : h.model["followers"])
+        {
+            h.state.selected = follower["formID"];
+            h.Frame();
+            Check(h.last.actions.empty(), "localized follower details render without commands");
+        }
+        Check(h.Click("dismiss").actions.empty(), "localized dismissal opens a confirmation");
+        h.Frame();
+        Check(h.Click("confirm-cancel").actions.empty(), "localized confirmation cancels without dismissal");
+        h.state.dismissed = true;
+        h.Frame();
+        Check(h.last.actions.empty(), "localized registry renders without commands");
+        std::cout << "Text fonts render Cyrillic, Greek, Chinese, Japanese, Korean and Latin\n";
+    }
+    {
+        Harness h;
+        Check(!LoadFonts(ImGui::GetIO(), "tools/imgui-preview/fonts-not-installed-for-test", h.fonts),
+              "missing bundled fonts still report an incomplete installation");
+        h.Frame();
+        Check(h.fonts.body->IsGlyphInFont(0x0416) && h.fonts.body->IsGlyphInFont(0x3042),
+              "emergency text font also retains system fallbacks");
+        Check(h.fonts.icons == nullptr, "missing icons are not substituted with text glyphs");
+    }
+    {
         Harness h;
         Check(h.last.actions.empty(), "initial screen does not mutate followers");
         Check(h.state.selected == 1001, "first follower selected initially");
