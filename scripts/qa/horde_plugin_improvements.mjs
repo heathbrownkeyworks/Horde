@@ -68,6 +68,24 @@ assert.deepEqual([waitLocation.readUInt32LE(), waitLocation.readUInt32LE(4), wai
     [12, 0, 800], 'Waiting sandbox must use NearSelf at 800 units');
 assert.ok(!packs[0].some(s => s.tag === 'PTDA'), 'Waiting must not pursue the player');
 
+// Each ANAM data input pairs, in order, with a UNAM template input index.
+function dataInputs(p) {
+    const values = [];
+    p.forEach((s, i) => { if (s.tag === 'ANAM') values.push({ type: zstring(s.value), value: p[i + 1].value }); });
+    const indices = p.filter(s => s.tag === 'UNAM').map(s => s.value[0]);
+    assert.equal(indices.length, values.length, 'Every data input needs a template index');
+    return new Map(indices.map((index, i) => [index, values[i]]));
+}
+const [waitInputs, activeInputs] = packs.slice(0, 2).map(dataInputs);
+for (const inputs of [waitInputs, activeInputs]) {
+    assert.equal(inputs.get(7)?.value[0], 1, 'Allow Wandering must be on or followers stand still');
+}
+// SandboxMultiLocation only runs locations whose time is above zero.
+assert.ok(waitInputs.get(32)?.value.readFloatLE() > 0, 'Waiting sandbox needs a Location 1 time');
+for (const index of [41, 43, 45, 97, 98]) {
+    assert.equal(waitInputs.get(index)?.value.readFloatLE(), 0, 'Locations 2-6 must stay off; they fall back to the editor location');
+}
+
 const safeKeywords = [0x13168, 0x1cd5a, 0x1cb87, 0xfc1a3, 0x13167, 0x1cb86, 0x13166];
 function conditions(p) {
     return p.filter(s => s.tag === 'CTDA').map(({ value: b }) => {

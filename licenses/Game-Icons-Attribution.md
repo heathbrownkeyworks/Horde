@@ -1,6 +1,6 @@
 # Horde icon attribution
 
-The SVG sources in `assets/icons/` and `assets/fonts/HordeIcons.ttf` use the following Game-icons.net artwork. The font converts the paths into monochrome glyphs, normalizes their size, and assigns private Unicode code points in the order recorded by `assets/icons/glyphs.json`. The artwork remains licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); see `Game-Icons-CC-BY-3.0.txt`.
+The SVG sources in `assets/icons/` and their copies in `view/icons.js` use the following Game-icons.net artwork. The artwork remains licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/); see `Game-Icons-CC-BY-3.0.txt`.
 
 | Horde glyph | Original artwork | Author |
 |---|---|---|

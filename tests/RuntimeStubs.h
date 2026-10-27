@@ -16,6 +16,7 @@
 #include <unordered_set>
 #include <vector>
 #include <nlohmann/json.hpp>
+#include "GameText.h"  // production cosave code serializes through DumpGameJSON
 #include "events/ScanWindow.h"
 #include "follower/CosaveReader.h"
 
@@ -208,6 +209,8 @@ struct PackageManager {
     void ClearSandboxState(RE::Actor*) {}
     void ClearSlot(int slot) { slots.erase(slot); }
     bool HasDialogueFollowerAlias(RE::Actor* actor) { return actor->vanillaAlias; }
+    RE::TESQuest* GetHordeQuest() { return RE::TESForm::LookupByEditorID<RE::TESQuest>("Horde_FollowerQuest"); }
+    bool PrecedeDialogueFollower(RE::Actor* actor);
     bool HasAnimalAlias(RE::Actor* actor) const;
     void ReleaseAnimal(RE::Actor* actor);
     void ClearDialogueFollowerAlias(RE::Actor* actor) {

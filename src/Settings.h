@@ -22,7 +22,8 @@ public:
     bool     GetUseKeybinds() const { return _useKeybinds; }
     bool     GetNotificationsEnabled() const { return _notificationsEnabled; }
     const std::string& GetFollowDistance() const { return _followDistance; }
-    const std::string& GetControllerGlyphs() const { return _controllerGlyphs; }
+    // The web interface's size as a percentage of its fitted size.
+    int      GetUIScale() const { return _uiScale; }
 
     void SetMaxFollowers(int v);
     void SetDefaultSandboxEnabled(bool v);
@@ -30,6 +31,10 @@ public:
     void SetUseKeybinds(bool v);
     void SetNotificationsEnabled(bool v);
     void SetFollowDistance(const std::string& preset);
+    void SetUIScale(int percent);
+
+    static constexpr int kMinUIScale = 70;
+    static constexpr int kMaxUIScale = 170;
 
     // Respect the global notification setting.
     static void Notify(const char* msg);
@@ -45,7 +50,7 @@ private:
     uint32_t _waitAllKey = 0x11;         // W
     uint32_t _summonAllKey = 0x1F;       // S
     uint32_t _passiveAllKey = 0x19;      // P
-    static constexpr int kSettingsVersion = 3;
+    static constexpr int kSettingsVersion = 4;
     int      _settingsVersion = kSettingsVersion;
     static constexpr int kMaxFollowerCeiling = 20;
     int      _maxFollowers = 20;
@@ -54,5 +59,5 @@ private:
     bool     _useKeybinds = false;
     bool     _notificationsEnabled = true;
     std::string _followDistance = "normal";  // "close", "normal", "far"
-    std::string _controllerGlyphs = "xbox";  // "xbox", "playstation", "generic"
+    int      _uiScale = 100;                 // percent, kMinUIScale..kMaxUIScale
 };

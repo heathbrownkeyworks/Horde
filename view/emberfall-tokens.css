@@ -1,0 +1,168 @@
+/* Emberfall — design tokens v0.1
+   Dark-only, warm charcoal + single ember accent. Compact by default.
+   Drop in as a global stylesheet; every component reads from these vars. */
+
+:root {
+  /* ── Accent: ember ─────────────────────────────────────────── */
+  --ef-ember-100: #2a1a0e;
+  --ef-ember-200: #4a2810;
+  --ef-ember-300: #7a3d10;
+  --ef-ember-400: #c9560f;
+  --ef-ember-500: #f4761f;   /* the accent */
+  --ef-ember-600: #ff9448;   /* hover */
+  --ef-ember-700: #ffb479;
+  --ef-ember-800: #ffd6b3;
+  --ef-ember: var(--ef-ember-500);
+  --ef-ember-hi: var(--ef-ember-600);
+  --ef-ember-lo: #c9560f;
+  --ef-ember-a08: rgba(244, 118, 31, 0.08);
+  --ef-ember-a14: rgba(244, 118, 31, 0.14);
+  --ef-ember-a28: rgba(244, 118, 31, 0.28);
+
+  /* ── Warm neutral surfaces ─────────────────────────────────── */
+  --ef-bg-sunken:  #0e0c0b;
+  --ef-bg-base:    #14110f;
+  --ef-bg-surface: #1c1917;
+  --ef-bg-raised:  #232019;
+  --ef-bg-overlay: #232019;
+  --ef-bg-inset:   #191512;
+
+  --ef-line-subtle: #221e1a;
+  --ef-line:        #2b2621;
+  --ef-line-strong: #3a352f;
+  --ef-line-hi:     #4a443d;
+
+  /* ── Text ──────────────────────────────────────────────────── */
+  --ef-text:        #f2ece4;
+  --ef-text-2:      #d8d0c6;
+  --ef-text-3:      #b3a99e;
+  --ef-text-muted:  #7d746b;
+  --ef-text-faint:  #5c544c;
+  --ef-text-on-ember: #14110f;
+
+  /* ── Semantic ──────────────────────────────────────────────── */
+  --ef-success: #7fb069;
+  --ef-warning: #e0b23c;
+  --ef-danger:  #dc5b46;
+  --ef-info:    #6b9bbd;
+  --ef-success-bg: rgba(127, 176, 105, 0.12);
+  --ef-warning-bg: rgba(224, 178, 60, 0.12);
+  --ef-danger-bg:  rgba(220, 91, 70, 0.12);
+  --ef-info-bg:    rgba(107, 155, 189, 0.12);
+
+  /* ── Type ──────────────────────────────────────────────────── */
+  --ef-font-display: 'Saira Condensed', 'Arial Narrow', sans-serif;
+  --ef-font-ui: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+  --ef-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --ef-fs-display-xl: 68px;
+  --ef-fs-display-lg: 44px;
+  --ef-fs-h1: 34px;
+  --ef-fs-h2: 24px;
+  --ef-fs-h3: 18px;
+  --ef-fs-panel: 15px;   /* display face, .12em tracking, uppercase */
+  --ef-fs-body-lg: 15px;
+  --ef-fs-body: 13px;
+  --ef-fs-sm: 12px;
+  --ef-fs-label: 11.5px; /* display face, .16em tracking, uppercase */
+  --ef-fs-micro: 10px;   /* mono, .18em tracking, uppercase */
+
+  --ef-tracking-display: 0.02em;
+  --ef-tracking-label: 0.16em;
+  --ef-tracking-micro: 0.2em;
+  --ef-lh-tight: 1.05;
+  --ef-lh-body: 1.55;
+
+  /* ── Space (4px grid) ──────────────────────────────────────── */
+  --ef-space-1: 4px;
+  --ef-space-2: 8px;
+  --ef-space-3: 12px;
+  --ef-space-4: 16px;
+  --ef-space-5: 24px;
+  --ef-space-6: 32px;
+  --ef-space-7: 48px;
+  --ef-space-8: 64px;
+
+  /* ── Radius ────────────────────────────────────────────────── */
+  --ef-radius-none: 0;
+  --ef-radius-sm: 3px;
+  --ef-radius-md: 4px;
+  --ef-radius-lg: 6px;
+  --ef-radius-full: 999px;
+
+  /* ── Elevation ─────────────────────────────────────────────── */
+  --ef-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --ef-shadow-2: 0 6px 18px -6px rgba(0, 0, 0, 0.7);
+  --ef-shadow-3: 0 24px 60px -12px rgba(0, 0, 0, 0.85);
+  --ef-glow: 0 0 24px -6px rgba(244, 118, 31, 0.35);
+  --ef-glow-strong: 0 0 18px -4px rgba(244, 118, 31, 0.55);
+  --ef-ring: 0 0 0 3px rgba(244, 118, 31, 0.2);
+  --ef-ring-danger: 0 0 0 3px rgba(220, 91, 70, 0.16);
+  --ef-stripes: repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0 1px, transparent 1px 7px);
+  --ef-header-wash: linear-gradient(180deg, #1f1b18, #14110f);
+
+  /* ── Motion ────────────────────────────────────────────────── */
+  --ef-dur-instant: 90ms;
+  --ef-dur-quick: 160ms;
+  --ef-dur-enter: 220ms;
+  --ef-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* ── Density: compact (default) ────────────────────────────── */
+  --ef-ctl-h: 30px;
+  --ef-ctl-px: 10px;
+  --ef-btn-py: 6px;
+  --ef-btn-px: 12px;
+  --ef-row-py: 8px;
+  --ef-icon: 14px;
+  --ef-hit: 30px;        /* 44px minimum on touch targets — see below */
+
+  /* ── Desktop shell (Tauri) ─────────────────────────────────── */
+  --ef-titlebar-h: 34px;
+  --ef-statusbar-h: 24px;
+  --ef-sidebar-w: 232px;
+  --ef-sidebar-w-collapsed: 48px;
+}
+
+[data-density="comfortable"] {
+  --ef-ctl-h: 38px;
+  --ef-ctl-px: 12px;
+  --ef-btn-py: 9px;
+  --ef-btn-px: 16px;
+  --ef-row-py: 12px;
+  --ef-icon: 16px;
+}
+
+@media (pointer: coarse) {
+  :root { --ef-ctl-h: 44px; --ef-hit: 44px; --ef-btn-py: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --ef-dur-instant: 0ms; --ef-dur-quick: 0ms; --ef-dur-enter: 0ms; }
+}
+
+/* ── Keyframes ───────────────────────────────────────────────── */
+@keyframes ef-spin { to { transform: rotate(360deg); } }
+@keyframes ef-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes ef-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes ef-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── Base ────────────────────────────────────────────────────── */
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  background: var(--ef-bg-base);
+  color: var(--ef-text);
+  font-family: var(--ef-font-ui);
+  font-size: var(--ef-fs-body);
+  line-height: var(--ef-lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+a { color: var(--ef-ember); text-decoration: none; }
+a:hover { color: var(--ef-ember-hi); }
+::selection { background: var(--ef-ember-a28); }
+:focus-visible { outline: none; border-color: var(--ef-ember); box-shadow: var(--ef-ring); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ef-bg-sunken); }
+::-webkit-scrollbar-thumb { background: #332e29; border: 2px solid var(--ef-bg-sunken); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ef-line-hi); }

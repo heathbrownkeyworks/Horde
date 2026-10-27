@@ -6,7 +6,6 @@
 #include "events/EventHandler.h"
 #include "events/HealthDamageHook.h"
 #include "ui/HordeUI.h"
-#include "ui/imgui/InputDispatchHook.h"
 #include "keyhandler/keyhandler.h"
 
 SKSE_PLUGIN_VERSION = Plugin::RuntimeCompatibility::MakePluginVersionData();
@@ -28,8 +27,8 @@ static_assert(
 
 static_assert(
     Plugin::RuntimeCompatibility::MakePluginVersionData().pluginVersion ==
-        REL::Version{ 3, 0, 1, 0 }.pack(),
-    "Horde plugin metadata must remain synchronized with version 3.0.1");
+        REL::Version{ 3, 1, 0, 0 }.pack(),
+    "Horde plugin metadata must remain synchronized with version 3.1.0");
 
 SKSE_EXPORT bool SKSEPlugin_Query(SKSE::QueryInterface*, SKSE::PluginInfo* a_pluginInfo)
 {
@@ -265,7 +264,6 @@ static void SKSEMessageHandler(SKSE::MessagingInterface::Message* message)
 {
     switch (message->type) {
     case SKSE::MessagingInterface::kPostPostLoad:
-        Horde::ImGuiUI::InstallInputDispatchHook();
         Horde::InstallHealthDamageHook();
         break;
     case SKSE::MessagingInterface::kPreLoadGame:

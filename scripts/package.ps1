@@ -8,10 +8,10 @@ $destination = [IO.Path]::GetFullPath($OutputDirectory)
 if (Test-Path -LiteralPath $destination) { throw "Choose a new output directory: $destination" }
 if (-not $DllPath) { $DllPath = Join-Path $repoRoot 'build/windows/x64/release/Horde.dll' }
 $DllPath = (Resolve-Path -LiteralPath $DllPath).Path
-$required = @('plugin/Horde.esp', 'assets/fonts/Poppins-Regular.ttf', 'assets/fonts/Poppins-Medium.ttf',
-    'assets/fonts/Poppins-SemiBold.ttf', 'assets/fonts/Montserrat-Black.ttf', 'assets/fonts/HordeIcons.ttf',
-    'LICENSE', 'EXCEPTIONS.md', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'README.md', 'IMGUI-VALIDATION.md',
-    'IMPROVEMENTS-VALIDATION.md', 'AUDIT-FIXES-VALIDATION.md')
+$required = @('plugin/Horde.esp',
+    'LICENSE', 'EXCEPTIONS.md', 'LICENSING.md', 'THIRD_PARTY_NOTICES.md', 'README.md', 'CHANGELOG.md',
+    'IMPROVEMENTS-VALIDATION.md', 'AUDIT-FIXES-VALIDATION.md',
+    'view/index.html', 'view/horde.js', 'view/horde.css', 'view/icons.js', 'view/emberfall-tokens.css')
 foreach ($file in $required) {
     if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $file) -PathType Leaf)) { throw "Missing package input: $file" }
 }
@@ -19,13 +19,25 @@ $revision = & git -C $repoRoot rev-parse HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Cannot record source revision.' }
 $sourceDirty = [bool](& git -C $repoRoot status --porcelain --untracked-files=normal)
 $pluginDirectory = Join-Path $destination 'SKSE/Plugins'
-$fontDirectory = Join-Path $pluginDirectory 'Horde/fonts'
-New-Item -ItemType Directory -Path $fontDirectory -Force | Out-Null
+New-Item -ItemType Directory -Path $pluginDirectory -Force | Out-Null
 Copy-Item -LiteralPath $DllPath -Destination (Join-Path $pluginDirectory 'Horde.dll')
 Copy-Item -LiteralPath (Join-Path $repoRoot 'plugin/Horde.esp') -Destination $destination
-Copy-Item -Path (Join-Path $repoRoot 'assets/fonts/*.ttf') -Destination $fontDirectory
 Copy-Item -LiteralPath (Join-Path $repoRoot 'licenses') -Destination $destination -Recurse
-foreach ($file in @('LICENSE','EXCEPTIONS.md','LICENSING.md','THIRD_PARTY_NOTICES.md','README.md','IMGUI-VALIDATION.md','IMPROVEMENTS-VALIDATION.md','AUDIT-FIXES-VALIDATION.md')) {
+# The Magelight UI web interface: view/ without the browser-preview mock in
+# view/dev/, loaded by HordeUI from Data/Magelight/Horde/index.html.
+$viewSource = Join-Path $repoRoot 'view'
+$viewDirectory = Join-Path $destination 'Magelight/Horde'
+$viewFiles = @(Get-ChildItem -LiteralPath $viewSource -File -Recurse | Where-Object {
+    -not $_.FullName.Substring($viewSource.Length + 1).StartsWith('dev\')
+})
+if (-not ($viewFiles | Where-Object { $_.Extension -eq '.woff' })) { throw 'Missing package input: view/fonts/*.woff' }
+foreach ($file in $viewFiles) {
+    $target = Join-Path $viewDirectory $file.FullName.Substring($viewSource.Length + 1)
+    New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
+    Copy-Item -LiteralPath $file.FullName -Destination $target
+}
+if (Test-Path -LiteralPath (Join-Path $viewDirectory 'dev')) { throw 'view/dev must not be packaged.' }
+foreach ($file in @('LICENSE','EXCEPTIONS.md','LICENSING.md','THIRD_PARTY_NOTICES.md','README.md','CHANGELOG.md','IMPROVEMENTS-VALIDATION.md','AUDIT-FIXES-VALIDATION.md')) {
     Copy-Item -LiteralPath (Join-Path $repoRoot $file) -Destination $destination
 }
 $commonLibLicenses = Join-Path $destination 'licenses/CommonLibSSE-NG'
@@ -39,7 +51,7 @@ $files = @(Get-ChildItem -LiteralPath $destination -File -Recurse | Sort-Object 
 })
 $signature = Get-AuthenticodeSignature -LiteralPath (Join-Path $pluginDirectory 'Horde.dll')
 $manifest = [ordered]@{
-    variant='Horde 3.0.1'; version='3.0.1'; ui='Dear ImGui / DX11'
+    variant='Horde 3.1.0'; version='3.1.0'; ui='Magelight UI web interface (requires Magelight UI 1.1+)'
     sourceRevision=$revision.Trim(); sourceDirty=$sourceDirty
     commonLibRevision=(& git -C (Join-Path $repoRoot 'lib/commonlibsse-ng') rev-parse HEAD).Trim()
     createdUtc=[DateTime]::UtcNow.ToString('o'); inGameValidation='NOT RUN'; vrSupported=$false

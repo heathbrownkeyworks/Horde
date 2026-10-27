@@ -57,8 +57,7 @@ Run from the repository after rebuilding `plugin/Horde.esp`:
 
 ```powershell
 xmake build -y Horde
-xmake run HordeImGuiScreenTests
-xmake run HordeImGuiInputTests
+xmake run HordeGameTextTests
 xmake run HordeFollowerRuntimeTests
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/qa/horde_static_regression.ps1
 node scripts/qa/horde_plugin_improvements.mjs plugin/Horde.esp
@@ -95,4 +94,4 @@ Use a copied save and retain the previous matching DLL/ESP for rollback.
    Verify payment, dialogue visibility, and subsequent recruitment.
 7. Check Essential-off behavior and restoration on dismissal. Confirm custom
    frameworks and quest-controlled companions remain outside Horde ownership.
-8. Run the input and controller gates in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
+8. With Magelight UI, test the menu by mouse and keyboard.

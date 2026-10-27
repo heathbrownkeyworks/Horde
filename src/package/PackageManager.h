@@ -18,6 +18,9 @@ public:
     // --- DialogueFollower Cleanup ---
     // Preserve other quests' aliases and packages.
     bool HasDialogueFollowerAlias(RE::Actor* actor) const;
+    // The engine runs the first eligible alias package in array order, whatever the
+    // quest priority. Keep vanilla's always-eligible follow package behind Horde's stack.
+    bool PrecedeDialogueFollower(RE::Actor* actor);
     bool HasAnimalAlias(RE::Actor* actor) const;
     void ReleaseAnimal(RE::Actor* actor);
     void ClearDialogueFollowerAlias(RE::Actor* actor);

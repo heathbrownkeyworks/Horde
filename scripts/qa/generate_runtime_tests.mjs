@@ -31,6 +31,7 @@ const groups = {
     ],
     'src/package/PackageManager.cpp': [
         'bool PackageManager::HasAnimalAlias(', 'void PackageManager::ReleaseAnimal(',
+        'bool PackageManager::PrecedeDialogueFollower(',
         'bool PackageManager::EnsureResidencePackage(', 'bool PackageManager::ClearResidencePackage('
     ]
 };

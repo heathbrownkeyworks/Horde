@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Horde</title>
+<link rel="stylesheet" href="emberfall-tokens.css">
+<link rel="stylesheet" href="horde.css">
+</head>
+<body>
+<div class="scrim"></div>
+<main class="app" id="app" inert>
+  <div class="shell" id="shell">
+    <div class="smoke" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="sparks" id="sparks" aria-hidden="true"></div>
+
+    <header class="titlebar">
+      <div class="brand reveal" style="--i:0">
+        <span class="brand-flame" data-icon="flame"></span>
+        <span class="brand-word">Horde</span><span class="brand-cursor"></span>
+      </div>
+      <nav class="tabs reveal" style="--i:1" role="tablist" aria-label="Horde sections">
+        <button class="tab" role="tab" id="tab-followers" data-tab="followers" aria-selected="true">
+          <span data-icon="users"></span>Followers<span class="tab-count" id="count-followers">0</span>
+        </button>
+        <button class="tab" role="tab" id="tab-dismissed" data-tab="dismissed" aria-selected="false">
+          <span data-icon="user-x"></span>Dismissed<span class="tab-count" id="count-dismissed">0</span>
+        </button>
+        <button class="tab" role="tab" id="tab-settings" data-tab="settings" aria-selected="false">
+          <span data-icon="settings-2"></span>Settings
+        </button>
+      </nav>
+      <div class="capacity reveal" style="--i:2">
+        <div class="capacity-count"><b id="cap-count">0</b><span id="cap-max">/ 20</span><em class="label">followers</em></div>
+        <div class="pips" id="pips"></div>
+      </div>
+      <button class="icon-btn reveal" style="--i:3" id="btn-close" aria-label="Close Horde">
+        <span data-icon="x"></span><kbd>Esc</kbd>
+      </button>
+    </header>
+
+    <div class="views">
+      <section class="view view-followers" id="view-followers" role="tabpanel" aria-labelledby="tab-followers">
+        <div class="muster reveal" style="--i:2">
+          <div class="muster-head">
+            <span class="micro">Distance from you</span>
+            <div class="legend">
+              <span><i class="dot lit"></i>Following <b id="legend-lit">0</b></span>
+              <span><i class="dot ash"></i>Waiting <b id="legend-ash">0</b></span>
+            </div>
+            <span class="muster-note" id="muster-note"></span>
+          </div>
+          <div class="rail" id="rail">
+            <div class="rail-glow"></div>
+            <div class="rail-track"></div>
+            <div class="rail-pulse"></div>
+            <div class="you"><span class="you-label">YOU</span><span class="you-mark"></span></div>
+          </div>
+        </div>
+        <div class="split">
+          <aside class="roster reveal" style="--i:3">
+            <div class="roster-head">
+              <span class="panel-title">Your followers</span>
+              <div class="seg" id="sort" role="group" aria-label="Sort followers">
+                <button data-sort="recruited" aria-pressed="true">Recruited</button>
+                <button data-sort="nearest" aria-pressed="false">Nearest</button>
+                <button data-sort="level" aria-pressed="false">Level</button>
+              </div>
+            </div>
+            <div class="roster-list" id="roster"></div>
+          </aside>
+          <div class="dossier reveal" style="--i:4" id="dossier"></div>
+        </div>
+      </section>
+
+      <section class="view view-dismissed" id="view-dismissed" role="tabpanel" aria-labelledby="tab-dismissed" hidden>
+        <div class="page" id="dismissed"></div>
+      </section>
+
+      <section class="view view-settings" id="view-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+        <div class="page" id="settings"></div>
+      </section>
+    </div>
+
+    <footer class="orders reveal" style="--i:5" id="orders">
+      <span class="label">Group orders</span>
+      <button class="btn tinted" id="order-summon"><span data-icon="locate-fixed"></span>Summon all</button>
+      <button class="btn" id="order-follow"><span data-icon="footprints"></span>All follow</button>
+      <button class="btn" id="order-wait"><span data-icon="hourglass"></span>All wait</button>
+      <button class="btn" id="order-passive"></button>
+      <div class="hints" id="hints"></div>
+    </footer>
+  </div>
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div class="modal" id="modal" hidden></div>
+</main>
+<script src="icons.js"></script>
+<script src="horde.js"></script>
+</body>
+</html>

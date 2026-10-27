@@ -6,5 +6,5 @@
 namespace Plugin
 {
     inline constexpr std::string_view NAME = "Horde";
-    inline constexpr REL::Version VERSION{ 3, 0, 1, 0 };
+    inline constexpr REL::Version VERSION{ 3, 1, 0, 0 };
 }

@@ -1,9 +1,8 @@
 # Horde follower lifecycle validation
 
-Horde 3.0.1 includes the following follower lifecycle and persistence repairs.
+Horde 3.1.0 includes the following follower lifecycle and persistence repairs.
 Automated verification results are recorded below. Skyrim release validation is
-**NOT RUN**; controller test status is tracked in
-[IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
+**NOT RUN**.
 
 ## Repairs
 
@@ -77,7 +76,7 @@ the sandbox integration records.
    dismiss a vanilla animal, then recruit another animal.
 7. Test shared-base essential preferences, equipment armor display, dialogue
    wait/follow synchronization, and rapid load/new-game/main-menu transitions.
-8. Run the native input/controller gates in IMGUI-VALIDATION.md on hardware.
+8. With Magelight UI, test the menu by mouse and keyboard on hardware.
 
 The damage filter deliberately requires an identifiable teammate attacker at
 the engine's health-damage entry point. Direct actor-value writes that bypass

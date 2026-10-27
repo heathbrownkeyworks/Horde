@@ -114,6 +114,7 @@ Data:
 - Key: 32
   Value:
     MutagenObjectType: PackageDataFloat
+    Data: 300
 - Key: 35
   Value:
     MutagenObjectType: PackageDataLocation
@@ -194,6 +195,7 @@ Data:
 - Key: 7
   Value:
     MutagenObjectType: PackageDataBool
+    Data: True
 - Key: 25
   Value:
     MutagenObjectType: PackageDataBool

@@ -3,6 +3,7 @@
 #include "package/PackageManager.h"
 #include "Settings.h"
 #include "follower/CosaveReader.h"
+#include "GameText.h"
 
 #include <cmath>
 #include <charconv>
@@ -151,7 +152,7 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
     // Record 1: follower list
     {
         nlohmann::json j = _followers;
-        std::string data = j.dump();
+        std::string data = Horde::DumpGameJSON(j);
         if (data.size() > Horde::kMaxCosavePayload) {
             logger::error("Horde: Cosave payload exceeds the supported size");
             return;
@@ -178,7 +179,7 @@ void FollowerManager::OnCosaveSave(SKSE::SerializationInterface* a_intfc)
         for (auto& [fid, entry] : _registry) {
             j[std::to_string(fid)] = entry;
         }
-        std::string data = j.dump();
+        std::string data = Horde::DumpGameJSON(j);
         if (data.size() > Horde::kMaxCosavePayload) {
             logger::error("Horde: Cosave payload exceeds the supported size");
             return;
@@ -986,6 +987,11 @@ void FollowerManager::ScanForFollowers()
         float currentWait = actor->AsActorValueOwner()->GetActorValue(RE::ActorValue::kWaitingForPlayer);
         if (currentWait != expectedWait) {
             actor->AsActorValueOwner()->SetActorValue(RE::ActorValue::kWaitingForPlayer, expectedWait);
+            fixed = true;
+        }
+
+        // Vanilla can re-force its alias onto a tracked follower after Horde's.
+        if (pkgMgr.PrecedeDialogueFollower(actor)) {
             fixed = true;
         }
 

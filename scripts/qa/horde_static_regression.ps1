@@ -241,7 +241,8 @@ Assert-NotContains `
 
 # --- Group passive (stand-down) toggle ---
 
-$nativeScreen = Read-RepoFile 'src/ui/imgui/HordeScreen.cpp'
+$viewScript = Read-RepoFile 'view/horde.js'
+$viewStyle = Read-RepoFile 'view/horde.css'
 
 Assert-Contains `
     $followerManager `
@@ -289,14 +290,14 @@ Assert-Contains `
     'UI must expose the group passive listener.'
 
 Assert-Contains `
-    $nativeScreen `
-    '"passive-all"' `
-    'Main window must carry the Passive/Aggressive toggle button.'
+    $viewScript `
+    'order-passive''\)\.addEventListener\(''click''[\s\S]*?hordePassiveAll' `
+    'Main window must carry the group passive toggle button.'
 
 Assert-Contains `
-    $nativeScreen `
-    'passive\s*\?\s*"Aggressive"\s*:\s*"Passive"' `
-    'Passive button must relabel to Aggressive while the group is standing down.'
+    $viewScript `
+    'model\.allPassive \? icon\(''swords''\) \+ ''All fight'' : icon\(''shield-off''\) \+ ''All passive''' `
+    'Passive button must relabel to All fight while the group is standing down.'
 
 # --- Horde: Passive power / keybind ---
 
@@ -304,7 +305,7 @@ $mainCpp = Read-RepoFile 'src/main.cpp'
 $settingsHeader = Read-RepoFile 'src/Settings.h'
 $passiveSpell = Join-Path $repoRoot 'plugin/Horde/Spells/Horde_PowerPassiveAll - 000837_Horde.esp.yaml'
 
-# --- Horde 3.0.1 / Skyrim 1.7.104 compatibility ---
+# --- Horde 3.1.0 / Skyrim 1.7.104 compatibility ---
 
 $xmake = Read-RepoFile 'xmake.lua'
 $pluginHeader = Read-RepoFile 'src/plugin.h'
@@ -315,23 +316,18 @@ $runtimeCompatibilityPath = Join-Path $repoRoot 'src/RuntimeCompatibility.h'
 
 Assert-Contains `
     $xmake `
-    'set_version\([''"]3\.0\.1[''"]\)' `
-    'The xmake project version must be Horde 3.0.1.'
+    'set_version\([''"]3\.1\.0[''"]\)' `
+    'The xmake project version must be Horde 3.1.0.'
 
 Assert-Contains `
     $pluginHeader `
-    'REL::Version\s+VERSION\s*\{\s*3\s*,\s*0\s*,\s*1\s*,\s*0\s*\}' `
-    'The runtime log/version constant must be Horde 3.0.1.'
-
-Assert-Contains `
-    (Read-RepoFile 'src/ui/imgui/HordeScreen.cpp') `
-    '"v3\.0\.1"' `
-    'The UI must display Horde v3.0.1.'
+    'REL::Version\s+VERSION\s*\{\s*3\s*,\s*1\s*,\s*0\s*,\s*0\s*\}' `
+    'The runtime log/version constant must be Horde 3.1.0.'
 
 Assert-Contains `
     (Read-RepoFile 'README.md') `
-    'Horde\s+3\.0\.1' `
-    'The README must identify Horde 3.0.1.'
+    'Horde\s+3\.1\.0' `
+    'The README must identify Horde 3.1.0.'
 
 Assert-Contains `
     $commonLibCMake `
@@ -379,20 +375,87 @@ Assert-Contains `
     'SKSEPlugin_Query' `
     'Horde must retain the legacy SKSEPlugin_Query export for Skyrim SE 1.5.97.'
 
-# --- Native ImGui startup / game-thread boundary ---
-$nativeHost = Read-RepoFile 'src/ui/imgui/ImGuiHost.cpp'
-$nativeMenu = Read-RepoFile 'src/ui/imgui/HordeMenu.cpp'
-Assert-NotContains $mainCpp 'ViewDllLoader|InputDllLoader|GetProcAddress' 'The native runtime must not acquire an external UI API.'
-Assert-NotContains $hordeUI 'ExecuteJavaScript|RegisterListener\(|CreateView\(' 'The native facade must not depend on a browser.'
-Assert-Contains $mainCpp 'void OnDataLoaded\(\)[\s\S]*?FollowerManager::GetSingleton\(\)\.Initialize\(\)[\s\S]*?HordeUI::GetSingleton\(\)\.Initialize\(\)[\s\S]*?KeyHandler::RegisterSink\(\)' 'Native UI, follower systems and hotkeys must initialize together.'
-Assert-Contains $hordeUI 'void HordeUI::Dispatch[\s\S]*?AddTask[\s\S]*?host\.Generation\(\)\s*!=\s*generation' 'Native commands must be game-thread tasks guarded by their opening generation.'
-Assert-Contains $nativeMenu 'F::kPausesGame' 'Horde must retain its paused menu behavior.'
-Assert-Contains $nativeHost 'ImGui_ImplDX11_RenderDrawData' 'The native host must render through DX11.'
-Assert-NotContains $nativeHost 'ImGui_ImplWin32_NewFrame|XInputGetState|SendInput\(' 'Runtime controller input must use Skyrim events without independent polling.'
-Assert-NotContains $nativeHost 'HordeUI::GetSingleton\(\)\.Toggle\(' 'Controller input must not open Horde; use the lesser power.'
-Assert-Contains $nativeHost 'if \(s\.held\.load\(\) == 0\)\s*s\.armed = true' 'Held controller buttons must be released before menu navigation begins.'
-Assert-Contains $mainCpp 'kPreLoadGame:[\s\S]{0,120}HordeUI::GetSingleton\(\)\.Close\(\)' 'Save loading must close the native menu.'
-Assert-Contains $nativeHost 'ContextScope' 'Rendering must restore another native mod''s ImGui context.'
+# --- UI host / game-thread boundary ---
+# Magelight UI hosts Horde's menu. Horde acquires it only through its public
+# API header; without it the menu cannot open, but followers, powers and
+# hotkeys work. Meridian UI is sunset and must not return as a host.
+if (Test-Path -LiteralPath (Join-Path $repoRoot 'src/MeridianUIAPI')) { throw 'Meridian UI is sunset; src/MeridianUIAPI must not return.' }
+foreach ($source in @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src') -Recurse -File -Include *.cpp, *.h) +
+                    @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'view') -Recurse -File -Include *.js, *.css, *.html)) {
+    if ((Get-Content -Raw -LiteralPath $source.FullName) -match 'Meridian') { throw "$($source.Name) references Meridian; Magelight UI is Horde's only host." }
+}
+Assert-Contains $hordeUI 'if \(!InitializeMagelight\(\)\)\s*logger::warn\("HordeUI: no UI host; the menu needs Magelight UI 1\.1 or newer"\)' 'Without Magelight UI, Horde must log what the menu needs.'
+Assert-Contains $hordeUI 'void HordeUI::Toggle\(\)[\s\S]*?if \(!HasHost\(\)\)[\s\S]*?ShowHUDMessage\("Horde''s menu needs Magelight UI 1\.1 or newer\."\)' 'Opening the menu without Magelight UI must tell the player what is missing.'
+Assert-NotContains $hordeUI 'GetProcAddress' 'Horde must acquire Magelight UI only through the RequestApi4 loader in its API header.'
+Assert-Contains $hordeUI 'L"Data" / L"Magelight" / L"Horde" / L"index\.html"' 'HordeUI must load the page from Data/Magelight/Horde/.'
+Assert-Contains (Read-RepoFile 'scripts/package.ps1') 'Join-Path \$destination ''Magelight/Horde''' 'The package must install the page where HordeUI loads it.'
+Assert-Contains $hordeUI 'RequestUIMode\(_view, kUIModeFlagPause\)' 'The menu must pause the game while open.'
+Assert-Contains $hordeUI 'SetEscapeCapture\(view, true\)' 'On Magelight the page must own Escape so it can close its own dialogs first.'
+Assert-Contains $hordeUI 'case Event::UIModeExited:[\s\S]{0,80}case Event::UIModeRefused:[\s\S]{0,300}ShowView\(ui\._view, false\)' 'Every way Magelight ends UI mode must close Horde''s menu.'
+# Magelight calls listeners on its render thread inside the frame, where SKSE's
+# AddTask can hang; page commands must reach the game thread through PostGameTask.
+$magelightListener = [regex]::Match($hordeUI, '(?s)void HordeUI::OnMagelightListener\(.*?(?=\r?\nvoid HordeUI::)').Value
+if (-not $magelightListener) { throw 'Could not locate HordeUI::OnMagelightListener.' }
+Assert-Contains $magelightListener 'PostGameTask' 'Magelight page commands must be posted with PostGameTask.'
+Assert-NotContains $magelightListener 'AddTask' 'Magelight page commands must not use SKSE''s AddTask on the render thread.'
+Assert-Contains $viewScript 'const host = window\.magelight;[\s\S]{0,120}host\.send\(name, JSON\.stringify\(payload \|\| \{\}\)\)' 'The page must reach HordeUI''s listeners through magelight.send as JSON text.'
+Assert-Contains $hordeUI 'Magelight could not create the Horde view' 'A failed view creation must be logged.'
+Assert-Contains $mainCpp 'void OnDataLoaded\(\)[\s\S]*?FollowerManager::GetSingleton\(\)\.Initialize\(\)[\s\S]*?HordeUI::GetSingleton\(\)\.Initialize\(\)[\s\S]*?KeyHandler::RegisterSink\(\)' 'The menu, follower systems and hotkeys must initialize together.'
+Assert-Contains $mainCpp 'kPreLoadGame:[\s\S]{0,120}HordeUI::GetSingleton\(\)\.Close\(\)' 'Save loading must close the menu.'
+Assert-Contains (Read-RepoFile 'src/keyhandler/keyhandler.cpp') 'if \(HordeUI::GetSingleton\(\)\.IsOpen\(\)\)' 'Group hotkeys must stand down while the page owns the keyboard.'
+
+# --- No native interface ---
+if (Test-Path -LiteralPath (Join-Path $repoRoot 'src/ui/imgui')) { throw 'The native ImGui interface was removed; src/ui/imgui must not return.' }
+if (Test-Path -LiteralPath (Join-Path $repoRoot 'assets/fonts')) { throw 'The native interface fonts were removed; assets/fonts must not return.' }
+Assert-NotContains $xmake 'imgui|''stb''|d3dcompiler' 'Horde must not link Dear ImGui, stb or the D3D shader compiler.'
+foreach ($source in Get-ChildItem -LiteralPath (Join-Path $repoRoot 'src') -Recurse -File -Include *.cpp, *.h) {
+    if ((Get-Content -Raw -LiteralPath $source.FullName) -match 'imgui|ImGui') { throw "$($source.Name) references ImGui; Horde's only interface is its Magelight UI page." }
+}
+
+# --- Interface scale ---
+# The page fits a 1600x900 stage to the screen, then applies the player's scale.
+Assert-Contains $settingsHeader 'kMinUIScale = 70;[\s\S]*?kMaxUIScale = 170;' 'Interface scale must range from 70% to 170%.'
+Assert-Contains $settingsHeader 'int\s+_uiScale = 100;' 'Interface scale must default to 100%.'
+Assert-Contains $settings 'std::clamp\(j\.value\("uiScale", _uiScale\), kMinUIScale, kMaxUIScale\)' 'A hand-edited uiScale must be clamped on load.'
+Assert-Contains $hordeUI 'j\["uiScale"\] = settings\.GetUIScale\(\)' 'State pushes must carry the interface scale.'
+Assert-Contains $hordeUI 'j\.contains\("uiScale"\)[\s\S]{0,80}SetUIScale' 'The settings listener must accept uiScale.'
+Assert-Contains $viewScript 'SCALE_MIN = 70, SCALE_MAX = 170' 'The slider range must match the native clamp.'
+Assert-Contains $viewScript 'Math\.min\(w / STAGE_W, h / STAGE_H\), 0\.5, 3\) \* ui\.scale' 'The fitted stage zoom must apply the interface scale.'
+Assert-Contains $viewScript '''<div class="settings-grid">'' \+\s*''<section class="panel setting setting-wide"><div><h3>Interface scale</h3>' 'Interface scale must be the first setting.'
+# At 170% a 16:9 stage is about 941x529 logical pixels; the layout must condense.
+foreach ($step in 'compact', 'narrow', 'short', 'shorter') {
+    Assert-Contains $viewScript "classList\.toggle\('$step', (width|height) < \d+\)" "fit() must mark the $step stage size."
+}
+Assert-Contains $viewStyle '\.app\.narrow \.dossier-body \{ grid-template-columns: minmax\(0, 1fr\); \}' 'A narrow stage must stack the follower details.'
+Assert-Contains $viewStyle '\.app\.narrow \.capacity-count em, \.app\.narrow \.pips \{ display: none; \}' 'A narrow title bar must keep the close button on screen.'
+
+# --- Game text encoding and language ---
+# Plugin text may be Windows-1252/1251 rather than UTF-8; the strict JSON
+# serializer throws type_error.316 on it, on the game thread.
+$gameText = Read-RepoFile 'src/GameText.h'
+Assert-Contains $gameText 'error_handler_t::replace' 'Game text must serialize with U+FFFD replacement, not the strict error handler.'
+Assert-NotContains $hordeUI '\.dump\(' 'HordeUI must serialize game text through Horde::DumpGameJSON.'
+Assert-NotContains $followerManager '\.dump\(' 'Co-save records must serialize follower names through Horde::DumpGameJSON.'
+Assert-Contains $hordeUI 'void HordeUI::PushStateToView\(\)[\s\S]*?try[\s\S]*?catch \(const std::exception' 'State pushes run on the game thread and must not throw.'
+Assert-Contains $hordeUI 'GetSetting\("sLanguage:General"\)' 'The page must learn the game language from Skyrim''s INI setting.'
+Assert-Contains $hordeUI 'state\["language"\]\s*=\s*_language' 'State pushes must carry the page language.'
+Assert-Contains $viewScript 'state\.language[\s\S]{0,120}setLanguage\(state\.language\)' 'The page must apply the language native sends.'
+Assert-Contains $viewScript 'document\.documentElement\.lang\s*=\s*tag' 'The page must set its document language.'
+Assert-Contains $viewScript 'new Intl\.Collator\(tag' 'The page must sort names in the game language.'
+Assert-Contains $viewStyle "--ef-font-display:\s*'Saira Condensed',\s*'Fira Sans Extra Condensed'" 'Cyrillic and Greek display text must use the condensed fallback before system fonts.'
+foreach ($subset in 'cyrillic', 'cyrillic-ext', 'greek') {
+    foreach ($weight in 400, 500, 600, 700) {
+        Assert-Contains $viewStyle "fonts/fira-sans-extra-condensed-$subset-$weight-normal\.woff" "Display weight $weight lacks the $subset subset."
+    }
+}
+foreach ($font in [regex]::Matches($viewStyle, 'url\((fonts/[^)]+)\)') | ForEach-Object { $_.Groups[1].Value }) {
+    if ($font -notmatch '\.woff$') { throw "view/horde.css loads $font; Ultralight decodes WOFF, not WOFF2." }
+    if (-not (Test-Path -LiteralPath (Join-Path $repoRoot "view/$font"))) { throw "view/horde.css loads missing view/$font." }
+}
+if (-not (Test-Path -LiteralPath (Join-Path $repoRoot 'licenses/FiraSansExtraCondensed-OFL.txt'))) {
+    throw 'The Fira Sans Extra Condensed license is missing from licenses/.'
+}
+Assert-Contains (Read-RepoFile 'THIRD_PARTY_NOTICES.md') 'licenses/FiraSansExtraCondensed-OFL\.txt' 'Third-party notices must list Fira Sans Extra Condensed.'
 
 if (-not (Test-Path -LiteralPath $passiveSpell)) {
     throw 'Horde_PowerPassiveAll spell record is missing from the plugin source.'

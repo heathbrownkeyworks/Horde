@@ -168,6 +168,7 @@ Data:
 - Key: 7
   Value:
     MutagenObjectType: PackageDataBool
+    Data: True
 - Key: 25
   Value:
     MutagenObjectType: PackageDataBool

@@ -265,6 +265,31 @@ namespace {
         Check(empty.records[1].bytes.substr(4)=="{}","empty registry is saved as an object");
     }
 
+    void AliasPrecedence()
+    {
+        Fixture f;
+        RE::TESQuest hordeQuest, otherQuest;
+        RE::TESForm::editors["Horde_FollowerQuest"]=&hordeQuest;
+        f.Active(f.actor);
+        int alias=0;
+        auto* extra=new RE::ExtraAliasInstanceArray();
+        f.actor.extraList.Add(extra);
+        auto add=[&](RE::TESQuest* quest) {
+            auto* instance=static_cast<RE::BGSRefAliasInstanceData*>(RE::malloc(sizeof(RE::BGSRefAliasInstanceData)));
+            *instance={quest,&alias,nullptr};
+            extra->aliases.push_back(instance);
+            return instance;
+        };
+        auto* vanilla=add(&f.dialogue);
+        auto* other=add(&otherQuest);
+        auto* hordeInstance=add(&hordeQuest);
+        const int evaluations=f.actor.evaluations;
+        f.manager.ScanForFollowers();
+        Check(extra->aliases==std::vector<RE::BGSRefAliasInstanceData*>{other,hordeInstance,vanilla},"scan moves only DialogueFollower behind Horde's packages");
+        Check(f.actor.evaluations>evaluations,"reordered follower re-evaluates packages");
+        Check(!f.packages.PrecedeDialogueFollower(&f.actor),"an ordered alias stack is left alone");
+    }
+
     void ScanWindows()
     {
         EventHandler events;
@@ -282,6 +307,6 @@ namespace {
 
 int main()
 {
-    Homes(); NullAndUnavailableHomes(); Recruitment(); AnimalsAndProtection(); Combat(); Cosaves(); ScanWindows();
+    Homes(); NullAndUnavailableHomes(); Recruitment(); AnimalsAndProtection(); Combat(); Cosaves(); AliasPrecedence(); ScanWindows();
     std::cout << checks << " follower runtime regression checks passed. Engine collaborators are fixtures; Skyrim: NOT RUN.\n";
 }

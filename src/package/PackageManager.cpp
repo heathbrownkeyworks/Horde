@@ -146,6 +146,7 @@ void PackageManager::FillSlot(int slot, RE::Actor* actor)
         }
         arr.push_back(instData);
     }
+    PrecedeDialogueFollower(actor);
 
     // Clear any stale ExtraPackage — it overrides alias packages
     actor->extraList.RemoveByType(RE::ExtraDataType::kPackage);
@@ -233,6 +234,32 @@ bool PackageManager::HasDialogueFollowerAlias(RE::Actor* actor) const
         }
     }
     return false;
+}
+
+bool PackageManager::PrecedeDialogueFollower(RE::Actor* actor)
+{
+    auto* quest = GetHordeQuest();
+    auto* dfQuest = RE::TESForm::LookupByEditorID<RE::TESQuest>("DialogueFollower");
+    if (!actor || !quest || !dfQuest) return false;
+
+    auto* aliasExtra = actor->extraList.GetByType<RE::ExtraAliasInstanceArray>();
+    if (!aliasExtra) return false;
+
+    // Move DialogueFollower instances behind Horde's; every other alias keeps its place.
+    {
+        RE::BSWriteLockGuard writeLock(aliasExtra->lock);
+        auto& arr = aliasExtra->aliases;
+        const auto isDialogueFollower = [&](auto* inst) { return inst && inst->quest == dfQuest; };
+        auto horde = std::find_if(arr.begin(), arr.end(), [&](auto* inst) {
+            return inst && inst->quest == quest && inst->alias;
+        });
+        if (horde == arr.end() || std::none_of(arr.begin(), horde, isDialogueFollower)) return false;
+        std::stable_partition(arr.begin(), horde + 1, std::not_fn(isDialogueFollower));
+    }
+
+    logger::info("PackageManager: Moved Horde packages ahead of DialogueFollower for {:08X}",
+        actor->GetFormID());
+    return true;
 }
 
 void PackageManager::ClearDialogueFollowerAlias(RE::Actor* actor)

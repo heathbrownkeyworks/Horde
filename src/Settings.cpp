@@ -47,8 +47,7 @@ void Settings::Load()
         _useKeybinds          = j.value("useKeybinds", _useKeybinds);
         _notificationsEnabled = j.value("notificationsEnabled", _notificationsEnabled);
         _followDistance       = j.value("followDistance", _followDistance);
-        const auto glyphs = j.value("controllerGlyphs", std::string("xbox"));
-        _controllerGlyphs = glyphs == "playstation" || glyphs == "generic" ? glyphs : "xbox";
+        _uiScale = std::clamp(j.value("uiScale", _uiScale), kMinUIScale, kMaxUIScale);
 
         logger::info("Settings loaded from {}", path);
 
@@ -94,7 +93,7 @@ void Settings::Save() const
     j["useKeybinds"]           = _useKeybinds;
     j["notificationsEnabled"]  = _notificationsEnabled;
     j["followDistance"]         = _followDistance;
-    j["controllerGlyphs"]       = _controllerGlyphs;
+    j["uiScale"]                = _uiScale;
 
     std::ofstream file(path);
     if (file.is_open()) {
@@ -141,6 +140,12 @@ void Settings::SetFollowDistance(const std::string& preset)
         _followDistance = preset;
         Save();
     }
+}
+
+void Settings::SetUIScale(int percent)
+{
+    _uiScale = std::clamp(percent, kMinUIScale, kMaxUIScale);
+    Save();
 }
 
 void Settings::Notify(const char* msg)

@@ -14,8 +14,7 @@ CLAUDE.md
 docs/
 screenshots/
 tests/*
-!tests/ImGuiScreenTests.cpp
-!tests/ImGuiInputTests.cpp
+!tests/GameTextTests.cpp
 !tests/FollowerRuntimeTests.cpp
 !tests/RuntimeStubs.h
 mod-page.md

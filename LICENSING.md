@@ -6,7 +6,7 @@ Horde is distributed as `GPL-3.0-or-later` with the additional permissions in [E
 
 Horde statically links CommonLibSSE-NG. A compiled native plugin containing CommonLibSSE-NG is a combined work and is not distributed as MIT-only software. The complete GNU GPL version 3 text is in [LICENSE](LICENSE). CommonLibSSE-NG retains its own license and exceptions in the `lib/commonlibsse-ng` submodule.
 
-The native UI embeds Dear ImGui and FreeType and bundles fonts in `assets/fonts/`. Those components retain their own licenses in `licenses/`; the same applies to the other dependencies listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The web interface in `view/` bundles web fonts and icons. Those components retain their own licenses in `licenses/`; the same applies to the other dependencies listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 The preferred form for modifying Horde is this repository with the CommonLibSSE-NG submodule initialized at the revision recorded by Git.
 

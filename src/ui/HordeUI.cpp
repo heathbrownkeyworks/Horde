@@ -1,13 +1,63 @@
 #include "pch.h"
 #include "ui/HordeUI.h"
-#include "ui/imgui/ImGuiHost.h"
 #include "follower/FollowerManager.h"
 #include "package/PackageManager.h"
 #include "Settings.h"
+#include "GameText.h"
+#include "MagelightUIAPI/MagelightUI_API.h"
 
-using Horde::ImGuiUI::ImGuiHost;
+#include <array>
+#include <filesystem>
+#include <memory>
 
-// Handler bodies execute inside Dispatch's guarded game-thread task.
+
+namespace
+{
+// The page's native calls, each registered as a Magelight JS listener.
+constexpr std::array<const char *, 23> kListeners = {
+    "hordeGetState",         "hordeClose",           "hordeSetFollow",        "hordeSetWait",
+    "hordeSetPassive",       "hordeSetSandbox",      "hordeSetFollowClose",   "hordeSetEssential",
+    "hordeSummon",           "hordeSummonAll",       "hordeFollowAll",        "hordeWaitAll",
+    "hordePassiveAll",       "hordeDismiss",         "hordeSetHome",          "hordeClearHome",
+    "hordeUpdateSettings",   "hordeToggleInputMode", "hordeGetDismissed",     "hordeSummonDismissed",
+    "hordeSetDismissedHome", "hordeClearDismissedHome", "hordeForgetFollower"};
+
+// 1.1.0 added CancelUIModeRequest, which a close right after an open needs.
+constexpr std::uint32_t kMagelightMinHost = MAGELIGHT_API::PackVersion(1, 1, 0);
+
+// A page command copied off Magelight's render thread for the game thread.
+struct PageCommand
+{
+    const char *name;
+    std::string payload;
+};
+
+// Horde installs its page in Magelight's mod tree, Data/Magelight/Horde/.
+std::string MagelightPagePath()
+{
+    wchar_t exe[MAX_PATH]{};
+    if (!::GetModuleFileNameW(nullptr, exe, MAX_PATH))
+        return {};
+    const auto page = std::filesystem::path(exe).parent_path() / L"Data" / L"Magelight" / L"Horde" / L"index.html";
+    std::error_code error;
+    if (!std::filesystem::exists(page, error))
+        return {};
+    const auto utf8 = page.u8string();
+    return std::string(utf8.begin(), utf8.end());
+}
+
+RE::FormID CrosshairFollower()
+{
+    auto *crosshairPick = RE::CrosshairPickData::GetSingleton();
+    if (!crosshairPick)
+        return 0;
+    auto refPtr = crosshairPick->GetActiveTarget().get();
+    auto *actor = refPtr ? refPtr->As<RE::Actor>() : nullptr;
+    return actor && FollowerManager::GetSingleton().IsTracked(actor->GetFormID()) ? actor->GetFormID() : 0;
+}
+} // namespace
+
+// Handler bodies execute inside RunMagelightCommand, on the game thread.
 template <class F> static void RunOnGameThread(F &&operation)
 {
     operation();
@@ -21,53 +71,210 @@ HordeUI &HordeUI::GetSingleton()
 void HordeUI::Initialize()
 {
     RegisterListeners();
-    ImGuiHost::GetSingleton().Initialize();
-}
-bool HordeUI::IsOpen() const
-{
-    return ImGuiHost::GetSingleton().IsOpen();
-}
-void HordeUI::Close()
-{
-    ImGuiHost::GetSingleton().RequestClose();
+
+    // navigator.language does not follow the game's language, so the page
+    // takes it from each state push.
+    auto *ini = RE::INISettingCollection::GetSingleton();
+    auto *language = ini ? ini->GetSetting("sLanguage:General") : nullptr;
+    const char *skyrimLanguage = language && language->GetString() ? language->GetString() : "";
+    _language = Horde::LanguageTag(skyrimLanguage);
+    logger::info("HordeUI: game language '{}', page language {}", skyrimLanguage, _language);
+
+    if (!InitializeMagelight())
+        logger::warn("HordeUI: no UI host; the menu needs Magelight UI 1.1 or newer");
 }
 void HordeUI::Toggle()
 {
     SKSE::GetTaskInterface()->AddTask([this] {
-        auto &host = ImGuiHost::GetSingleton();
-        if (host.IsOpen())
+        if (!HasHost())
         {
-            Close();
+            // Shown even with notifications muted: it explains a menu that will not open.
+            RE::SendHUDMessage::ShowHUDMessage("Horde's menu needs Magelight UI 1.1 or newer.");
+            logger::warn("HordeUI: cannot open the menu without Magelight UI");
             return;
         }
-        RE::FormID selected = 0;
-        auto *crosshairPick = RE::CrosshairPickData::GetSingleton();
-        if (crosshairPick)
-        {
-            auto refPtr = crosshairPick->GetActiveTarget().get();
-            auto *actor = refPtr ? refPtr->As<RE::Actor>() : nullptr;
-            if (actor && FollowerManager::GetSingleton().IsTracked(actor->GetFormID()))
-                selected = actor->GetFormID();
-        }
-        if (host.RequestOpen(selected))
-            PushStateToView();
+        if (_open)
+            Close();
+        else
+            Open();
     });
 }
-void HordeUI::Dispatch(Horde::ImGuiUI::Action action, std::uint64_t generation)
+
+bool HordeUI::InitializeMagelight()
 {
-    SKSE::GetTaskInterface()->AddTask([this, action = std::move(action), generation] {
-        auto &host = ImGuiHost::GetSingleton();
-        if (!host.IsOpen() || !host.HasFocus() || host.Generation() != generation)
-            return;
-        const auto handler = _handlers.find(action.name);
-        if (handler == _handlers.end())
+    using namespace MAGELIGHT_API;
+    const auto *api = RequestApi4();
+    if (!api)
+        return false;
+    if (api->hostVersionNumber < kMagelightMinHost)
+    {
+        logger::warn("HordeUI: Magelight UI {} is older than 1.1.0", api->hostVersion);
+        return false;
+    }
+    const auto page = MagelightPagePath();
+    if (page.empty())
+    {
+        logger::error("HordeUI: Data/Magelight/Horde/index.html is missing; reinstall Horde");
+        return false;
+    }
+
+    ModDesc mod{};
+    mod.size = sizeof(mod);
+    mod.modId = "Horde";
+    mod.displayName = "Horde";
+    mod.modVersion = PackVersion(Plugin::VERSION.major(), Plugin::VERSION.minor(), Plugin::VERSION.patch());
+    mod.minHostVersion = kMagelightMinHost;
+    mod.callbackThread = CallbackThread::GameThread;
+    mod.onEvent = &HordeUI::OnMagelightEvent;
+    ModId modId = 0;
+    if (const auto registered = api->RegisterMod(&mod, &modId); registered != Result::Ok)
+    {
+        logger::error("HordeUI: Magelight refused to register Horde ({})", static_cast<std::int32_t>(registered));
+        return false;
+    }
+
+    ViewDesc desc{};
+    desc.size = sizeof(desc);
+    desc.name = "main";
+    desc.htmlPath = page.c_str();
+    desc.fullscreen = true;
+    desc.layer = Layer::Panel;
+    ViewId view = 0;
+    if (const auto created = api->CreateViewEx(modId, &desc, &view); created != Result::Ok)
+    {
+        logger::error("HordeUI: Magelight could not create the Horde view ({}): {}", static_cast<std::int32_t>(created),
+                      api->GetLastErrorMessage(modId));
+        api->UnregisterMod(modId);
+        return false;
+    }
+    _magelight = api;
+    _magelightMod = modId;
+    _view = view;
+
+    for (const auto *name : kListeners)
+    {
+        if (!_handlers.contains(name))
+            logger::error("HordeUI: no handler for page command {}", name);
+        // The name doubles as the user pointer; kListeners has static storage.
+        if (api->RegisterJSListenerEx(view, name, &HordeUI::OnMagelightListener, const_cast<char *>(name)) != Result::Ok)
+            logger::error("HordeUI: Magelight refused listener {}: {}", name, api->GetLastErrorMessage(modId));
+    }
+    // The page closes its own dialogs on Escape, then sends hordeClose.
+    api->SetEscapeCapture(view, true);
+    logger::info("HordeUI: using Magelight UI {} ({})", api->hostVersion, page);
+    logger::info("HordeUI: Magelight has no controller input on flat Skyrim; Horde opens with its hotkey");
+    return true;
+}
+
+void HordeUI::Open()
+{
+    using namespace MAGELIGHT_API;
+    if (_open || !_magelight->IsViewValid(_view))
+        return;
+    _magelight->ShowView(_view, true);
+    const auto requested = _magelight->RequestUIMode(_view, kUIModeFlagPause);
+    if (requested != Result::Ok)
+    {
+        _magelight->ShowView(_view, false);
+        if (requested == Result::Busy)
+            logger::info("HordeUI: another Magelight page holds the cursor; Horde stays closed");
+        else
+            logger::warn("HordeUI: Magelight refused the menu ({}): {}", static_cast<std::int32_t>(requested),
+                         _magelight->GetLastErrorMessage(_magelightMod));
+        return;
+    }
+    _open = true;
+    // Open on the follower under the crosshair, if any.
+    const auto selected = CrosshairFollower();
+    ExecuteScript(selected ? "hordeShowPanel(" + std::to_string(selected) + ")" : std::string("hordeShowPanel()"));
+    PushStateToView();
+}
+
+void HordeUI::Close()
+{
+    if (!_open)
+        return;
+    _open = false;
+    ExecuteScript("window.hordeHidePanel && hordeHidePanel()");
+    // Withdraw an entry the host has not run yet; release one it has.
+    if (_magelight->CancelUIModeRequest(_magelightMod) != MAGELIGHT_API::Result::Ok)
+        _magelight->ReleaseUIMode(_magelightMod);
+    _magelight->ShowView(_view, false);
+}
+
+void HordeUI::OnMagelightListener(std::uint64_t, const char *argument, void *user)
+{
+    // Render thread, inside the frame: copy the argument and let the host post
+    // it to the game thread. Posting to SKSE's task queue from here can hang.
+    const auto *name = static_cast<const char *>(user);
+    auto command = std::make_unique<PageCommand>(PageCommand{name, argument ? argument : ""});
+    const auto *api = GetSingleton()._magelight;
+    if (api && api->PostGameTask(&HordeUI::RunMagelightCommand, command.get()) == MAGELIGHT_API::Result::Ok)
+        command.release();
+    else
+        logger::warn("HordeUI: could not post page command {}", name);
+}
+
+void HordeUI::RunMagelightCommand(void *user)
+{
+    const std::unique_ptr<PageCommand> command(static_cast<PageCommand *>(user));
+    auto &ui = GetSingleton();
+    const auto handler = ui._handlers.find(command->name);
+    if (handler != ui._handlers.end())
+        handler->second(command->payload.c_str());
+}
+
+void HordeUI::OnMagelightEvent(const MAGELIGHT_API::EventData *event, void *)
+{
+    using MAGELIGHT_API::Event;
+    if (!event)
+        return;
+    auto &ui = GetSingleton();
+    if (event->type == Event::RenderDead)
+    {
+        logger::error("HordeUI: Magelight turned its overlay off for this session; Horde's menu cannot open");
+        return;
+    }
+    if (event->view != ui._view)
+        return;
+
+    switch (event->type)
+    {
+    case Event::ViewDomReady:
+        if (ui._open)
         {
-            logger::warn("HordeUI: unknown native action {}", action.name);
-            return;
+            ui.ExecuteScript("hordeShowPanel()");
+            ui.PushStateToView();
         }
-        const auto payload = action.data.dump();
-        handler->second(payload.c_str());
-    });
+        break;
+    case Event::UIModeEntered:
+        // An entry that lands after Horde closed is given back.
+        if (!ui._open)
+            ui._magelight->ReleaseUIMode(ui._magelightMod);
+        break;
+    case Event::UIModeExited:
+    case Event::UIModeRefused:
+        // The host's toggle key, a save load or a lost race end UI mode too.
+        if (ui._open)
+        {
+            ui._open = false;
+            ui.ExecuteScript("window.hordeHidePanel && hordeHidePanel()");
+            ui._magelight->ShowView(ui._view, false);
+        }
+        break;
+    case Event::ViewLoadFailed:
+        logger::error("HordeUI: Magelight could not load Horde's page: {}", event->detail ? event->detail : "");
+        ui.Close();
+        break;
+    default:
+        break;
+    }
+}
+
+void HordeUI::ExecuteScript(const std::string &script)
+{
+    if (_magelight)
+        _magelight->InvokeJS(_view, script.c_str());
 }
 void HordeUI::RefreshState()
 {
@@ -76,11 +283,21 @@ void HordeUI::RefreshState()
 }
 void HordeUI::PushStateToView()
 {
-    if (!IsOpen())
+    if (!IsOpen() || !HasHost())
         return;
-    auto state = nlohmann::json::parse(BuildStateJSON());
-    state.update(nlohmann::json::parse(BuildDismissedJSON()));
-    ImGuiHost::GetSingleton().Publish(std::move(state));
+    // Runs on the game thread: a bad name must cost one refresh, not the game.
+    try
+    {
+        // Parsing the dumped text hands the page valid UTF-8.
+        auto state = nlohmann::json::parse(BuildStateJSON());
+        state.update(nlohmann::json::parse(BuildDismissedJSON()));
+        state["language"] = _language;
+        ExecuteScript("hordeUpdateState(" + Horde::DumpGameJSON(state) + ")");
+    }
+    catch (const std::exception &e)
+    {
+        logger::error("HordeUI: could not publish state: {}", e.what());
+    }
 }
 void HordeUI::PushDismissedToView()
 {
@@ -100,6 +317,7 @@ std::string HordeUI::BuildStateJSON() const
     j["notificationsEnabled"] = settings.GetNotificationsEnabled();
     j["followDistance"] = settings.GetFollowDistance();
     j["useKeybinds"] = settings.GetUseKeybinds();
+    j["uiScale"] = settings.GetUIScale();
     j["allPassive"] = mgr.IsAllPassive();
 
     nlohmann::json followersArray = nlohmann::json::array();
@@ -235,7 +453,7 @@ std::string HordeUI::BuildStateJSON() const
     }
     j["followers"] = followersArray;
 
-    return j.dump();
+    return Horde::DumpGameJSON(j);
 }
 
 std::string HordeUI::BuildDismissedJSON() const
@@ -254,7 +472,7 @@ std::string HordeUI::BuildDismissedJSON() const
         arr.push_back(dj);
     }
     j["dismissed"] = arr;
-    return j.dump();
+    return Horde::DumpGameJSON(j);
 }
 
 // Helper to parse FormID from JSON argument string
@@ -468,6 +686,8 @@ void HordeUI::RegisterListeners()
                 s.SetDefaultSandboxEnabled(j["defaultSandboxEnabled"].get<bool>());
             if (j.contains("notificationsEnabled"))
                 s.SetNotificationsEnabled(j["notificationsEnabled"].get<bool>());
+            if (j.contains("uiScale"))
+                s.SetUIScale(j["uiScale"].get<int>());
             std::string distancePreset;
             if (j.contains("followDistance"))
             {

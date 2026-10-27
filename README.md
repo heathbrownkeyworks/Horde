@@ -1,12 +1,14 @@
 # Horde
 
-Horde 3.0.1 is a lightweight follower manager for Skyrim Special Edition
+Horde 3.1.0 is a lightweight follower manager for Skyrim Special Edition
 and Anniversary Edition. It automatically tracks up to 20 followers using
 Skyrim's vanilla `DialogueFollower` system and presents the whole party through
-a native Dear ImGui/DX11 panel, group lesser powers, or configurable hotkeys.
+an animated web interface hosted by
+[Magelight UI](https://github.com/Severause/MagelightUI), group lesser
+powers, or configurable hotkeys.
 
-Build and test coverage is documented in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md),
-[IMPROVEMENTS-VALIDATION.md](IMPROVEMENTS-VALIDATION.md), and
+Build and test coverage is documented in
+[IMPROVEMENTS-VALIDATION.md](IMPROVEMENTS-VALIDATION.md) and
 [AUDIT-FIXES-VALIDATION.md](AUDIT-FIXES-VALIDATION.md). The current source includes
 changes awaiting in-game validation.
 
@@ -58,17 +60,32 @@ changes awaiting in-game validation.
 - Crosshair quick-open jumps directly to the targeted follower's detail screen.
 - Five lesser powers: Horde, Follow, Wait, Summon, and Passive.
 - Optional configurable keyboard controls, including group commands.
-- Native controller navigation with follower and command focus, section
-  switching, confirmation dialogs, button legends, and an optional stick cursor.
-- Full-screen roster and follower detail panels with a copper and amber palette,
-  Poppins/Montserrat fonts, and detailed icons.
-- Skyrim's native mouse cursor and sensitivity.
-- Keyboard, mouse-button, and gamepad shortcuts are filtered before other
-  Skyrim input listeners while Horde owns input.
+- Full-screen roster and follower detail screens with a copper and amber
+  palette, detailed icons, and animated transitions.
+- An interface scale setting from 70% to 170%, the first option in Settings.
+- Group hotkeys stand down while Horde is open, so typing in it issues no orders.
 - Notifications can be disabled globally.
 - Vanilla Follow, Wait, and Dismiss dialogue is hidden for tracked followers;
   Trade and Command dialogue remains available.
 - The included `Horde.esp` is ESL-flagged and does not consume a full plugin slot.
+
+## Magelight UI
+
+Horde's menu is a web page rendered by Magelight UI 1.1 or newer. It ships in
+the package under `Magelight/Horde/`.
+
+- The Horde lesser power, keybinds, and crosshair quick-open open it.
+- Mouse, Tab/arrows/Enter, and Escape work inside it; it pauses the game while
+  open.
+- Magelight UI has no controller input on flat Skyrim, so the menu is used with
+  a mouse and keyboard.
+- Without Magelight UI the menu cannot open. Opening it shows "Horde's menu
+  needs Magelight UI 1.1 or newer." Follower tracking, the group powers, and
+  group hotkeys keep working. `Horde.log` records whether Magelight UI was found.
+
+Horde does not use PrismaUI.
+
+In-game testing of the interface with Magelight UI is **NOT RUN** in these notes.
 
 ## Compatibility
 
@@ -87,9 +104,9 @@ quest after Horde, its winning Follower alias must also omit those two items.
 This prevents future recruitment grants; it does not remove items already
 stored in a follower's inventory.
 
-The DLL declares compatibility with SE 1.5.97 and AE through 1.7.104.
-Runtime-specific in-game checks are listed in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
-Skyrim VR is not supported.
+The DLL declares compatibility with SE 1.5.97 and AE through 1.7.104. The menu
+also needs Magelight UI, whose supported runtimes are listed on its page. Skyrim
+VR is not supported.
 
 ## Runtime requirements
 
@@ -97,76 +114,52 @@ Skyrim VR is not supported.
 - [Address Library for SKSE Plugins](https://www.nexusmods.com/skyrimspecialedition/mods/32444)
   matching the installed runtime
 - The release package's ESL-flagged `Horde.esp`
-- The package's five fonts in `Data/SKSE/Plugins/Horde/fonts/`
+- [Magelight UI](https://github.com/Severause/MagelightUI) 1.1 or newer,
+  and the package's `Data/Magelight/Horde/` files
 
-ImGui and FreeType are compiled into Horde. Install the complete package into
-the Horde MO2 mod, including its five fonts and license files. Preserve
-`SKSE/Plugins/Horde/settings.json` when upgrading. Install the matching DLL and
-ESP together. Existing per-follower sandbox preferences are restored from the
-SKSE cosave; new fields have defaults for older saves.
+Install the complete package into the Horde MO2 mod, including its license
+files. Preserve `SKSE/Plugins/Horde/settings.json` when upgrading. Install the
+matching DLL and ESP together. Existing per-follower sandbox preferences are
+restored from the SKSE cosave; new fields have defaults for older saves. Horde
+3.1.0 no longer uses `SKSE/Plugins/Horde/fonts/`; a manual upgrade from 3.0.x
+can delete it.
 
 Horde should not be installed alongside another multi-follower framework.
 Testing on a new game is strongly recommended when replacing an existing
 framework.
 
-### Font fallback
+### Language
 
-The bundled Poppins and Montserrat fonts retain their existing appearance.
-Characters they lack use installed Windows fonts: Segoe UI for Cyrillic and
-Greek, then Microsoft YaHei/SimSun, Yu Gothic/Meiryo/MS Gothic, and Malgun Gothic
-for Chinese, Japanese, and Korean. Shared CJK characters prefer the font for
-Windows' display language. The same fallback applies to every text weight,
-including follower names, equipment, homes, and confirmation dialogs.
-
-Windows font files are read locally and are not included in Horde's package.
-Missing system fonts are skipped. If an East Asian language still shows missing
-characters, install its Windows language or supplemental font feature and
-restart Skyrim. See Microsoft's [font installation guidance](https://learn.microsoft.com/windows/deployment/windows-10-missing-fonts).
-This adds character coverage; it does not translate Horde's English interface.
+Horde's interface text is English. The page follows Skyrim's `sLanguage`
+setting to sort names and format distances, and its headings include Cyrillic
+and Greek letters.
 
 ## Controls and settings
 
 The default mode grants the five Horde lesser powers on save load. Keybind mode
-can be selected from the roster screen. Its defaults are Shift+H for the panel
-and Alt+F/W/S/P for Follow All, Wait All, Summon All, and Passive.
+can be selected in Settings. Its defaults are Shift+H for the menu and
+Alt+F/W/S/P for Follow All, Wait All, Summon All, and Passive.
 
 Settings are stored in `Data/SKSE/Plugins/Horde/settings.json`. They include the
-roster limit, control mode and scan codes, default sandbox and Follow Close
-states, notification state, and party follow distance.
+interface scale, roster limit, control mode and scan codes, default sandbox and
+Follow Close states, notification state, and party follow distance.
+
+### Interface scale
+
+Horde fits its layout to the screen. Settings > Interface scale, the first
+option, makes it larger or smaller from 70% to 170% in 5% steps; Default
+returns to 100%. The percentage updates while dragging and the new size applies
+on release. Above 100% there is less room, so the layout condenses: follower
+details stack into fewer columns, and at the largest sizes the distance rail
+hides and the details scroll. The value is stored as `uiScale` in
+`settings.json`, and hand-edited values are clamped to the same range.
 
 ### Controllers
 
-The bottom legend shows controller actions for the current section, confirmation,
-or cursor mode. It appears after controller activity and hides when mouse/keyboard
-input resumes. The optional `controllerGlyphs` setting accepts `xbox` (default),
-`playstation`, or `generic`; changing the labels does not change the bindings.
-
-| Control | Action |
-|---|---|
-| Cast the Horde lesser power from Favorites | Open Horde in Favorites mode |
-| D-pad / left stick | Move focus within the current section |
-| A | Select a follower and enter their commands, or activate the focused control |
-| LB / RB | Previous / next section: Followers, Commands or Dismissed, Group Orders, Settings |
-| B | Cancel a confirmation, return from a section, or close from Followers |
-| X | Group Orders from Followers; return to Followers from Commands |
-| Y | Open the dismissed registry from Followers, when entries exist |
-| Right-stick click (R3) | Toggle cursor/navigation mode |
-| Right stick | Scroll the current section, or move the cursor when enabled |
-
-Use Favorites mode, select the Horde lesser power from Skyrim's Favorites menu,
-then cast it from normal gameplay with other game menus closed. The controller
-legend and navigation appear as usual. Once Horde is open, Y opens the dismissed
-registry.
-
-Dismiss, Forget, and active-follower Clear Home retain their confirmation dialogs,
-with Cancel initially focused. Focus is restored by follower identity after
-state updates, rather than by row number. Mouse use remains available at any time.
-Horde pauses the game while open and captures menu input. Input coexistence and
-controller validation details are in [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
-
-Horde reserves no gamepad opening shortcut, leaving those buttons available to
-Skyrim and other mods during gameplay. Mouse, Tab/arrows/Enter, and Escape remain
-available inside Horde; Shift+H remains available in keybind mode.
+Magelight UI has no controller input on flat Skyrim, so Horde's menu is used
+with a mouse and keyboard. Dismiss, Forget, and active-follower Clear Home keep
+their confirmation dialogs, with Cancel initially focused. Horde pauses the game
+while open.
 
 ## Building
 
@@ -199,7 +192,7 @@ preserves the full values without a binary patch step.
 Stage a complete package in a new directory with a SHA-256 manifest:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -OutputDirectory E:\tmp\Horde-3.0.1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -OutputDirectory E:\tmp\Horde-3.1.0
 ```
 
 Use `-DllPath` to package an independently signed copy of the same built DLL.
@@ -207,45 +200,23 @@ The script records its signature status and source revision. It refuses an
 existing destination and does not install into MO2. Keep the matching source
 checkout/archive alongside any binary you distribute.
 
-Run the native screen, input, and follower runtime suites:
+Run the game text and follower runtime suites:
 
 ```powershell
-xmake -y HordeImGuiScreenTests
-xmake run HordeImGuiScreenTests
-xmake -y HordeImGuiInputTests
-xmake run HordeImGuiInputTests
+xmake -y HordeGameTextTests
+xmake run HordeGameTextTests
 xmake -y HordeFollowerRuntimeTests
 xmake run HordeFollowerRuntimeTests
 ```
 
-Build the shared-screen DX11 preview:
+Preview the interface in a browser with synthetic data by opening
+`view/index.html?mock`. `view/dev/mock.js` stands in for the plugin; add `pad`
+for controller prompts, `empty` for an empty roster, `lang=ru` for a game
+language, or `intl` for names in other scripts. The fixture is not a
+compatibility claim, and `view/dev/` is not packaged.
 
-```powershell
-xmake -y HordeImGuiPreview
-build\windows\x64\release\HordeImGuiPreview.exe --fixture tools/imgui-preview/fixture.json --size 1920x1080 --shot E:/tmp/Horde-imgui/roster.png --frames 6
-```
-
-The test suite exercises real ImGui items and action payloads. The preview uses
-the same screen code and fonts as the DLL. Its fixture is synthetic; it includes
-names that Horde deliberately excludes in-game and is not a compatibility claim.
-Use `--screen dismissed` or `--screen modal`, `--controller`, `--cursor`,
-`--glyphs playstation` (also `xbox`/`generic`), or
-`--focus controller` for additional captures. Omitting `--shot` explicitly opens
-an interactive fixture preview. `--shot` keeps the window hidden.
-
-In-game validation is still required for SE/AE rendering, game pause/input
-capture, controller reconnect, coexisting native menus, load transitions, and
-follower actions. See [IMGUI-VALIDATION.md](IMGUI-VALIDATION.md).
-
-The checked-in icon font can be regenerated from `assets/icons/` without
-changing its artwork. `glyphs.json` fixes the glyph order and code points.
-Node 24 or later and the pinned development packages are
-used only for this optional step:
-
-```powershell
-npm --prefix tools/imgui-preview ci
-npm --prefix tools/imgui-preview run icons
-```
+`tools/view/build-icons.mjs` regenerates `view/icons.js` from a lucide-svelte
+package and the artwork in `assets/icons/`.
 
 `plugin/generate_dialogue_overrides.mjs` regenerates the vanilla dialogue
 overrides from a supplied load-order-winner `DialogTopics` directory. Use the
@@ -255,11 +226,12 @@ another mod's dialogue changes.
 ## Source layout
 
 - `src/` - SKSE plugin, follower state, behavior, and serialization
-- `src/ui/imgui/` - native menu, input host, custom screen, and theme
-- `assets/fonts/` - runtime fonts and converted original icons
-- `assets/icons/` - editable SVG artwork and ordered glyph manifest
-- `tools/imgui-preview/` - standalone DX11 preview, fixtures, and font builder
-- `tests/` - native interaction, layout, input-routing, and follower runtime tests
+- `src/ui/` - Magelight UI view host and page listeners
+- `src/MagelightUIAPI/` - Magelight UI's public API header
+- `view/` - the Magelight UI page; `view/dev/` is the browser preview stand-in
+- `assets/icons/` - editable Game-icons.net SVG artwork
+- `tools/view/` - icon builder for `view/icons.js`
+- `tests/` - game text and follower runtime tests
 - `plugin/Horde/` - Spriggit YAML source for the ESL-flagged plugin
 - `plugin/generate_dialogue_overrides.mjs` - dialogue override generation
 - `scripts/qa/` - static regression and plugin inventory checks
@@ -272,7 +244,8 @@ Modding Exception and GPL-3.0 Linking Exception in
 [EXCEPTIONS.md](EXCEPTIONS.md). Horde statically links CommonLibSSE-NG and is
 not distributed as MIT-only software.
 
-Bundled fonts and native dependencies retain their licenses in `licenses/`.
+Bundled web fonts, icons, and native dependencies retain their licenses in
+`licenses/`.
 See [LICENSING.md](LICENSING.md) and
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the exact boundaries and
 corresponding-source information.
